@@ -28,11 +28,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .container {
             max-width: 800px;
-            width: 90%;
+            width: 100%;
             text-align: center;
         }
 
@@ -115,6 +116,11 @@
             transform: translateY(-5px);
         }
 
+        .upload-option.active {
+            background: rgba(255,68,68,0.3);
+            border-color: var(--primary);
+        }
+
         .option-icon {
             font-size: 2.5em;
             color: var(--primary);
@@ -147,6 +153,10 @@
             margin-bottom: 15px;
         }
 
+        input[type="url"]:focus {
+            outline: 2px solid var(--primary);
+        }
+
         button {
             width: 100%;
             padding: 15px;
@@ -163,6 +173,12 @@
         button:hover {
             background: #ff6666;
             transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .file-input-wrapper {
@@ -198,18 +214,76 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         .loading {
             display: none;
             margin-top: 20px;
+            padding: 20px;
         }
 
         .loading i {
             font-size: 2em;
             color: var(--primary);
             margin-bottom: 10px;
+        }
+
+        .loading p {
+            color: #ccc;
+        }
+
+        .success {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            color: #00ff00;
+        }
+
+        .error {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,0,0,0.1);
+            border: 1px solid #ff0000;
+            border-radius: 10px;
+            color: #ff0000;
+        }
+
+        .demo-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        .demo-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            padding: 10px 20px;
+            background: rgba(255,68,68,0.3);
+            color: white;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            background: var(--primary);
         }
     </style>
 </head>
@@ -219,7 +293,7 @@
         <div class="logo">
             <i class="fas fa-satellite-dish"></i>
             <h1>PRO IPTV</h1>
-            <p>Profesyonel IPTV Çözümü</p>
+            <p>M3U Playlistinizi Yükleyin</p>
         </div>
 
         <!-- Upload Container -->
@@ -235,7 +309,7 @@
             <!-- Upload Options -->
             <div class="upload-options">
                 <!-- URL Upload -->
-                <div class="upload-option" onclick="showUrlInput()">
+                <div class="upload-option active" id="urlOption" onclick="selectOption('url')">
                     <div class="option-icon">
                         <i class="fas fa-link"></i>
                     </div>
@@ -244,7 +318,7 @@
                 </div>
 
                 <!-- File Upload -->
-                <div class="upload-option" onclick="showFileInput()">
+                <div class="upload-option" id="fileOption" onclick="selectOption('file')">
                     <div class="option-icon">
                         <i class="fas fa-file-upload"></i>
                     </div>
@@ -254,9 +328,9 @@
             </div>
 
             <!-- URL Input -->
-            <div id="urlInput" class="input-group hidden">
-                <input type="url" id="m3uUrl" placeholder="https://example.com/playlist.m3u">
-                <button onclick="loadFromUrl()">
+            <div id="urlInput" class="input-group">
+                <input type="url" id="m3uUrl" placeholder="https://example.com/playlist.m3u" value="">
+                <button onclick="loadFromUrl()" id="urlBtn">
                     <i class="fas fa-download"></i> M3U'yu Yükle
                 </button>
             </div>
@@ -265,11 +339,11 @@
             <div id="fileInput" class="input-group hidden">
                 <div class="file-input-wrapper">
                     <input type="file" id="m3uFile" accept=".m3u,.m3u8">
-                    <label for="m3uFile" class="file-input-label">
+                    <label for="m3uFile" class="file-input-label" id="fileLabel">
                         <i class="fas fa-folder-open"></i> M3U Dosyası Seç
                     </label>
                 </div>
-                <button onclick="loadFromFile()" id="fileUploadBtn" style="display: none;">
+                <button onclick="loadFromFile()" id="fileBtn" disabled>
                     <i class="fas fa-upload"></i> Dosyayı Yükle
                 </button>
             </div>
@@ -279,63 +353,143 @@
                 <i class="fas fa-spinner fa-spin"></i>
                 <p>M3U listesi yükleniyor...</p>
             </div>
+
+            <!-- Success -->
+            <div id="success" class="success">
+                <i class="fas fa-check-circle"></i>
+                <p>M3U başarıyla yüklendi! Player'a yönlendiriliyorsunuz...</p>
+            </div>
+
+            <!-- Error -->
+            <div id="error" class="error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p id="errorText">Hata oluştu</p>
+            </div>
+        </div>
+
+        <!-- Demo Section -->
+        <div class="demo-section">
+            <h3><i class="fas fa-vial"></i> Test Etmek İster misin?</h3>
+            <p style="color: #ccc; margin-bottom: 15px;">Hemen test etmek için örnek M3U kullan:</p>
+            <div class="demo-buttons">
+                <button class="demo-btn" onclick="loadDemoM3U('tr')">Türk Kanalları</button>
+                <button class="demo-btn" onclick="loadDemoM3U('int')">Uluslararası</button>
+                <button class="demo-btn" onclick="loadDemoM3U('sport')">Spor Kanalları</button>
+            </div>
         </div>
 
         <!-- Info -->
         <div style="color: #666; font-size: 0.9em; margin-top: 20px;">
-            <i class="fas fa-info-circle"></i> M3U dosyanız sunucuya kaydedilmez, sadece sizde kalır
+            <i class="fas fa-info-circle"></i> M3U dosyanız sadece tarayıcınızda saklanır
         </div>
     </div>
 
     <script>
         let selectedFile = null;
+        let currentOption = 'url';
 
-        function showUrlInput() {
-            document.getElementById('urlInput').classList.remove('hidden');
-            document.getElementById('fileInput').classList.add('hidden');
-            document.getElementById('m3uUrl').focus();
+        function selectOption(option) {
+            currentOption = option;
+            
+            // Update UI
+            document.getElementById('urlOption').classList.toggle('active', option === 'url');
+            document.getElementById('fileOption').classList.toggle('active', option === 'file');
+            document.getElementById('urlInput').classList.toggle('hidden', option !== 'url');
+            document.getElementById('fileInput').classList.toggle('hidden', option !== 'file');
+            
+            // Reset states
+            hideMessages();
         }
 
-        function showFileInput() {
-            document.getElementById('fileInput').classList.remove('hidden');
-            document.getElementById('urlInput').classList.add('hidden');
+        function hideMessages() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('success').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function showLoading() {
+            hideMessages();
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function showSuccess() {
+            hideMessages();
+            document.getElementById('success').style.display = 'block';
+        }
+
+        function showError(message) {
+            hideMessages();
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('error').style.display = 'block';
         }
 
         // File selection handler
         document.getElementById('m3uFile').addEventListener('change', function(e) {
             selectedFile = e.target.files[0];
+            const fileBtn = document.getElementById('fileBtn');
+            const fileLabel = document.getElementById('fileLabel');
+            
             if (selectedFile) {
-                document.getElementById('fileUploadBtn').style.display = 'block';
-                document.querySelector('.file-input-label').innerHTML = 
-                    `<i class="fas fa-check"></i> ${selectedFile.name}`;
+                // Check file type
+                if (!selectedFile.name.endsWith('.m3u') && !selectedFile.name.endsWith('.m3u8')) {
+                    showError('Lütfen .m3u veya .m3u8 dosyası seçin');
+                    selectedFile = null;
+                    fileLabel.innerHTML = '<i class="fas fa-folder-open"></i> M3U Dosyası Seç';
+                    fileBtn.disabled = true;
+                    return;
+                }
+                
+                fileBtn.disabled = false;
+                fileLabel.innerHTML = `<i class="fas fa-check"></i> ${selectedFile.name}`;
+                hideMessages();
+            } else {
+                fileBtn.disabled = true;
+                fileLabel.innerHTML = '<i class="fas fa-folder-open"></i> M3U Dosyası Seç';
             }
         });
 
         async function loadFromUrl() {
             const url = document.getElementById('m3uUrl').value.trim();
             if (!url) {
-                alert('Lütfen M3U URL\'sini girin');
+                showError('Lütfen M3U URL\'sini girin');
+                return;
+            }
+
+            // Basic URL validation
+            if (!url.startsWith('http')) {
+                showError('Geçerli bir URL girin (http veya https ile başlamalı)');
                 return;
             }
 
             showLoading();
             
             try {
+                console.log('URL yükleniyor:', url);
                 const response = await fetch(url);
-                if (!response.ok) throw new Error('URL yüklenemedi');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP hatası! Durum: ${response.status}`);
+                }
                 
                 const text = await response.text();
+                console.log('M3U içeriği alındı, uzunluk:', text.length);
+                
+                if (!text.includes('#EXTM3U')) {
+                    throw new Error('Geçerli bir M3U dosyası değil');
+                }
+                
                 processM3U(text);
                 
             } catch (error) {
-                hideLoading();
-                alert('Hata: ' + error.message);
+                console.error('Hata:', error);
+                showError('Yükleme hatası: ' + error.message);
             }
         }
 
         async function loadFromFile() {
             if (!selectedFile) {
-                alert('Lütfen bir dosya seçin');
+                showError('Lütfen bir dosya seçin');
                 return;
             }
 
@@ -343,26 +497,48 @@
             
             try {
                 const text = await selectedFile.text();
+                console.log('Dosya okundu, uzunluk:', text.length);
+                
+                if (!text.includes('#EXTM3U')) {
+                    throw new Error('Geçerli bir M3U dosyası değil');
+                }
+                
                 processM3U(text);
                 
             } catch (error) {
-                hideLoading();
-                alert('Dosya okunamadı: ' + error.message);
+                console.error('Hata:', error);
+                showError('Dosya okunamadı: ' + error.message);
             }
         }
 
         function processM3U(m3uContent) {
-            // M3U içeriğini işle ve player sayfasına gönder
-            const channels = parseM3U(m3uContent);
+            console.log('M3U işleniyor...');
             
-            // LocalStorage'a kaydet
-            localStorage.setItem('iptvChannels', JSON.stringify(channels));
-            localStorage.setItem('m3uContent', m3uContent);
-            
-            // Player sayfasına yönlendir
-            setTimeout(() => {
-                window.location.href = 'player.html';
-            }, 1000);
+            try {
+                const channels = parseM3U(m3uContent);
+                console.log('Parsed channels:', channels.length);
+                
+                if (channels.length === 0) {
+                    throw new Error('M3U dosyasında kanal bulunamadı');
+                }
+                
+                // LocalStorage'a kaydet
+                localStorage.setItem('iptvChannels', JSON.stringify(channels));
+                localStorage.setItem('m3uContent', m3uContent);
+                localStorage.setItem('lastUpdate', new Date().toISOString());
+                
+                console.log('LocalStorage\'a kaydedildi');
+                showSuccess();
+                
+                // Player sayfasına yönlendir
+                setTimeout(() => {
+                    window.location.href = 'player.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('M3U işleme hatası:', error);
+                showError('M3U işlenirken hata: ' + error.message);
+            }
         }
 
         function parseM3U(data) {
@@ -394,12 +570,15 @@
                 category: 'live'
             };
             
+            // Kanal adını al
             const nameMatch = line.match(/,(.*)$/);
             if (nameMatch) channel.name = nameMatch[1].trim();
             
+            // Grup bilgisini al
             const groupMatch = line.match(/group-title="([^"]*)"/);
             if (groupMatch) channel.group = groupMatch[1].trim();
             
+            // Kategori belirle
             channel.category = determineCategory(channel.name, channel.group);
             
             return channel;
@@ -409,10 +588,18 @@
             const lowerName = name.toLowerCase();
             const lowerGroup = group.toLowerCase();
 
-            if (lowerName.includes('film') || lowerName.includes('movie')) return 'movie';
-            if (lowerName.includes('dizi') || lowerName.includes('series')) return 'series';
-            if (lowerName.includes('spor') || lowerName.includes('sport')) return 'sport';
-            if (lowerName.includes('müzik') || lowerName.includes('music')) return 'music';
+            if (lowerName.includes('film') || lowerName.includes('movie') || lowerGroup.includes('film')) {
+                return 'movie';
+            }
+            if (lowerName.includes('dizi') || lowerName.includes('series') || lowerGroup.includes('dizi')) {
+                return 'series';
+            }
+            if (lowerName.includes('spor') || lowerName.includes('sport') || lowerGroup.includes('spor')) {
+                return 'sport';
+            }
+            if (lowerName.includes('müzik') || lowerName.includes('music') || lowerGroup.includes('müzik')) {
+                return 'music';
+            }
             return 'live';
         }
 
@@ -420,12 +607,29 @@
             return channel.name && channel.url && channel.url.startsWith('http');
         }
 
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
+        // Demo M3U loader
+        async function loadDemoM3U(type) {
+            showLoading();
+            
+            // Örnek M3U URL'leri
+            const demoUrls = {
+                'tr': 'https://raw.githubusercontent.com/iptv-org/iptv/master/streams/tr.m3u',
+                'int': 'https://raw.githubusercontent.com/iptv-org/iptv/master/streams/ru.m3u',
+                'sport': 'https://raw.githubusercontent.com/iptv-org/iptv/master/streams/sport.m3u'
+            };
 
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
+            const url = demoUrls[type];
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Demo liste yüklenemedi');
+                
+                const text = await response.text();
+                processM3U(text);
+                
+            } catch (error) {
+                showError('Demo yükleme hatası: ' + error.message);
+            }
         }
 
         // Enter key support
@@ -433,6 +637,11 @@
             if (e.key === 'Enter') {
                 loadFromUrl();
             }
+        });
+
+        // Sayfa yüklendiğinde URL input'una focus
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('m3uUrl').focus();
         });
     </script>
 </body>
