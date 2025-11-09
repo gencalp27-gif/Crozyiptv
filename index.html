@@ -1,190 +1,683 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-    <title>IPTV Player</title>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Player | M3U Yükleyici</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #1a1a1a; 
-            color: white; 
-            padding: 20px;
+        :root {
+            --primary: #ff4444;
+            --secondary: #2d2d2d;
+            --dark: #1a1a1a;
+            --light: #ffffff;
+            --gray: #555;
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: var(--light);
+            min-height: 100vh;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
-        .player-container {
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .header p {
+            color: #ccc;
+            font-size: 1.1em;
+        }
+
+        /* Upload Sections */
+        .upload-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .upload-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .upload-box {
+            background: rgba(0,0,0,0.6);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px dashed var(--gray);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .upload-box h3 {
+            margin-bottom: 10px;
+            color: var(--light);
+        }
+
+        .upload-box p {
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        /* Input Styles */
+        .input-group {
+            margin-top: 15px;
+        }
+
+        input[type="url"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #ff6666;
+            transform: translateY(-2px);
+        }
+
+        /* Player Area */
+        .player-area {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .player-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .video-container {
             background: #000;
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 20px;
         }
+
         #videoPlayer {
             width: 100%;
             height: 400px;
             background: #000;
         }
-        .controls {
+
+        .player-info {
             padding: 15px;
-            background: #2a2a2a;
+            background: rgba(0,0,0,0.7);
+            border-top: 2px solid var(--primary);
+        }
+
+        /* Channels Sidebar */
+        .channels-sidebar {
+            background: rgba(0,0,0,0.6);
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .channels-sidebar h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
             display: flex;
+            align-items: center;
             gap: 10px;
         }
-        button {
-            padding: 8px 15px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover { background: #0056b3; }
+
         .channel-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
+
         .channel-item {
-            background: #2a2a2a;
-            padding: 15px;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
             border-radius: 8px;
             cursor: pointer;
-            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
         }
+
         .channel-item:hover {
-            border-color: #007bff;
-            background: #363636;
+            background: rgba(255,255,255,0.2);
+            border-left-color: var(--primary);
+            transform: translateX(5px);
         }
+
+        .channel-item.playing {
+            background: rgba(255,68,68,0.2);
+            border-left-color: var(--primary);
+        }
+
         .channel-name {
             font-weight: bold;
             margin-bottom: 5px;
         }
-        .loading {
-            text-align: center;
-            padding: 20px;
+
+        .channel-url {
+            font-size: 12px;
             color: #ccc;
+            word-break: break-all;
+        }
+
+        /* Categories */
+        .categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn.active {
+            background: var(--primary);
+        }
+
+        .category-btn:hover {
+            background: var(--primary);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--gray);
+        }
+
+        .stat-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        /* File Input Custom */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background: #ff6666;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 IPTV Player</h1>
-        
-        <div class="player-container">
-            <video id="videoPlayer" controls>
-                Your browser does not support the video tag.
-            </video>
-            <div class="controls">
-                <button onclick="toggleFullscreen()">📺 Tam Ekran</button>
-                <button onclick="refreshChannels()">🔄 Yenile</button>
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-tv"></i> IPTV PLAYER</h1>
+            <p>Kendi M3U listenizi yükleyin ve izlemeye başlayın</p>
+        </div>
+
+        <!-- Upload Sections -->
+        <div class="upload-sections">
+            <!-- URL Upload -->
+            <div class="upload-box" id="urlUploadBox">
+                <div class="upload-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h3>M3U URL'si ile Yükle</h3>
+                <p>M3U dosyasının internet adresini yapıştırın</p>
+                <div class="input-group">
+                    <input type="url" id="m3uUrl" placeholder="https://example.com/playlist.m3u">
+                    <button onclick="loadFromUrl()">
+                        <i class="fas fa-download"></i> URL'den Yükle
+                    </button>
+                </div>
+            </div>
+
+            <!-- File Upload -->
+            <div class="upload-box" id="fileUploadBox">
+                <div class="upload-icon">
+                    <i class="fas fa-file-upload"></i>
+                </div>
+                <h3>M3U Dosyası Yükle</h3>
+                <p>Bilgisayarınızdan M3U dosyası seçin</p>
+                <div class="input-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="m3uFile" accept=".m3u,.m3u8" onchange="loadFromFile(this.files[0])">
+                        <label for="m3uFile" class="file-input-label">
+                            <i class="fas fa-folder-open"></i> Dosya Seç
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="channel-list" id="channelList">
-            <div class="loading">Kanal listesi yükleniyor...</div>
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalChannels">0</div>
+                <div class="stat-label">Toplam Kanal</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="loadedChannels">0</div>
+                <div class="stat-label">Yüklü Kanallar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="currentCategory">-</div>
+                <div class="stat-label">Aktif Kategori</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="playStatus">DURUYOR</div>
+                <div class="stat-label">Oynatma Durumu</div>
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="categories">
+            <button class="category-btn active" onclick="filterChannels('all')">Tümü</button>
+            <button class="category-btn" onclick="filterChannels('live')">Canlı TV</button>
+            <button class="category-btn" onclick="filterChannels('movie')">Film</button>
+            <button class="category-btn" onclick="filterChannels('series')">Dizi</button>
+            <button class="category-btn" onclick="filterChannels('sport')">Spor</button>
+            <button class="category-btn" onclick="filterChannels('music')">Müzik</button>
+        </div>
+
+        <!-- Player Area -->
+        <div class="player-area">
+            <!-- Video Player -->
+            <div class="video-container">
+                <video id="videoPlayer" controls poster="https://via.placeholder.com/800x450/333/fff?text=IPTV+PLAYER">
+                    Tarayıcınız video oynatmayı desteklemiyor.
+                </video>
+                <div class="player-info">
+                    <div id="nowPlaying">
+                        <i class="fas fa-info-circle"></i> Lütfen M3U dosyası yükleyin
+                    </div>
+                </div>
+            </div>
+
+            <!-- Channels List -->
+            <div class="channels-sidebar">
+                <h3><i class="fas fa-list"></i> Kanallar</h3>
+                <div class="channel-list" id="channelList">
+                    <div style="text-align: center; color: #999; padding: 20px;">
+                        <i class="fas fa-tv" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <p>M3U dosyası yükleyin</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        class IPTVPlayer {
+        class M3UUploadPlayer {
             constructor() {
                 this.player = document.getElementById('videoPlayer');
                 this.channelList = document.getElementById('channelList');
-                this.channels = [];
+                this.nowPlaying = document.getElementById('nowPlaying');
+                this.allChannels = [];
+                this.filteredChannels = [];
+                this.currentFilter = 'all';
+
+                this.initializePlayer();
             }
 
-            // M3U listesini yükle
-            async loadPlaylist() {
-                try {
-                    this.channelList.innerHTML = '<div class="loading">Kanal listesi yükleniyor...</div>';
-                    
-                    // Örnek M3U URL - bunu değiştirebilirsiniz
-                    const m3uUrl = 'https://raw.githubusercontent.com/iptv-org/iptv/master/streams/tr.m3u';
-                    
-                    const response = await fetch(m3uUrl);
-                    const text = await response.text();
-                    this.parseM3U(text);
-                    
-                } catch (error) {
-                    console.error('Hata:', error);
-                    this.channelList.innerHTML = '<div class="loading">Kanal listesi yüklenemedi</div>';
-                }
+            initializePlayer() {
+                // Player event listeners
+                this.player.addEventListener('play', () => {
+                    this.updatePlayStatus('OYNUYOR');
+                });
+
+                this.player.addEventListener('pause', () => {
+                    this.updatePlayStatus('DURAKLATILDI');
+                });
+
+                this.player.addEventListener('ended', () => {
+                    this.updatePlayStatus('BİTTİ');
+                });
             }
 
-            // M3U dosyasını işle
-            parseM3U(data) {
-                this.channels = [];
-                const lines = data.split('\n');
-                
-                for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].startsWith('#EXTINF:')) {
-                        const info = lines[i];
-                        const streamUrl = lines[i + 1]?.trim();
-                        
-                        if (streamUrl && streamUrl.startsWith('http')) {
-                            const nameMatch = info.match(/,(.*)$/);
-                            const name = nameMatch ? nameMatch[1].trim() : 'Bilinmeyen Kanal';
-                            
-                            this.channels.push({
-                                name: name,
-                                url: streamUrl
-                            });
-                        }
-                        i++;
-                    }
-                }
-                
-                this.renderChannels();
-            }
-
-            // Kanalları listele
-            renderChannels() {
-                if (this.channels.length === 0) {
-                    this.channelList.innerHTML = '<div class="loading">Kanal bulunamadı</div>';
+            async loadFromUrl(url) {
+                if (!url) {
+                    this.showMessage('Lütfen bir URL girin', 'error');
                     return;
                 }
 
-                this.channelList.innerHTML = this.channels.map((channel, index) => `
-                    <div class="channel-item" onclick="iptvPlayer.playChannel(${index})">
+                try {
+                    this.showMessage('M3U listesi yükleniyor...', 'loading');
+                    
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('URL yüklenemedi');
+                    
+                    const text = await response.text();
+                    this.parseM3U(text);
+                    this.showMessage('M3U listesi başarıyla yüklendi!', 'success');
+                    
+                } catch (error) {
+                    this.showMessage('Hata: ' + error.message, 'error');
+                }
+            }
+
+            async loadFromFile(file) {
+                if (!file) {
+                    this.showMessage('Lütfen bir dosya seçin', 'error');
+                    return;
+                }
+
+                if (!file.name.endsWith('.m3u') && !file.name.endsWith('.m3u8')) {
+                    this.showMessage('Lütfen .m3u veya .m3u8 dosyası seçin', 'error');
+                    return;
+                }
+
+                try {
+                    this.showMessage('Dosya okunuyor...', 'loading');
+                    const text = await file.text();
+                    this.parseM3U(text);
+                    this.showMessage('Dosya başarıyla yüklendi!', 'success');
+                    
+                } catch (error) {
+                    this.showMessage('Dosya okunamadı: ' + error.message, 'error');
+                }
+            }
+
+            parseM3U(data) {
+                this.allChannels = [];
+                const lines = data.split('\n');
+                let currentChannel = {};
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.startsWith('#EXTINF:')) {
+                        currentChannel = this.parseExtinfLine(line);
+                    } else if (line.startsWith('http')) {
+                        currentChannel.url = line;
+                        if (this.isValidChannel(currentChannel)) {
+                            this.allChannels.push({...currentChannel});
+                        }
+                        currentChannel = {};
+                    }
+                }
+
+                this.updateStats();
+                this.filterChannels(this.currentFilter);
+                this.showChannels();
+            }
+
+            parseExtinfLine(line) {
+                const channel = {
+                    name: 'Bilinmeyen Kanal',
+                    group: 'Genel',
+                    category: 'live'
+                };
+                
+                // Kanal adını al
+                const nameMatch = line.match(/,(.*)$/);
+                if (nameMatch) channel.name = nameMatch[1].trim();
+                
+                // Grup bilgisini al
+                const groupMatch = line.match(/group-title="([^"]*)"/);
+                if (groupMatch) channel.group = groupMatch[1].trim();
+                
+                // Kategori belirle
+                channel.category = this.determineCategory(channel.name, channel.group);
+                
+                return channel;
+            }
+
+            determineCategory(name, group) {
+                const lowerName = name.toLowerCase();
+                const lowerGroup = group.toLowerCase();
+
+                if (lowerName.includes('film') || lowerName.includes('movie') || lowerGroup.includes('film')) {
+                    return 'movie';
+                }
+                if (lowerName.includes('dizi') || lowerName.includes('series') || lowerGroup.includes('dizi')) {
+                    return 'series';
+                }
+                if (lowerName.includes('spor') || lowerName.includes('sport') || lowerGroup.includes('spor')) {
+                    return 'sport';
+                }
+                if (lowerName.includes('müzik') || lowerName.includes('music') || lowerGroup.includes('müzik')) {
+                    return 'music';
+                }
+                return 'live';
+            }
+
+            isValidChannel(channel) {
+                return channel.name && channel.url && channel.url.startsWith('http');
+            }
+
+            filterChannels(category) {
+                this.currentFilter = category;
+                
+                // Update active button
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+                
+                this.filteredChannels = category === 'all' 
+                    ? this.allChannels 
+                    : this.allChannels.filter(ch => ch.category === category);
+                
+                this.showChannels();
+                this.updateStats();
+            }
+
+            showChannels() {
+                if (this.filteredChannels.length === 0) {
+                    this.channelList.innerHTML = `
+                        <div style="text-align: center; color: #999; padding: 20px;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2em; margin-bottom: 10px;"></i>
+                            <p>Bu kategoride kanal bulunamadı</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.channelList.innerHTML = this.filteredChannels.map((channel, index) => `
+                    <div class="channel-item" onclick="player.playChannel(${index})">
                         <div class="channel-name">${channel.name}</div>
-                        <div style="font-size: 12px; color: #ccc;">${channel.url}</div>
+                        <div class="channel-url">${channel.url.substring(0, 50)}...</div>
                     </div>
                 `).join('');
             }
 
-            // Kanal oynat
             playChannel(index) {
-                const channel = this.channels[index];
+                const channel = this.filteredChannels[index];
                 if (channel && channel.url) {
                     this.player.src = channel.url;
+                    this.nowPlaying.innerHTML = `<i class="fas fa-play"></i> Şu an: <strong>${channel.name}</strong>`;
+                    
+                    // Highlight playing channel
+                    document.querySelectorAll('.channel-item').forEach(item => {
+                        item.classList.remove('playing');
+                    });
+                    document.querySelectorAll('.channel-item')[index].classList.add('playing');
+                    
                     this.player.play().catch(e => {
-                        alert('Kanal oynatılamıyor: ' + e.message);
+                        this.showMessage('Kanal oynatılamıyor: ' + e.message, 'error');
                     });
                 }
+            }
+
+            updateStats() {
+                document.getElementById('totalChannels').textContent = this.allChannels.length;
+                document.getElementById('loadedChannels').textContent = this.filteredChannels.length;
+                document.getElementById('currentCategory').textContent = this.getCategoryName(this.currentFilter);
+            }
+
+            updatePlayStatus(status) {
+                document.getElementById('playStatus').textContent = status;
+            }
+
+            getCategoryName(category) {
+                const names = {
+                    'all': 'Tümü',
+                    'live': 'Canlı TV',
+                    'movie': 'Film',
+                    'series': 'Dizi',
+                    'sport': 'Spor',
+                    'music': 'Müzik'
+                };
+                return names[category] || category;
+            }
+
+            showMessage(message, type) {
+                const colors = {
+                    'error': '#ff4444',
+                    'success': '#44ff44',
+                    'loading': '#4444ff'
+                };
+                
+                this.nowPlaying.innerHTML = `
+                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'spinner fa-spin'}"></i>
+                    <span style="color: ${colors[type] || '#fff'}">${message}</span>
+                `;
             }
         }
 
         // Global player instance
-        const iptvPlayer = new IPTVPlayer();
+        const player = new M3UUploadPlayer();
 
-        // Yardımcı fonksiyonlar
-        function toggleFullscreen() {
-            const player = document.getElementById('videoPlayer');
-            if (player.requestFullscreen) {
-                player.requestFullscreen();
+        // Global functions for buttons
+        function loadFromUrl() {
+            const url = document.getElementById('m3uUrl').value.trim();
+            player.loadFromUrl(url);
+        }
+
+        function loadFromFile(file) {
+            player.loadFromFile(file);
+        }
+
+        function filterChannels(category) {
+            player.filterChannels(category);
+        }
+
+        // Enter key support for URL input
+        document.getElementById('m3uUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadFromUrl();
             }
-        }
+        });
 
-        function refreshChannels() {
-            iptvPlayer.loadPlaylist();
-        }
-
-        // Sayfa yüklendiğinde
-        document.addEventListener('DOMContentLoaded', () => {
-            iptvPlayer.loadPlaylist();
+        // File input display
+        document.getElementById('m3uFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Dosya seçilmedi';
+            document.querySelector('.file-input-label').innerHTML = 
+                `<i class="fas fa-file"></i> ${fileName}`;
         });
     </script>
 </body>
