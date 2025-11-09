@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IPTV Player | M3U Yükle</title>
+    <title>IPTV Player | Xtream Codes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -32,7 +32,7 @@
         }
 
         .container {
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
             text-align: center;
         }
@@ -58,53 +58,73 @@
             font-size: 1.1em;
         }
 
-        .upload-container {
+        .login-container {
             background: rgba(0,0,0,0.6);
             padding: 40px;
             border-radius: 20px;
-            border: 3px dashed var(--gray);
-            transition: all 0.3s ease;
+            border: 2px solid var(--gray);
             margin-bottom: 30px;
         }
 
-        .upload-container:hover {
-            border-color: var(--primary);
-        }
-
-        .upload-icon {
-            font-size: 4em;
+        .login-icon {
+            font-size: 3em;
             color: var(--primary);
             margin-bottom: 20px;
         }
 
-        .upload-text h2 {
+        .login-text h2 {
             margin-bottom: 15px;
             color: var(--light);
         }
 
-        .upload-text p {
+        .login-text p {
             color: #999;
             margin-bottom: 25px;
             font-size: 1em;
         }
 
-        .input-group {
-            margin-top: 20px;
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
         }
 
-        input[type="url"] {
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-weight: bold;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+
+        .input-with-icon input {
             width: 100%;
-            padding: 15px;
+            padding: 15px 15px 15px 45px;
             border: none;
             border-radius: 10px;
             background: rgba(255,255,255,0.1);
             color: white;
             font-size: 16px;
-            margin-bottom: 15px;
         }
 
-        input[type="url"]:focus {
+        .input-with-icon input:focus {
             outline: 2px solid var(--primary);
+        }
+
+        .port-protocol {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         button {
@@ -118,6 +138,7 @@
             font-size: 16px;
             font-weight: bold;
             transition: all 0.3s ease;
+            margin-top: 10px;
         }
 
         button:hover {
@@ -171,23 +192,78 @@
             color: #ff0000;
         }
 
-        .example-url {
-            margin-top: 15px;
-            padding: 15px;
+        .examples {
+            margin-top: 25px;
+            padding: 20px;
             background: rgba(255,255,255,0.05);
             border-radius: 10px;
-            font-size: 0.9em;
-            color: #ccc;
             text-align: left;
         }
 
-        .example-url code {
+        .examples h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .example-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .example-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--light);
+        }
+
+        .example-code {
             background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 5px;
             font-family: monospace;
             color: var(--primary);
             word-break: break-all;
+            font-size: 0.9em;
+        }
+
+        .quick-test {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,68,68,0.1);
+            border-radius: 10px;
+            border: 1px solid var(--primary);
+        }
+
+        .quick-test p {
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .test-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .test-btn {
+            padding: 10px;
+            background: rgba(255,68,68,0.2);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .test-btn:hover {
+            background: var(--primary);
         }
     </style>
 </head>
@@ -196,62 +272,125 @@
         <!-- Logo & Title -->
         <div class="logo">
             <i class="fas fa-satellite-dish"></i>
-            <h1>PRO IPTV</h1>
-            <p>M3U Bağlantınızı Yapıştırın</p>
+            <h1>XTREAM IPTV</h1>
+            <p>Xtream Codes API Girişi</p>
         </div>
 
-        <!-- Upload Container -->
-        <div class="upload-container">
-            <div class="upload-icon">
-                <i class="fas fa-link"></i>
+        <!-- Login Container -->
+        <div class="login-container">
+            <div class="login-icon">
+                <i class="fas fa-key"></i>
             </div>
-            <div class="upload-text">
-                <h2>M3U Bağlantısı</h2>
-                <p>IPTV sağlayıcınızın M3U bağlantısını yapıştırın</p>
-            </div>
-
-            <!-- URL Input -->
-            <div class="input-group">
-                <input type="url" id="m3uUrl" 
-                       placeholder="http://example.com:8080/get.php?username=xxx&password=xxx&type=m3u_plus&output=ts"
-                       value="http://test.newtests.xyz:8080/get.php?username=ibrahiim034&password=130719&type=m3u_plus&output=ts">
-                <button onclick="loadFromUrl()" id="loadBtn">
-                    <i class="fas fa-play"></i> Kanalları Yükle
-                </button>
+            <div class="login-text">
+                <h2>Xtream Codes Bilgileriniz</h2>
+                <p>IPTV panel bilgilerinizi girin</p>
             </div>
 
-            <!-- Example URL -->
-            <div class="example-url">
-                <strong><i class="fas fa-info-circle"></i> Örnek Format:</strong><br>
-                <code>http://sunucu:port/get.php?username=KULLANICI&password=ŞİFRE&type=m3u_plus&output=ts</code>
+            <!-- Xtream Codes Form -->
+            <div class="form-group">
+                <label for="serverUrl"><i class="fas fa-server"></i> Sunucu URL</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-globe"></i>
+                    <input type="text" id="serverUrl" placeholder="sunucu.com" value="test.newtests.xyz">
+                </div>
             </div>
+
+            <div class="port-protocol">
+                <div class="form-group">
+                    <label for="serverPort"><i class="fas fa-plug"></i> Port</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-network-wired"></i>
+                        <input type="number" id="serverPort" placeholder="8080" value="8080">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="protocol"><i class="fas fa-shield-alt"></i> Protokol</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <select id="protocol" style="width:100%;padding:15px 15px 15px 45px;border-radius:10px;background:rgba(255,255,255,0.1);color:white;border:none;">
+                            <option value="http">HTTP</option>
+                            <option value="https">HTTPS</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Kullanıcı Adı</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Kullanıcı adınız" value="ibrahiim034">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Şifre</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Şifreniz" value="130719">
+                </div>
+            </div>
+
+            <button onclick="connectXtream()" id="connectBtn">
+                <i class="fas fa-plug"></i> Bağlan & Kanalları Yükle
+            </button>
 
             <!-- Loading -->
             <div id="loading" class="loading">
                 <i class="fas fa-spinner fa-spin"></i>
-                <p>Kanallar yükleniyor...</p>
+                <p>Xtream Codes'a bağlanılıyor...</p>
             </div>
 
             <!-- Success -->
             <div id="success" class="success">
                 <i class="fas fa-check-circle"></i>
-                <p>Kanallar başarıyla yüklendi! Player'a yönlendiriliyorsunuz...</p>
+                <p>Başarıyla bağlandı! Player'a yönlendiriliyorsunuz...</p>
             </div>
 
             <!-- Error -->
             <div id="error" class="error">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p id="errorText">Hata oluştu</p>
+                <p id="errorText">Bağlantı hatası</p>
+            </div>
+        </div>
+
+        <!-- Quick Test Section -->
+        <div class="quick-test">
+            <p><i class="fas fa-bolt"></i> Hızlı Test:</p>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="fillTestData()">
+                    <i class="fas fa-vial"></i> Test Verileri
+                </button>
+                <button class="test-btn" onclick="clearForm()">
+                    <i class="fas fa-times"></i> Temizle
+                </button>
             </div>
         </div>
 
         <!-- Info -->
         <div style="color: #666; font-size: 0.9em; margin-top: 20px;">
-            <i class="fas fa-shield-alt"></i> Bilgileriniz sadece sizde saklanır
+            <i class="fas fa-shield-alt"></i> Bilgileriniz sadece tarayıcınızda saklanır
         </div>
     </div>
 
     <script>
+        function fillTestData() {
+            document.getElementById('serverUrl').value = 'test.newtests.xyz';
+            document.getElementById('serverPort').value = '8080';
+            document.getElementById('username').value = 'ibrahiim034';
+            document.getElementById('password').value = '130719';
+            hideMessages();
+        }
+
+        function clearForm() {
+            document.getElementById('serverUrl').value = '';
+            document.getElementById('serverPort').value = '';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            hideMessages();
+        }
+
         function hideMessages() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('success').style.display = 'none';
@@ -274,120 +413,145 @@
             document.getElementById('error').style.display = 'block';
         }
 
-        async function loadFromUrl() {
-            const url = document.getElementById('m3uUrl').value.trim();
-            const loadBtn = document.getElementById('loadBtn');
-            
-            if (!url) {
-                showError('Lütfen M3U bağlantısını girin');
+        async function connectXtream() {
+            const serverUrl = document.getElementById('serverUrl').value.trim();
+            const serverPort = document.getElementById('serverPort').value.trim();
+            const protocol = document.getElementById('protocol').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const connectBtn = document.getElementById('connectBtn');
+
+            // Validation
+            if (!serverUrl || !serverPort || !username || !password) {
+                showError('Lütfen tüm alanları doldurun');
                 return;
             }
 
-            // URL validation
-            if (!url.startsWith('http')) {
-                showError('Geçerli bir URL girin (http veya https ile başlamalı)');
+            if (!/^\d+$/.test(serverPort)) {
+                showError('Port sadece rakamlardan oluşmalı');
                 return;
             }
 
             // Butonu devre dışı bırak
-            loadBtn.disabled = true;
-            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yükleniyor...';
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Bağlanıyor...';
             showLoading();
-            
+
             try {
-                console.log('M3U URL yükleniyor:', url);
-                
-                // Fetch with timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 saniye timeout
-                
-                const response = await fetch(url, {
+                // Xtream Codes API base URL
+                const baseUrl = `${protocol}://${serverUrl}:${serverPort}`;
+                console.log('Xtream Codes bağlantısı:', baseUrl);
+
+                // 1. Önce panel bilgilerini kontrol et
+                const panelUrl = `${baseUrl}/panel_api.php?username=${username}&password=${password}`;
+                console.log('Panel API URL:', panelUrl);
+
+                const panelResponse = await fetch(panelUrl, {
                     method: 'GET',
-                    signal: controller.signal,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!panelResponse.ok) {
+                    throw new Error(`Panel hatası! Durum: ${panelResponse.status}`);
+                }
+
+                const panelData = await panelResponse.json();
+                console.log('Panel yanıtı:', panelData);
+
+                // Panel bilgilerini kontrol et
+                if (!panelData.user_info || !panelData.user_info.auth) {
+                    throw new Error('Geçersiz kullanıcı adı veya şifre');
+                }
+
+                // 2. M3U playlist al
+                const m3uUrl = `${baseUrl}/get.php?username=${username}&password=${password}&type=m3u_plus&output=ts`;
+                console.log('M3U URL:', m3uUrl);
+
+                const m3uResponse = await fetch(m3uUrl, {
+                    method: 'GET',
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                     }
                 });
-                
-                clearTimeout(timeoutId);
-                
-                console.log('Response status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`Sunucu hatası! Durum: ${response.status}`);
+
+                if (!m3uResponse.ok) {
+                    throw new Error(`M3U hatası! Durum: ${m3uResponse.status}`);
                 }
-                
-                const text = await response.text();
-                console.log('M3U içeriği alındı, uzunluk:', text.length);
-                
-                if (text.length === 0) {
-                    throw new Error('Boş yanıt alındı');
+
+                const m3uContent = await m3uResponse.text();
+                console.log('M3U içeriği alındı, uzunluk:', m3uContent.length);
+
+                if (m3uContent.length === 0) {
+                    throw new Error('Boş playlist alındı');
                 }
-                
-                // M3U format kontrolü
-                if (!text.includes('#EXTM3U')) {
-                    // Eğer M3U header yoksa ama kanal varsa, ekleyelim
-                    if (text.includes('#EXTINF:')) {
-                        console.log('M3U header ekleniyor...');
-                        processM3U('#EXTM3U\n' + text);
-                    } else {
-                        throw new Error('Geçerli bir M3U formatı değil');
-                    }
-                } else {
-                    processM3U(text);
-                }
-                
+
+                // 3. Verileri işle ve kaydet
+                processXtreamData(panelData, m3uContent, baseUrl, username, password);
+
             } catch (error) {
-                console.error('Hata:', error);
+                console.error('Xtream Codes hatası:', error);
                 
-                if (error.name === 'AbortError') {
-                    showError('Bağlantı zaman aşımına uğradı (30 saniye)');
+                if (error.name === 'TypeError') {
+                    showError('Sunucuya bağlanılamadı. URL ve portu kontrol edin.');
                 } else {
-                    showError('Yükleme hatası: ' + error.message);
+                    showError('Bağlantı hatası: ' + error.message);
                 }
                 
                 // Butonu tekrar aktif et
-                loadBtn.disabled = false;
-                loadBtn.innerHTML = '<i class="fas fa-play"></i> Kanalları Yükle';
+                connectBtn.disabled = false;
+                connectBtn.innerHTML = '<i class="fas fa-plug"></i> Bağlan & Kanalları Yükle';
             }
         }
 
-        function processM3U(m3uContent) {
-            console.log('M3U işleniyor...');
+        function processXtreamData(panelData, m3uContent, baseUrl, username, password) {
+            console.log('Xtream verileri işleniyor...');
             
             try {
+                // Kanalları parse et
                 const channels = parseM3U(m3uContent);
                 console.log('Ayrıştırılan kanallar:', channels.length);
-                
+
                 if (channels.length === 0) {
-                    throw new Error('M3U bağlantısında kanal bulunamadı');
+                    throw new Error('Playlistte kanal bulunamadı');
                 }
-                
+
+                // Kullanıcı bilgilerini hazırla
+                const userInfo = {
+                    server: baseUrl,
+                    username: username,
+                    password: password,
+                    userData: panelData.user_info,
+                    serverInfo: panelData.server_info || {}
+                };
+
                 // İstatistikleri hesapla
                 const stats = calculateStats(channels);
-                console.log('İstatistikler:', stats);
-                
+
                 // LocalStorage'a kaydet
                 localStorage.setItem('iptvChannels', JSON.stringify(channels));
+                localStorage.setItem('xtreamUser', JSON.stringify(userInfo));
                 localStorage.setItem('m3uContent', m3uContent);
                 localStorage.setItem('lastUpdate', new Date().toISOString());
                 localStorage.setItem('channelStats', JSON.stringify(stats));
-                
-                console.log('LocalStorage\'a kaydedildi');
+
+                console.log('Xtream verileri kaydedildi');
                 showSuccess();
-                
+
                 // Player sayfasına yönlendir
                 setTimeout(() => {
                     window.location.href = 'player.html';
                 }, 1500);
-                
+
             } catch (error) {
-                console.error('M3U işleme hatası:', error);
-                showError('M3U işlenirken hata: ' + error.message);
+                console.error('Veri işleme hatası:', error);
+                showError('Veri işlenirken hata: ' + error.message);
                 
                 // Butonu tekrar aktif et
-                document.getElementById('loadBtn').disabled = false;
-                document.getElementById('loadBtn').innerHTML = '<i class="fas fa-play"></i> Kanalları Yükle';
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('connectBtn').innerHTML = '<i class="fas fa-plug"></i> Bağlan & Kanalları Yükle';
             }
         }
 
@@ -443,41 +607,13 @@
             const lowerName = name.toLowerCase();
             const lowerGroup = group.toLowerCase();
 
-            // Film kontrolü
-            if (lowerName.includes('film') || lowerName.includes('movie') || 
-                lowerName.includes('sinema') || lowerGroup.includes('film')) {
-                return 'movie';
-            }
-            
-            // Dizi kontrolü
-            if (lowerName.includes('dizi') || lowerName.includes('series') || 
-                lowerName.includes('tv series') || lowerGroup.includes('dizi')) {
-                return 'series';
-            }
-            
-            // Spor kontrolü
-            if (lowerName.includes('spor') || lowerName.includes('sport') || 
-                lowerName.includes('futbol') || lowerGroup.includes('spor')) {
-                return 'sport';
-            }
-            
-            // Müzik kontrolü
-            if (lowerName.includes('müzik') || lowerName.includes('music') || 
-                lowerName.includes('muzik') || lowerGroup.includes('müzik')) {
-                return 'music';
-            }
-            
-            // Haber kontrolü
-            if (lowerName.includes('haber') || lowerName.includes('news') || 
-                lowerGroup.includes('haber')) {
-                return 'news';
-            }
-            
-            // Belgesel kontrolü
-            if (lowerName.includes('belgesel') || lowerName.includes('documentary') || 
-                lowerGroup.includes('belgesel')) {
-                return 'documentary';
-            }
+            if (lowerName.includes('film') || lowerName.includes('movie')) return 'movie';
+            if (lowerName.includes('dizi') || lowerName.includes('series')) return 'series';
+            if (lowerName.includes('spor') || lowerName.includes('sport')) return 'sport';
+            if (lowerName.includes('müzik') || lowerName.includes('music')) return 'music';
+            if (lowerName.includes('haber') || lowerName.includes('news')) return 'news';
+            if (lowerName.includes('belgesel') || lowerName.includes('documentary')) return 'documentary';
+            if (lowerName.includes('çocuk') || lowerName.includes('kids')) return 'kids';
             
             return 'live';
         }
@@ -491,10 +627,7 @@
             const groups = {};
             
             channels.forEach(channel => {
-                // Kategori istatistikleri
                 categories[channel.category] = (categories[channel.category] || 0) + 1;
-                
-                // Grup istatistikleri
                 groups[channel.group] = (groups[channel.group] || 0) + 1;
             });
             
@@ -505,18 +638,10 @@
             };
         }
 
-        // Enter key support
-        document.getElementById('m3uUrl').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                loadFromUrl();
-            }
-        });
-
-        // Sayfa yüklendiğinde URL input'una focus
+        // Sayfa yüklendiğinde test verilerini doldur
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('m3uUrl').focus();
-            // Input'taki değeri seç
-            document.getElementById('m3uUrl').select();
+            fillTestData();
+            document.getElementById('serverUrl').focus();
         });
     </script>
 </body>
