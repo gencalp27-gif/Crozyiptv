@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO IPTV | Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff4444;
+            --secondary: #2d2d2d;
+            --dark: #1a1a1a;
+            --light: #ffffff;
+            --gray: #555;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: var(--light);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.6);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--gray);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2em;
+            color: var(--primary);
+        }
+
+        .logo h1 {
+            font-size: 1.5em;
+            color: var(--primary);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-btn {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: #ff6666;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(0,0,0,0.6);
+            border-radius: 15px;
+            padding: 20px;
+            height: fit-content;
+            border: 1px solid var(--gray);
+        }
+
+        .stats {
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .categories {
+            margin-bottom: 25px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .category-item:hover {
+            background: rgba(255,68,68,0.2);
+            transform: translateX(5px);
+        }
+
+        .category-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Player Section */
+        .player-section {
+            background: rgba(0,0,0,0.6);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--gray);
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+        }
+
+        #videoPlayer {
+            width: 100%;
+            height: 500px;
+            background: #000;
+        }
+
+        .player-info {
+            padding: 15px;
+            background: rgba(0,0,0,0.8);
+            border-top: 2px solid var(--primary);
+        }
+
+        /* Channels Grid */
+        .channels-section {
+            padding: 25px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .channel-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(255,68,68,0.3);
+        }
+
+        .channel-card.playing {
+            border-color: #00ff88;
+            background: rgba(0,255,136,0.1);
+        }
+
+        .channel-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .channel-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        .channel-category {
+            background: var(--primary);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.8em;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .no-channels {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .no-channels i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-satellite-dish"></i>
+                <h1>PRO IPTV PLAYER</h1>
+            </div>
+            <div class="header-controls">
+                <button class="header-btn" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Yeni M3U Yükle
+                </button>
+                <button class="header-btn" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i> Tam Ekran
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="stats">
+                    <h3><i class="fas fa-chart-bar"></i> İstatistikler</h3>
+                    <div class="stat-item">
+                        <span>Toplam Kanal:</span>
+                        <span id="totalChannels">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Canlı TV:</span>
+                        <span id="liveCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Filmler:</span>
+                        <span id="movieCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Diziler:</span>
+                        <span id="seriesCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Spor:</span>
+                        <span id="sportCount">0</span>
+                    </div>
+                </div>
+
+                <div class="categories">
+                    <h3><i class="fas fa-list"></i> Kategoriler</h3>
+                    <div class="category-item active" data-category="all">
+                        <i class="fas fa-globe"></i>
+                        <span>Tüm Kanallar</span>
+                    </div>
+                    <div class="category-item" data-category="live">
+                        <i class="fas fa-tv"></i>
+                        <span>Canlı TV</span>
+                    </div>
+                    <div class="category-item" data-category="movie">
+                        <i class="fas fa-film"></i>
+                        <span>Filmler</span>
+                    </div>
+                    <div class="category-item" data-category="series">
+                        <i class="fas fa-video"></i>
+                        <span>Diziler</span>
+                    </div>
+                    <div class="category-item" data-category="sport">
+                        <i class="fas fa-basketball-ball"></i>
+                        <span>Spor</span>
+                    </div>
+                    <div class="category-item" data-category="music">
+                        <i class="fas fa-music"></i>
+                        <span>Müzik</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Section -->
+            <div class="player-section">
+                <div class="video-container">
+                    <video id="videoPlayer" controls>
+                        Tarayıcınız video oynatmayı desteklemiyor.
+                    </video>
+                </div>
+                <div class="player-info">
+                    <div id="nowPlaying">
+                        <i class="fas fa-info-circle"></i> Bir kanal seçin
+                    </div>
+                </div>
+
+                <div class="channels-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-broadcast-tower"></i> Kanallar
+                    </h3>
+                    <div class="channels-grid" id="channelsGrid">
+                        <div class="no-channels">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Kanal bulunamadı</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class IPTVPlayer {
+            constructor() {
+                this.player = document.getElementById('videoPlayer');
+                this.channelsGrid = document.getElementById('channelsGrid');
+                this.nowPlaying = document.getElementById('nowPlaying');
+                this.allChannels = [];
+                this.filteredChannels = [];
+                this.currentCategory = 'all';
+
+                this.loadChannels();
+                this.initializeEventListeners();
+            }
+
+            loadChannels() {
+                const savedChannels = localStorage.getItem('iptvChannels');
+                if (savedChannels) {
+                    this.allChannels = JSON.parse(savedChannels);
+                    this.updateStats();
+                    this.setActiveCategory('all');
+                } else {
+                    this.showNoChannels();
+                }
+            }
+
+            initializeEventListeners() {
+                // Kategori tıklama
+                document.querySelectorAll('.category-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.setActiveCategory(item.dataset.category);
+                    });
+                });
+            }
+
+            setActiveCategory(category) {
+                this.currentCategory = category;
+                
+                // Aktif kategoriyi güncelle
+                document.querySelectorAll('.category-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.category === category);
+                });
+                
+                // Kanalları filtrele
+                this.filteredChannels = category === 'all' 
+                    ? this.allChannels 
+                    : this.allChannels.filter(ch => ch.category === category);
+                
+                this.renderChannels();
+            }
+
+            renderChannels() {
+                if (this.filteredChannels.length === 0) {
+                    this.showNoChannels();
+                    return;
+                }
+
+                this.channelsGrid.innerHTML = this.filteredChannels.map((channel, index) => `
+                    <div class="channel-card" onclick="iptvPlayer.playChannel(${index})">
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-info">
+                            <span>${channel.group}</span>
+                            <span class="channel-category">${this.getCategoryName(channel.category)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            playChannel(index) {
+                const channel = this.filteredChannels[index];
+                if (channel && channel.url) {
+                    this.player.src = channel.url;
+                    this.nowPlaying.innerHTML = `<i class="fas fa-play"></i> Şu an: <strong>${channel.name}</strong>`;
+                    
+                    // Oynatılan kanalı işaretle
+                    document.querySelectorAll('.channel-card').forEach(card => {
+                        card.classList.remove('playing');
+                    });
+                    document.querySelectorAll('.channel-card')[index].classList.add('playing');
+                    
+                    this.player.play().catch(e => {
+                        alert('Kanal oynatılamıyor: ' + e.message);
+                    });
+                }
+            }
+
+            updateStats() {
+                const counts = {
+                    all: this.allChannels.length,
+                    live: this.allChannels.filter(ch => ch.category === 'live').length,
+                    movie: this.allChannels.filter(ch => ch.category === 'movie').length,
+                    series: this.allChannels.filter(ch => ch.category === 'series').length,
+                    sport: this.allChannels.filter(ch => ch.category === 'sport').length,
+                    music: this.allChannels.filter(ch => ch.category === 'music').length
+                };
+
+                document.getElementById('totalChannels').textContent = counts.all;
+                document.getElementById('liveCount').textContent = counts.live;
+                document.getElementById('movieCount').textContent = counts.movie;
+                document.getElementById('seriesCount').textContent = counts.series;
+                document.getElementById('sportCount').textContent = counts.sport;
+            }
+
+            getCategoryName(category) {
+                const names = {
+                    'live': 'Canlı TV',
+                    'movie': 'Film',
+                    'series': 'Dizi',
+                    'sport': 'Spor',
+                    'music': 'Müzik'
+                };
+                return names[category] || 'Diğer';
+            }
+
+            showNoChannels() {
+                this.channelsGrid.innerHTML = `
+                    <div class="no-channels">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Kanal bulunamadı</p>
+                        <button class="header-btn" onclick="goBack()" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-left"></i> M3U Yükle
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Global player instance
+        const iptvPlayer = new IPTVPlayer();
+
+        // Global functions
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        function toggleFullscreen() {
+            const player = document.getElementById('videoPlayer');
+            if (player.requestFullscreen) {
+                player.requestFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
