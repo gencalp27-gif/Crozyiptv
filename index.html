@@ -2,32 +2,28 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Croz IPTV Pro</title>
+<title>Croz IPTV Pro (Mobil Test)</title>
 <style>
-body { font-family: sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; padding:2rem; }
-input, button { padding:0.5rem; margin:0.5rem 0; border-radius:5px; border:none; }
-input { width:300px; }
+body { font-family: sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; padding:1rem; }
+input, button { padding:0.5rem; margin:0.3rem 0; border-radius:5px; border:none; }
+input { width:90%; max-width:350px; }
 button { background:#e50914; color:#fff; cursor:pointer; }
-video { margin-top:1rem; border-radius:10px; width:80%; max-width:600px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:0.5rem; margin-top:1rem; width:80%; }
-.card { background:#222; padding:0.5rem; border-radius:5px; cursor:pointer; text-align:center; }
+video { margin-top:1rem; border-radius:10px; width:90%; max-width:600px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:0.3rem; margin-top:1rem; width:90%; }
+.card { background:#222; padding:0.5rem; border-radius:5px; cursor:pointer; text-align:center; font-size:0.9rem; }
 .card:hover { background:#333; }
 </style>
 </head>
 <body>
 
-<h2>Croz IPTV Pro</h2>
+<h2>Croz IPTV Pro (Mobil)</h2>
 
-<!-- Kullanıcı Bilgileri -->
 <input type="text" id="server" placeholder="Server URL">
 <input type="text" id="username" placeholder="Username">
 <input type="password" id="password" placeholder="Password">
 <button id="loginBtn">Login ve Kanalları Getir</button>
 
-<!-- Video Player -->
 <video id="player" controls></video>
-
-<!-- Kanal Listesi -->
 <div class="grid" id="channelGrid"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -46,17 +42,14 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
     }
 
     try {
-        // Xtream Codes API ile giriş ve canlı kanal listesi çekme
-        const liveURL = `${server}/player_api.php?username=${username}&password=${password}&action=get_live_streams`;
-        const vodURL = `${server}/player_api.php?username=${username}&password=${password}&action=get_vod_streams`;
+        const corsProxy = "https://api.allorigins.win/raw?url=";
+
+        const liveURL = `${corsProxy}${encodeURIComponent(server+'/player_api.php?username='+username+'&password='+password+'&action=get_live_streams')}`;
+        const vodURL = `${corsProxy}${encodeURIComponent(server+'/player_api.php?username='+username+'&password='+password+'&action=get_vod_streams')}`;
 
         const liveRes = await fetch(liveURL);
         const liveData = await liveRes.json();
 
-        const vodRes = await fetch(vodURL);
-        const vodData = await vodRes.json();
-
-        // Kanalları grid'e ekleme
         grid.innerHTML = "";
         liveData.forEach(ch => {
             const card = document.createElement('div');
@@ -66,8 +59,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
             grid.appendChild(card);
         });
 
-        // VOD kanalları eklemek için istersen ben eklerim
-        alert("Canlı kanallar yüklendi! Artık bir kanal seçip izleyebilirsin.");
+        alert("Canlı kanallar yüklendi! Bir kanal seçip izleyebilirsin.");
 
     } catch(err){
         console.error(err);
@@ -81,6 +73,7 @@ function playStream(url){
         hls.loadSource(url);
         hls.attachMedia(player);
         hls.on(Hls.Events.MANIFEST_PARSED, () => player.play());
+        hls.on(Hls.Events.ERROR, (event,data)=>console.error("HLS Error:", data));
     } else if(player.canPlayType('application/vnd.apple.mpegurl')){
         player.src = url;
         player.play();
