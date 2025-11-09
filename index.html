@@ -17,27 +17,14 @@
             --card-bg: #1a1a1a;
             --success: #00d46a;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * {margin:0;padding:0;box-sizing:border-box;}
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background: var(--dark);
             color: var(--light);
             min-height: 100vh;
             overflow-x: hidden;
         }
-
-        /* App Container */
-        .app-container {
-            min-height: 100vh;
-        }
-
-        /* Header */
         .header {
             background: rgba(20, 20, 20, 0.95);
             backdrop-filter: blur(20px);
@@ -47,7 +34,6 @@
             z-index: 1000;
             border-bottom: 1px solid var(--gray);
         }
-
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
@@ -55,105 +41,39 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: .75rem;
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--primary);
         }
-
-        /* Main Content */
-        .main-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 80vh;
-            padding: 2rem;
-        }
-
-        /* Auth Container */
+        .main-content {display:flex;align-items:center;justify-content:center;min-height:80vh;padding:2rem;}
         .auth-container {
             background: var(--card-bg);
             border-radius: 20px;
             padding: 3rem;
-            width: 100%;
             max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,.5);
             border: 1px solid var(--gray);
         }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .auth-icon {
-            font-size: 3rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            background: var(--gray);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 2rem;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            text-align: center;
-            background: transparent;
-            border: none;
-            color: #ccc;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #ccc;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
+        .auth-header{text-align:center;margin-bottom:2rem;}
+        .auth-icon{font-size:3rem;color:var(--primary);margin-bottom:1rem;}
+        .form-group{margin-bottom:1.5rem;}
+        .form-label{display:block;margin-bottom:.5rem;color:#ccc;font-weight:600;font-size:.9rem;}
         .form-input {
             width: 100%;
             padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
             border: 2px solid transparent;
             border-radius: 12px;
             color: white;
             font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: all .3s ease;
         }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        /* Button */
+        .form-input:focus{outline:none;border-color:var(--primary);background:rgba(255,255,255,0.15);}
         .btn {
             width: 100%;
             padding: 1rem;
@@ -164,25 +84,11 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            transition: all .3s ease;
+            display:flex;align-items:center;justify-content:center;gap:.5rem;
         }
-
-        .btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            background: var(--gray);
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Messages */
+        .btn:hover{background:var(--primary-dark);transform:translateY(-2px);}
+        .btn:disabled{background:var(--gray);cursor:not-allowed;transform:none;}
         .message {
             padding: 1rem;
             border-radius: 12px;
@@ -190,716 +96,221 @@
             text-align: center;
             display: none;
         }
-
-        .message.error {
-            background: rgba(229, 9, 20, 0.1);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .message.success {
-            background: rgba(0, 212, 106, 0.1);
-            border: 1px solid var(--success);
-            color: var(--success);
-        }
-
-        .message.loading {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--gray);
-            color: #ccc;
-        }
-
-        /* Player Section */
-        .player-section {
-            display: none;
-            min-height: 100vh;
-            background: var(--dark);
-        }
-
-        .player-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .player-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .video-container {
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            position: relative;
-        }
-
-        #videoPlayer {
-            width: 100%;
-            height: 500px;
-            background: #000;
-        }
-
-        .stream-info {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-
-        .player-info {
-            padding: 1.5rem;
-            background: var(--card-bg);
-            border-radius: 12px;
-            margin-bottom: 2rem;
-        }
-
-        .now-playing {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        /* Channels Grid */
-        .channels-section {
-            margin-top: 2rem;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .channels-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .channel-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .channel-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-
-        .channel-card.playing {
-            background: rgba(229, 9, 20, 0.1);
-            border-color: var(--primary);
-        }
-
-        .channel-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .channel-logo {
-            width: 50px;
-            height: 50px;
-            background: var(--primary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        .channel-info {
-            flex: 1;
-        }
-
-        .channel-name {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            font-size: 1.1rem;
-        }
-
-        .channel-group {
-            color: #ccc;
-            font-size: 0.9rem;
-        }
-
-        .channel-category {
-            background: var(--primary);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        /* Stream Test Section */
-        .stream-test {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .test-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .test-btn {
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--gray);
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .test-btn:hover {
-            border-color: var(--primary);
-            background: rgba(229, 9, 20, 0.1);
-        }
-
-        /* Footer */
-        .footer {
-            background: var(--secondary);
-            padding: 2rem;
-            text-align: center;
-            color: #666;
-            border-top: 1px solid var(--gray);
-        }
-
-        @media (max-width: 768px) {
-            .auth-container {
-                padding: 2rem;
-                margin: 1rem;
-            }
-            .channels-grid {
-                grid-template-columns: 1fr;
-            }
-            .test-buttons {
-                flex-direction: column;
-            }
-        }
+        .message.error{background:rgba(229,9,20,0.1);border:1px solid var(--primary);color:var(--primary);}
+        .message.success{background:rgba(0,212,106,0.1);border:1px solid var(--success);color:var(--success);}
+        .message.loading{background:rgba(255,255,255,0.1);border:1px solid var(--gray);color:#ccc;}
+        .player-section{display:none;min-height:100vh;background:var(--dark);}
+        .player-container{max-width:1400px;margin:0 auto;padding:2rem;}
+        .player-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;}
+        .video-container{background:#000;border-radius:16px;overflow:hidden;margin-bottom:2rem;box-shadow:0 20px 60px rgba(0,0,0,.5);position:relative;}
+        #videoPlayer{width:100%;height:500px;background:#000;}
+        .stream-info{position:absolute;top:1rem;left:1rem;background:rgba(0,0,0,.8);padding:.5rem 1rem;border-radius:8px;font-size:.9rem;color:#ccc;}
+        .player-info{padding:1.5rem;background:var(--card-bg);border-radius:12px;margin-bottom:2rem;}
+        .now-playing{font-size:1.1rem;font-weight:600;}
+        .channels-section{margin-top:2rem;}
+        .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+        .channels-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;}
+        .channel-card{background:var(--card-bg);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all .3s ease;border:2px solid transparent;}
+        .channel-card:hover{transform:translateY(-5px);border-color:var(--primary);}
+        .channel-card.playing{background:rgba(229,9,20,0.1);border-color:var(--primary);}
+        .channel-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;}
+        .channel-logo{width:50px;height:50px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+        .channel-info{flex:1;}
+        .channel-name{font-weight:600;margin-bottom:.25rem;font-size:1.1rem;}
+        .channel-group{color:#ccc;font-size:.9rem;}
+        .channel-category{background:var(--primary);color:white;padding:.25rem .75rem;border-radius:20px;font-size:.8rem;font-weight:600;}
+        .stream-test{background:var(--card-bg);border-radius:12px;padding:1.5rem;margin-top:2rem;}
+        .test-buttons{display:flex;gap:1rem;flex-wrap:wrap;}
+        .test-btn{padding:.75rem 1.5rem;background:rgba(255,255,255,0.1);border:1px solid var(--gray);border-radius:8px;color:white;cursor:pointer;transition:all .3s ease;}
+        .test-btn:hover{border-color:var(--primary);background:rgba(229,9,20,0.1);}
+        .footer{background:var(--secondary);padding:2rem;text-align:center;color:#666;border-top:1px solid var(--gray);}
+        @media(max-width:768px){.auth-container{padding:2rem;margin:1rem;}.channels-grid{grid-template-columns:1fr;}.test-buttons{flex-direction:column;}}
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-tv"></i>
-                    <span>StreamTV Pro</span>
+<div class="app-container">
+    <header class="header">
+        <div class="header-content">
+            <div class="logo"><i class="fas fa-tv"></i><span>StreamTV Pro</span></div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="auth-container" id="authSection">
+            <div class="auth-header">
+                <div class="auth-icon"><i class="fas fa-satellite-dish"></i></div>
+                <h1>IPTV Giriş</h1>
+                <p>M3U listenizi ekleyin</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">M3U URL</label>
+                <input type="url" class="form-input" id="m3uUrl"
+                       placeholder="http://sunucu:port/get.php?username=xxx&password=xxx&type=m3u_plus&output=ts"
+                       value="">
+            </div>
+            <button class="btn" onclick="loadM3U()" id="loadBtn"><i class="fas fa-bolt"></i> Kanalları Yükle</button>
+            <div class="message loading" id="loadingMessage"><i class="fas fa-spinner fa-spin"></i> Kanallar yükleniyor...</div>
+            <div class="message error" id="errorMessage"><i class="fas fa-exclamation-triangle"></i> <span id="errorText"></span></div>
+            <div class="message success" id="successMessage"><i class="fas fa-check-circle"></i> Başarıyla giriş yapıldı!</div>
+        </div>
+
+        <section class="player-section" id="playerSection">
+            <div class="player-container">
+                <div class="player-header">
+                    <div class="logo"><i class="fas fa-tv"></i><span>StreamTV Pro</span></div>
+                    <button class="btn" onclick="showAuthSection()" style="width:auto;"><i class="fas fa-sign-out-alt"></i> Çıkış</button>
+                </div>
+                <div class="video-container">
+                    <video id="videoPlayer" controls crossorigin="anonymous">Tarayıcınız video oynatmayı desteklemiyor.</video>
+                    <div class="stream-info" id="streamInfo">Stream hazır</div>
+                </div>
+                <div class="player-info">
+                    <div class="now-playing" id="nowPlaying"><i class="fas fa-info-circle"></i> Bir kanal seçin</div>
+                </div>
+                <div class="stream-test">
+                    <h3 style="margin-bottom:1rem;">Stream Test</h3>
+                    <div class="test-buttons">
+                        <button class="test-btn" onclick="testStream('hls')"><i class="fas fa-video"></i> HLS Stream Test</button>
+                        <button class="test-btn" onclick="testStream('dash')"><i class="fas fa-film"></i> DASH Stream Test</button>
+                        <button class="test-btn" onclick="testStream('mp4')"><i class="fas fa-play"></i> MP4 Test</button>
+                    </div>
+                </div>
+                <div class="channels-section">
+                    <div class="section-header">
+                        <h2>Kanallar</h2>
+                        <input type="text" class="form-input" placeholder="Kanal ara..." style="width:300px;" onkeyup="searchChannels(this.value)">
+                    </div>
+                    <div class="channels-grid" id="channelsGrid"></div>
                 </div>
             </div>
-        </header>
+        </section>
+    </main>
+    <footer class="footer"><p>&copy; 2024 StreamTV Pro. Tüm hakları saklıdır.</p></footer>
+</div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Authentication Section -->
-            <div class="auth-container" id="authSection">
-                <div class="auth-header">
-                    <div class="auth-icon">
-                        <i class="fas fa-satellite-dish"></i>
-                    </div>
-                    <h1 class="auth-title">IPTV Giriş</h1>
-                    <p class="auth-subtitle">M3U listenizi ekleyin</p>
-                </div>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+let allChannels = [], filteredChannels = [], currentHls = null;
 
-                <div class="form-group">
-                    <label class="form-label">M3U URL</label>
-                    <input type="url" class="form-input" id="m3uUrl" 
-                           placeholder="http://sunucu:port/get.php?username=xxx&password=xxx&type=m3u_plus&output=ts"
-                           value="http://test.newtests.xyz:8080/get.php?username=ibrahiim034&password=130719&type=m3u_plus&output=ts">
-                </div>
+function showMessage(type,text=''){hideMessages();if(text)document.getElementById('errorText').textContent=text;document.getElementById(type+'Message').style.display='block';}
+function hideMessages(){document.querySelectorAll('.message').forEach(m=>m.style.display='none');}
+function showAuthSection(){document.getElementById('authSection').style.display='block';document.getElementById('playerSection').style.display='none';localStorage.removeItem('iptvChannels');allChannels=[];if(currentHls){currentHls.destroy();currentHls=null;}}
+function showPlayerSection(){document.getElementById('authSection').style.display='none';document.getElementById('playerSection').style.display='block';}
 
-                <button class="btn" onclick="loadM3U()" id="loadBtn">
-                    <i class="fas fa-bolt"></i> Kanalları Yükle
-                </button>
+async function loadM3U(){
+ const url=document.getElementById('m3uUrl').value.trim();
+ const btn=document.getElementById('loadBtn');
+ if(!url){showMessage('error','Lütfen M3U URL girin');return;}
+ btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Yükleniyor...';showMessage('loading');
+ try{
+  const proxyUrl=`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const res=await fetch(proxyUrl);
+  if(!res.ok)throw new Error('Sunucu hatası: '+res.status);
+  const text=await res.text();
+  if(!text.includes('#EXTINF:'))throw new Error('Geçerli M3U formatı değil');
+  processM3UData(text);
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-bolt"></i> Kanalları Yükle';
+ }catch(e){
+  showMessage('error','Bağlantı hatası: '+e.message);
+  btn.disabled=false;btn.innerHTML='<i class="fas fa-bolt"></i> Kanalları Yükle';
+ }
+}
 
-                <!-- Messages -->
-                <div class="message loading" id="loadingMessage">
-                    <i class="fas fa-spinner fa-spin"></i> Kanallar yükleniyor...
-                </div>
+function processM3UData(m3u){
+ try{
+  allChannels=parseM3U(m3u);
+  if(allChannels.length===0)throw new Error('M3U içinde kanal bulunamadı');
+  localStorage.setItem('iptvChannels',JSON.stringify(allChannels));
+  showMessage('success');
+  setTimeout(()=>{showPlayerSection();renderChannels();hideMessages();},1000);
+ }catch(e){showMessage('error','M3U işleme hatası: '+e.message);}
+}
 
-                <div class="message error" id="errorMessage">
-                    <i class="fas fa-exclamation-triangle"></i> <span id="errorText"></span>
-                </div>
+function parseM3U(data){
+ const chs=[];const lines=data.split('\n');let ch={};
+ for(let i=0;i<lines.length;i++){
+  const l=lines[i].trim();
+  if(l.startsWith('#EXTINF:')){ch=parseExtinfLine(l);}
+  else if(/^https?:\/\//i.test(l)){ch.url=l;if(ch.name&&ch.url)chs.push({...ch});ch={};}
+ }
+ return chs;
+}
+function parseExtinfLine(line){
+ const c={name:'Bilinmeyen Kanal',group:'Genel',category:'live',logo:''};
+ const n=line.match(/,(.*)$/);if(n)c.name=n[1].trim();
+ const g=line.match(/group-title="([^"]*)"/);if(g)c.group=g[1].trim();
+ const lg=line.match(/tvg-logo="([^"]*)"/);if(lg)c.logo=lg[1];
+ const nm=c.name.toLowerCase(),gr=c.group.toLowerCase();
+ if(nm.includes('film')||nm.includes('movie'))c.category='movie';
+ else if(nm.includes('dizi')||nm.includes('series'))c.category='series';
+ else if(nm.includes('spor')||nm.includes('sport'))c.category='sport';
+ else if(nm.includes('müzik')||nm.includes('music'))c.category='music';
+ return c;
+}
 
-                <div class="message success" id="successMessage">
-                    <i class="fas fa-check-circle"></i> Başarıyla giriş yapıldı!
-                </div>
-            </div>
+function playChannel(i){
+ const arr=filteredChannels.length?filteredChannels:allChannels;
+ const ch=arr[i];if(!ch)return;
+ const player=document.getElementById('videoPlayer'),info=document.getElementById('streamInfo');
+ if(currentHls){currentHls.destroy();currentHls=null;}
+ player.src='';document.getElementById('nowPlaying').innerHTML=`<i class="fas fa-play" style="color:var(--primary);"></i> Şu an: <strong>${ch.name}</strong>`;
+ document.querySelectorAll('.channel-card').forEach(c=>c.classList.remove('playing'));
+ document.querySelectorAll('.channel-card')[i].classList.add('playing');
+ const url=ch.url;info.textContent='Yükleniyor...';
+ if(url.includes('.m3u8')){
+  if(Hls.isSupported()){currentHls=new Hls();currentHls.loadSource(url);currentHls.attachMedia(player);currentHls.on(Hls.Events.MANIFEST_PARSED,()=>player.play());}
+  else{player.src=url;player.play();}
+ }else{player.src=url;player.play();}
+ player.onplaying=()=>info.textContent='Oynatılıyor';
+ player.onwaiting=()=>info.textContent='Buffering...';
+ player.onerror=()=>{info.textContent='Oynatma hatası';showMessage('error','Stream oynatılamıyor');};
+}
 
-            <!-- Player Section -->
-            <section class="player-section" id="playerSection">
-                <div class="player-container">
-                    <div class="player-header">
-                        <div class="logo">
-                            <i class="fas fa-tv"></i>
-                            <span>StreamTV Pro</span>
-                        </div>
-                        <button class="btn" onclick="showAuthSection()" style="width: auto;">
-                            <i class="fas fa-sign-out-alt"></i> Çıkış
-                        </button>
-                    </div>
+function testStream(t){
+ const p=document.getElementById('videoPlayer'),i=document.getElementById('streamInfo');
+ if(currentHls){currentHls.destroy();currentHls=null;}p.src='';i.textContent='Test yükleniyor...';
+ let u='';if(t==='hls')u='https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+ else if(t==='dash')u='https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd';
+ else u='https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+ document.getElementById('nowPlaying').innerHTML=`<i class="fas fa-vial" style="color:var(--accent);"></i> Test: <strong>${t.toUpperCase()}</strong>`;
+ if(t==='hls'&&Hls.isSupported()){currentHls=new Hls();currentHls.loadSource(u);currentHls.attachMedia(p);currentHls.on(Hls.Events.MANIFEST_PARSED,()=>p.play());}
+ else{p.src=u;p.play();}
+}
 
-                    <div class="video-container">
-                        <video id="videoPlayer" controls crossorigin="anonymous">
-                            Tarayıcınız video oynatmayı desteklemiyor.
-                        </video>
-                        <div class="stream-info" id="streamInfo">
-                            Stream hazır
-                        </div>
-                    </div>
-
-                    <div class="player-info">
-                        <div class="now-playing" id="nowPlaying">
-                            <i class="fas fa-info-circle"></i> Bir kanal seçin
-                        </div>
-                    </div>
-
-                    <!-- Stream Test Buttons -->
-                    <div class="stream-test">
-                        <h3 style="margin-bottom: 1rem;">Stream Test</h3>
-                        <div class="test-buttons">
-                            <button class="test-btn" onclick="testStream('hls')">
-                                <i class="fas fa-video"></i> HLS Stream Test
-                            </button>
-                            <button class="test-btn" onclick="testStream('dash')">
-                                <i class="fas fa-film"></i> DASH Stream Test
-                            </button>
-                            <button class="test-btn" onclick="testStream('mp4')">
-                                <i class="fas fa-play"></i> MP4 Test
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="channels-section">
-                        <div class="section-header">
-                            <h2 class="section-title">Kanallar</h2>
-                            <input type="text" class="form-input" placeholder="Kanal ara..." style="width: 300px;" onkeyup="searchChannels(this.value)">
-                        </div>
-
-                        <div class="channels-grid" id="channelsGrid">
-                            <!-- Kanallar buraya gelecek -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2024 StreamTV Pro. Tüm hakları saklıdır.</p>
-        </footer>
+function searchChannels(q){filteredChannels=q?allChannels.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.group.toLowerCase().includes(q.toLowerCase())):[];renderChannels();}
+function renderChannels(){
+ const g=document.getElementById('channelsGrid');
+ const list=filteredChannels.length?filteredChannels:allChannels;
+ if(list.length===0){g.innerHTML='<div style="text-align:center
+if(list.length===0){
+    g.innerHTML = '<div style="text-align:center;opacity:0.7;">Kanal bulunamadı</div>';
+    return;
+}
+g.innerHTML = list.map((ch,i)=>`
+<div class="channel-card" onclick="playChannel(${i})">
+    <div class="channel-header">
+        <div class="channel-logo">${ch.logo ? `<img src="${ch.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : '<i class="fas fa-tv"></i>'}</div>
+        <div class="channel-info">
+            <div class="channel-name">${ch.name}</div>
+            <div class="channel-group">${ch.group}</div>
+        </div>
+        <div class="channel-category">${ch.category}</div>
     </div>
+</div>
+`).join('');
+}
 
-    <!-- HLS.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-    <script>
-        // Global variables
-        let allChannels = [];
-        let filteredChannels = [];
-        let currentHls = null;
-
-        // Message functions
-        function showMessage(type, text = '') {
-            hideMessages();
-            if (text) {
-                document.getElementById('errorText').textContent = text;
-            }
-            document.getElementById(type + 'Message').style.display = 'block';
-        }
-
-        function hideMessages() {
-            document.querySelectorAll('.message').forEach(msg => {
-                msg.style.display = 'none';
-            });
-        }
-
-        // Section navigation
-        function showAuthSection() {
-            document.getElementById('authSection').style.display = 'block';
-            document.getElementById('playerSection').style.display = 'none';
-            localStorage.removeItem('iptvChannels');
-            allChannels = [];
-            if (currentHls) {
-                currentHls.destroy();
-                currentHls = null;
-            }
-        }
-
-        function showPlayerSection() {
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('playerSection').style.display = 'block';
-        }
-
-        // Load M3U function
-        async function loadM3U() {
-            const url = document.getElementById('m3uUrl').value.trim();
-            const btn = document.getElementById('loadBtn');
-            
-            if (!url) {
-                showMessage('error', 'Lütfen M3U URL girin');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yükleniyor...';
-            showMessage('loading');
-
-            try {
-                console.log('M3U URL yükleniyor:', url);
-                
-                // Use proxy for M3U fetch
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`Sunucu hatası: ${response.status}`);
-                }
-                
-                const text = await response.text();
-                console.log('M3U içeriği alındı:', text.length, 'karakter');
-                
-                if (!text.includes('#EXTINF:')) {
-                    throw new Error('Geçerli M3U formatı değil');
-                }
-                
-                processM3UData(text);
-                
-            } catch (error) {
-                console.error('Hata:', error);
-                showMessage('error', 'Bağlantı hatası: ' + error.message);
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-bolt"></i> Kanalları Yükle';
-            }
-        }
-
-        // Process M3U data
-        function processM3UData(m3uContent) {
-            try {
-                allChannels = parseM3U(m3uContent);
-                console.log('Ayrıştırılan kanallar:', allChannels.length);
-                
-                if (allChannels.length === 0) {
-                    throw new Error('M3U içinde kanal bulunamadı');
-                }
-
-                localStorage.setItem('iptvChannels', JSON.stringify(allChannels));
-                showMessage('success');
-                
-                setTimeout(() => {
-                    showPlayerSection();
-                    renderChannels();
-                    hideMessages();
-                }, 1000);
-                
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-bolt"></i> Kanalları Yükle';
-                
-            } catch (error) {
-                showMessage('error', 'M3U işleme hatası: ' + error.message);
-            }
-        }
-
-        // Parse M3U content
-        function parseM3U(data) {
-            const channels = [];
-            const lines = data.split('\n');
-            let currentChannel = {};
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                
-                if (line.startsWith('#EXTINF:')) {
-                    currentChannel = parseExtinfLine(line);
-                } else if (line.startsWith('http')) {
-                    currentChannel.url = line;
-                    if (isValidChannel(currentChannel)) {
-                        channels.push({...currentChannel});
-                    }
-                    currentChannel = {};
-                }
-            }
-            
-            return channels;
-        }
-
-        // Parse EXTINF line
-        function parseExtinfLine(line) {
-            const channel = {
-                name: 'Bilinmeyen Kanal',
-                group: 'Genel',
-                category: 'live',
-                logo: ''
-            };
-            
-            const nameMatch = line.match(/,(.*)$/);
-            if (nameMatch) channel.name = nameMatch[1].trim();
-            
-            const groupMatch = line.match(/group-title="([^"]*)"/);
-            if (groupMatch) channel.group = groupMatch[1].trim();
-            
-            const logoMatch = line.match(/tvg-logo="([^"]*)"/);
-            if (logoMatch) channel.logo = logoMatch[1];
-            
-            channel.category = determineCategory(channel.name, channel.group);
-            
-            return channel;
-        }
-
-        // Determine category
-        function determineCategory(name, group) {
-            const lowerName = name.toLowerCase();
-            const lowerGroup = group.toLowerCase();
-
-            if (lowerName.includes('film') || lowerName.includes('movie')) return 'movie';
-            if (lowerName.includes('dizi') || lowerName.includes('series')) return 'series';
-            if (lowerName.includes('spor') || lowerName.includes('sport')) return 'sport';
-            if (lowerName.includes('müzik') || lowerName.includes('music')) return 'music';
-            return 'live';
-        }
-
-        // Check if channel is valid
-        function isValidChannel(channel) {
-            return channel.name && channel.url && channel.url.startsWith('http');
-        }
-
-        // Play channel with HLS support
-        function playChannel(index) {
-            const channelsToUse = filteredChannels.length > 0 ? filteredChannels : allChannels;
-            const channel = channelsToUse[index];
-            const player = document.getElementById('videoPlayer');
-            const streamInfo = document.getElementById('streamInfo');
-            
-            if (!channel || !channel.url) return;
-
-            // Destroy previous HLS instance
-            if (currentHls) {
-                currentHls.destroy();
-                currentHls = null;
-            }
-
-            player.src = '';
-            document.getElementById('nowPlaying').innerHTML = 
-                `<i class="fas fa-play" style="color: var(--primary);"></i> Şu an: <strong>${channel.name}</strong>`;
-            
-            // Highlight playing channel
-            document.querySelectorAll('.channel-card').forEach(card => {
-                card.classList.remove('playing');
-            });
-            document.querySelectorAll('.channel-card')[index].classList.add('playing');
-
-            const streamUrl = channel.url;
-            console.log('Stream URL:', streamUrl);
-
-            // Check stream type and play accordingly
-            if (streamUrl.includes('.m3u8')) {
-                // HLS Stream
-                streamInfo.textContent = 'HLS Stream yükleniyor...';
-                
-                if (Hls.isSupported()) {
-                    currentHls = new Hls({
-                        enableWorker: false,
-                        lowLatencyMode: true,
-                        backBufferLength: 90
-                    });
-                    
-                    currentHls.loadSource(streamUrl);
-                    currentHls.attachMedia(player);
-                    
-                    currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        player.play().catch(e => {
-                            console.error('HLS play error:', e);
-                            streamInfo.textContent = 'HLS oynatma hatası';
-                        });
-                    });
-                    
-                    currentHls.on(Hls.Events.ERROR, function(event, data) {
-                        console.error('HLS error:', data);
-                        streamInfo.textContent = 'HLS hatası: ' + data.type;
-                    });
-                    
-                } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
-                    // Safari native HLS support
-                    player.src = streamUrl;
-                    player.addEventListener('loadedmetadata', function() {
-                        player.play().catch(e => {
-                            console.error('Safari HLS error:', e);
-                            streamInfo.textContent = 'Safari HLS hatası';
-                        });
-                    });
-                }
-                
-            } else if (streamUrl.includes('.mpd')) {
-                // DASH Stream
-                streamInfo.textContent = 'DASH Stream - Desteklenmiyor';
-                showMessage('error', 'DASH stream formatı desteklenmiyor');
-                
-            } else if (streamUrl.includes('.mp4') || streamUrl.includes('.m4v')) {
-                // MP4 Direct
-                streamInfo.textContent = 'MP4 Stream yükleniyor...';
-                player.src = streamUrl;
-                player.load();
-                
-                player.addEventListener('loadeddata', function() {
-                    player.play().catch(e => {
-                        console.error('MP4 play error:', e);
-                        streamInfo.textContent = 'MP4 oynatma hatası';
-                    });
-                });
-                
-            } else {
-                // Try direct play
-                streamInfo.textContent = 'Direct Stream deneniyor...';
-                player.src = streamUrl;
-                player.load();
-                
-                player.addEventListener('loadeddata', function() {
-                    player.play().catch(e => {
-                        console.error('Direct play error:', e);
-                        streamInfo.textContent = 'Direct play hatası';
-                        // Fallback to HLS if possible
-                        if (streamUrl.includes('m3u8')) {
-                            playChannel(index); // Retry with HLS
-                        }
-                    });
-                });
-            }
-
-            // Player event listeners
-            player.addEventListener('playing', function() {
-                streamInfo.textContent = 'Stream oynatılıyor';
-            });
-
-            player.addEventListener('error', function(e) {
-                console.error('Video player error:', e);
-                streamInfo.textContent = 'Stream hatası: ' + player.error?.message;
-                showMessage('error', 'Stream oynatılamıyor: ' + player.error?.message);
-            });
-
-            player.addEventListener('waiting', function() {
-                streamInfo.textContent = 'Stream buffering...';
-            });
-        }
-
-        // Test streams
-        function testStream(type) {
-            const player = document.getElementById('videoPlayer');
-            const streamInfo = document.getElementById('streamInfo');
-            
-            if (currentHls) {
-                currentHls.destroy();
-                currentHls = null;
-            }
-
-            player.src = '';
-            streamInfo.textContent = 'Test stream yükleniyor...';
-
-            let testUrl = '';
-            switch(type) {
-                case 'hls':
-                    testUrl = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
-                    break;
-                case 'dash':
-                    testUrl = 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd';
-                    break;
-                case 'mp4':
-                    testUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-                    break;
-            }
-
-            document.getElementById('nowPlaying').innerHTML = 
-                `<i class="fas fa-vial" style="color: var(--accent);"></i> Test: <strong>${type.toUpperCase()} Stream</strong>`;
-
-            if (type === 'hls' && Hls.isSupported()) {
-                currentHls = new Hls();
-                currentHls.loadSource(testUrl);
-                currentHls.attachMedia(player);
-                currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    player.play();
-                });
-            } else {
-                player.src = testUrl;
-                player.play();
-            }
-        }
-
-        // Search channels
-        function searchChannels(query) {
-            if (!query) {
-                filteredChannels = [];
-            } else {
-                filteredChannels = allChannels.filter(ch => 
-                    ch.name.toLowerCase().includes(query.toLowerCase()) ||
-                    ch.group.toLowerCase().includes(query.toLowerCase())
-                );
-            }
+// Sayfa yüklendiğinde önceden kaydedilmiş M3U varsa otomatik aç
+window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('iptvChannels');
+    if (saved) {
+        allChannels = JSON.parse(saved);
+        if (allChannels.length > 0) {
+            showPlayerSection();
             renderChannels();
         }
-
-        // Render channels
-        function renderChannels() {
-            const grid = document.getElementById('channelsGrid');
-            const channelsToRender = filteredChannels.length > 0 ? filteredChannels : allChannels;
-            
-            if (channelsToRender.length === 0) {
-                grid.innerHTML = '<div style="text-align: center; padding: 3rem; color: #ccc; grid-column: 1/-1;">Kanal bulunamadı</div>';
-                return;
-            }
-
-            grid.innerHTML = channelsToRender.map((channel, index) => `
-                <div class="channel-card" onclick="playChannel(${index})">
-                    <div class="channel-header">
-                        <div class="channel-logo">
-                            ${channel.logo ? 
-                                `<img src="${channel.logo}" alt="${channel.name}" style="width:100%;height:100%;border-radius:8px;object-fit:cover;">` : 
-                                `<i class="fas fa-tv"></i>`
-                            }
-                        </div>
-                        <div class="channel-info">
-                            <div class="channel-name">${channel.name}</div>
-                            <div class="channel-group">${channel.group}</div>
-                        </div>
-                        <div class="channel-category">${channel.category}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Check for existing channels on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedChannels = localStorage.getItem('iptvChannels');
-            if (savedChannels) {
-                allChannels = JSON.parse(savedChannels);
-                showPlayerSection();
-                renderChannels();
-            }
-            
-            document.getElementById('m3uUrl').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') loadM3U();
-            });
-        });
-    </script>
+    }
+});
+</script>
 </body>
 </html>
