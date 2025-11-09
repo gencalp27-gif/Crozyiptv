@@ -255,33 +255,86 @@
             transform: none;
         }
 
-        /* Quick Actions */
-        .quick-actions {
+        /* Connection Methods */
+        .connection-methods {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 30px;
         }
 
-        .quick-btn {
+        .method-card {
             background: var(--card-bg);
             border: 2px solid var(--gray);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
+            border-radius: 15px;
+            padding: 25px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .quick-btn:hover {
+        .method-card:hover {
             border-color: var(--primary);
             transform: translateY(-5px);
         }
 
-        .quick-btn i {
-            font-size: 2em;
+        .method-card.active {
+            border-color: var(--primary);
+            background: rgba(229,9,20,0.1);
+        }
+
+        .method-icon {
+            font-size: 2.5em;
             color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .method-title {
+            font-size: 1.3em;
             margin-bottom: 10px;
+            color: white;
+        }
+
+        .method-desc {
+            color: #ccc;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .method-example {
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8em;
+            color: var(--accent);
+            word-break: break-all;
+        }
+
+        /* Xtream Codes Form */
+        .xtream-form {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-weight: bold;
         }
 
         /* Player Section */
@@ -567,6 +620,10 @@
             .channels-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -599,14 +656,11 @@
         <!-- Hero Section -->
         <section class="hero" id="heroSection">
             <div class="hero-content">
-                <h1>Sınırsız Eğlence</h1>
-                <p>3000'den fazla kanal, binlerce film ve dizi. Profesyonel IPTV deneyimi.</p>
+                <h1>Profesyonel IPTV Deneyimi</h1>
+                <p>Kendi IPTV listenizi ekleyin, binlerce kanalı kesintisiz izleyin</p>
                 <div class="cta-buttons">
                     <button class="cta-btn primary" onclick="showUploadSection()">
                         <i class="fas fa-play"></i> Hemen Başla
-                    </button>
-                    <button class="cta-btn secondary" onclick="loadDemoContent()">
-                        <i class="fas fa-eye"></i> Demo'yu Gör
                     </button>
                 </div>
             </div>
@@ -617,18 +671,68 @@
             <div class="upload-section">
                 <div class="upload-header">
                     <i class="fas fa-satellite-dish"></i>
-                    <h2>IPTV Listenizi Ekleyin</h2>
-                    <p>M3U bağlantınızı yapıştırın veya demo içerikle başlayın</p>
+                    <h2>IPTV Bağlantınızı Ekleyin</h2>
+                    <p>M3U bağlantınızı veya Xtream Codes bilgilerinizi girin</p>
                 </div>
 
-                <div class="input-group">
-                    <input type="url" class="url-input" id="m3uUrl" 
-                           placeholder="http://sunucu:port/get.php?username=xxx&password=xxx&type=m3u_plus&output=ts">
-                    <button class="action-btn" onclick="loadM3U()" id="loadBtn">
-                        <i class="fas fa-bolt"></i> Kanalları Yükle
+                <!-- Connection Methods -->
+                <div class="connection-methods">
+                    <div class="method-card active" onclick="showMethod('m3u')">
+                        <div class="method-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="method-title">M3U URL</div>
+                        <div class="method-desc">M3U bağlantınızı yapıştırın</div>
+                        <div class="method-example">http://sunucu:port/get.php?username=xxx&password=xxx&type=m3u_plus&output=ts</div>
+                    </div>
+
+                    <div class="method-card" onclick="showMethod('xtream')">
+                        <div class="method-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="method-title">Xtream Codes</div>
+                        <div class="method-desc">Panel bilgilerinizi girin</div>
+                        <div class="method-example">Sunucu, Port, Kullanıcı Adı, Şifre</div>
+                    </div>
+                </div>
+
+                <!-- M3U URL Method -->
+                <div id="m3uMethod">
+                    <div class="input-group">
+                        <input type="url" class="url-input" id="m3uUrl" 
+                               placeholder="M3U URL'nizi buraya yapıştırın...">
+                        <button class="action-btn" onclick="loadM3U()" id="loadBtn">
+                            <i class="fas fa-bolt"></i> Kanalları Yükle
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Xtream Codes Method -->
+                <div id="xtreamMethod" class="xtream-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Sunucu</label>
+                            <input type="text" class="url-input" id="xtreamServer" placeholder="sunucu.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Port</label>
+                            <input type="number" class="url-input" id="xtreamPort" placeholder="8080">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="url-input" id="xtreamUsername" placeholder="Kullanıcı adınız">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Şifre</label>
+                            <input type="password" class="url-input" id="xtreamPassword" placeholder="Şifreniz">
+                        </div>
+                    </div>
+                    <button class="action-btn" onclick="loadXtream()">
+                        <i class="fas fa-plug"></i> Xtream Codes'a Bağlan
                     </button>
                 </div>
 
+                <!-- Messages -->
                 <div class="message loading" id="loadingMessage">
                     <i class="fas fa-spinner fa-spin"></i> Kanallar yükleniyor...
                 </div>
@@ -639,24 +743,6 @@
 
                 <div class="message success" id="successMessage">
                     <i class="fas fa-check-circle"></i> Kanallar başarıyla yüklendi!
-                </div>
-
-                <div class="quick-actions">
-                    <div class="quick-btn" onclick="loadDemoContent()">
-                        <i class="fas fa-play-circle"></i>
-                        <h3>Demo İçerik</h3>
-                        <p>Test kanalları ile başlayın</p>
-                    </div>
-                    <div class="quick-btn" onclick="showHelp()">
-                        <i class="fas fa-question-circle"></i>
-                        <h3>Yardım</h3>
-                        <p>Nasıl kullanılır?</p>
-                    </div>
-                    <div class="quick-btn" onclick="clearAll()">
-                        <i class="fas fa-broom"></i>
-                        <h3>Temizle</h3>
-                        <p>Formu temizle</p>
-                    </div>
                 </div>
             </div>
         </section>
@@ -768,6 +854,7 @@
         let allChannels = [];
         let filteredChannels = [];
         let currentCategory = 'all';
+        let currentMethod = 'm3u';
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -796,6 +883,23 @@
                 }
             });
         });
+
+        // Show connection method
+        function showMethod(method) {
+            currentMethod = method;
+            
+            // Update active card
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.target.closest('.method-card').classList.add('active');
+            
+            // Show/hide forms
+            document.getElementById('m3uMethod').style.display = method === 'm3u' ? 'block' : 'none';
+            document.getElementById('xtreamMethod').style.display = method === 'xtream' ? 'block' : 'none';
+            
+            hideMessages();
+        }
 
         // Message functions
         function showMessage(type, text = '') {
@@ -871,6 +975,47 @@
             }
         }
 
+        // Load Xtream Codes
+        async function loadXtream() {
+            const server = document.getElementById('xtreamServer').value.trim();
+            const port = document.getElementById('xtreamPort').value.trim();
+            const username = document.getElementById('xtreamUsername').value.trim();
+            const password = document.getElementById('xtreamPassword').value.trim();
+            
+            if (!server || !port || !username || !password) {
+                showMessage('error', 'Lütfen tüm alanları doldurun');
+                return;
+            }
+
+            showMessage('loading');
+
+            try {
+                // Generate M3U URL from Xtream Codes
+                const m3uUrl = `http://${server}:${port}/get.php?username=${username}&password=${password}&type=m3u_plus&output=ts`;
+                
+                // Use CORS proxy
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(m3uUrl)}`;
+                
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Xtream Codes hatası: ${response.status}`);
+                }
+                
+                const text = await response.text();
+                
+                if (!text.includes('#EXTINF:')) {
+                    throw new Error('Geçerli M3U formatı değil');
+                }
+                
+                processM3UData(text);
+                
+            } catch (error) {
+                console.error('Hata:', error);
+                showMessage('error', 'Xtream Codes bağlantı hatası: ' + error.message);
+            }
+        }
+
         // Process M3U data
         function processM3UData(m3uContent) {
             try {
@@ -889,31 +1034,15 @@
                 showPlayerSection();
                 
                 // Reset button
-                document.getElementById('loadBtn').disabled = false;
-                document.getElementById('loadBtn').innerHTML = '<i class="fas fa-bolt"></i> Kanalları Yükle';
+                const loadBtn = document.getElementById('loadBtn');
+                if (loadBtn) {
+                    loadBtn.disabled = false;
+                    loadBtn.innerHTML = '<i class="fas fa-bolt"></i> Kanalları Yükle';
+                }
                 
             } catch (error) {
                 showMessage('error', 'M3U işleme hatası: ' + error.message);
             }
-        }
-
-        // Load demo content
-        function loadDemoContent() {
-            showMessage('loading');
-            
-            const demoM3U = `#EXTM3U
-#EXTINF:-1 tvg-id="demo1" tvg-name="🔴 NATIONAL GEOGRAPHIC" tvg-logo="https://via.placeholder.com/100x50/ff0000/ffffff?text=NG" group-title="Belgesel",🔴 NATIONAL GEOGRAPHIC
-https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
-#EXTINF:-1 tvg-id="demo2" tvg-name="🔵 DISCOVERY CHANNEL" tvg-logo="https://via.placeholder.com/100x50/0000ff/ffffff?text=DC" group-title="Belgesel",🔵 DISCOVERY CHANNEL
-https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
-#EXTINF:-1 tvg-id="demo3" tvg-name="🎬 HBO HD" tvg-logo="https://via.placeholder.com/100x50/800080/ffffff?text=HBO" group-title="Film",🎬 HBO HD
-https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
-#EXTINF:-1 tvg-id="demo4" tvg-name="⚽ BEIN SPORTS HD" tvg-logo="https://via.placeholder.com/100x50/008000/ffffff?text=BEIN" group-title="Spor",⚽ BEIN SPORTS HD
-https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
-#EXTINF:-1 tvg-id="demo5" tvg-name="📻 NRJ HITS" tvg-logo="https://via.placeholder.com/100x50/ffa500/ffffff?text=NRJ" group-title="Müzik",📻 NRJ HITS
-https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8`;
-
-            processM3UData(demoM3U);
         }
 
         // Parse M3U content
@@ -972,6 +1101,7 @@ https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8`;
             if (lowerName.includes('spor') || lowerName.includes('sport') || lowerGroup.includes('spor')) return 'sport';
             if (lowerName.includes('müzik') || lowerName.includes('music') || lowerGroup.includes('müzik')) return 'music';
             if (lowerName.includes('belgesel') || lowerName.includes('documentary')) return 'documentary';
+            if (lowerName.includes('haber') || lowerName.includes('news')) return 'news';
             return 'live';
         }
 
@@ -1077,18 +1207,12 @@ https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8`;
         }
 
         // Utility functions
-        function clearAll() {
-            document.getElementById('m3uUrl').value = '';
-            hideMessages();
-        }
-
         function toggleFullscreen() {
             const player = document.getElementById('videoPlayer');
             if (player.requestFullscreen) {
                 player.requestFullscreen();
             }
         }
-
-        function showHelp() {
-            alert('M3U URL formatı: http://sunucu:port/get.php?username=KULLANICI&password=ŞİFRE&type=m3u_plus&output=ts\n\nDemo içerik ile hemen test edebilirsiniz.');
-        }
+    </script>
+</body>
+</html>
