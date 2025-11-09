@@ -2,47 +2,92 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Croz IPTV Test</title>
+<title>Croz IPTV Pro</title>
 <style>
 body { font-family: sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; padding:2rem; }
-input { padding:0.5rem; margin:0.5rem 0; width:300px; border-radius:5px; border:none; }
-button { padding:0.5rem 1rem; margin:1rem 0; border:none; border-radius:5px; cursor:pointer; background:#e50914; color:white; }
+input, button { padding:0.5rem; margin:0.5rem 0; border-radius:5px; border:none; }
+input { width:300px; }
+button { background:#e50914; color:#fff; cursor:pointer; }
 video { margin-top:1rem; border-radius:10px; width:80%; max-width:600px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:0.5rem; margin-top:1rem; width:80%; }
+.card { background:#222; padding:0.5rem; border-radius:5px; cursor:pointer; text-align:center; }
+.card:hover { background:#333; }
 </style>
 </head>
 <body>
 
-<h2>Croz IPTV Test Player</h2>
+<h2>Croz IPTV Pro</h2>
 
 <!-- Kullanıcı Bilgileri -->
-<input type="text" id="server" placeholder="Server URL (test için boş bırak)">
-<input type="text" id="username" placeholder="Kullanıcı adı (test için boş)">
-<input type="password" id="password" placeholder="Şifre (test için boş)">
-<button id="loginBtn">Login ve Test Stream</button>
+<input type="text" id="server" placeholder="Server URL">
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
+<button id="loginBtn">Login ve Kanalları Getir</button>
 
-<!-- Video -->
+<!-- Video Player -->
 <video id="player" controls></video>
+
+<!-- Kanal Listesi -->
+<div class="grid" id="channelGrid"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 const player = document.getElementById('player');
+const grid = document.getElementById('channelGrid');
 
-document.getElementById('loginBtn').addEventListener('click', () => {
-    // Bu örnek test streami kullanıyor
-    const testStream = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+document.getElementById('loginBtn').addEventListener('click', async () => {
+    const server = document.getElementById('server').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
 
-    if(Hls.isSupported()){
-        const hls = new Hls();
-        hls.loadSource(testStream);
-        hls.attachMedia(player);
-        hls.on(Hls.Events.MANIFEST_PARSED, function() {
-            player.play();
+    if(!server || !username || !password){
+        alert("Tüm alanları doldurun!");
+        return;
+    }
+
+    try {
+        // Xtream Codes API ile giriş ve canlı kanal listesi çekme
+        const liveURL = `${server}/player_api.php?username=${username}&password=${password}&action=get_live_streams`;
+        const vodURL = `${server}/player_api.php?username=${username}&password=${password}&action=get_vod_streams`;
+
+        const liveRes = await fetch(liveURL);
+        const liveData = await liveRes.json();
+
+        const vodRes = await fetch(vodURL);
+        const vodData = await vodRes.json();
+
+        // Kanalları grid'e ekleme
+        grid.innerHTML = "";
+        liveData.forEach(ch => {
+            const card = document.createElement('div');
+            card.className = "card";
+            card.innerText = ch.name;
+            card.onclick = () => playStream(ch.stream_url);
+            grid.appendChild(card);
         });
-    } else if(player.canPlayType('application/vnd.apple.mpegurl')){
-        player.src = testStream;
-        player.play();
+
+        // VOD kanalları eklemek için istersen ben eklerim
+        alert("Canlı kanallar yüklendi! Artık bir kanal seçip izleyebilirsin.");
+
+    } catch(err){
+        console.error(err);
+        alert("Giriş başarısız veya API hatası.");
     }
 });
+
+function playStream(url){
+    if(Hls.isSupported()){
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(player);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => player.play());
+    } else if(player.canPlayType('application/vnd.apple.mpegurl')){
+        player.src = url;
+        player.play();
+    } else {
+        alert("HLS desteklenmiyor!");
+    }
+}
 </script>
 
 </body>
