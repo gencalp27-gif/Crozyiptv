@@ -7,13 +7,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{--primary:#e50914;--primary-dark:#b80710;--bg:#111;--card:#1a1a1a;--text:#fff;--accent:#00a8ff;--success:#00d46a;}
-*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
-body{background:var(--bg);color:var(--text);}
+body{background:var(--bg);color:var(--text);font-family:sans-serif;margin:0;padding:0;}
 .container{max-width:1200px;margin:auto;padding:1rem;}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
-.header h1{color:var(--primary);font-size:1.5rem;}
-input,select,button{padding:0.5rem 1rem;border-radius:8px;border:none;font-size:1rem;}
-input,select{width:100%;margin-bottom:0.5rem;}
+.header h1{color:var(--primary);}
+input,select,button{padding:0.5rem 1rem;border-radius:8px;border:none;font-size:1rem;margin-bottom:0.5rem;}
 button{background:var(--primary);color:#fff;cursor:pointer;transition:all 0.3s;}
 button:hover{background:var(--primary-dark);}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.5rem;margin-top:1rem;}
@@ -37,8 +35,10 @@ video{width:100%;border-radius:12px;background:#000;}
     <h1><i class="fas fa-tv"></i> Croz IPTV Pro</h1>
   </div>
 
-  <input type="url" id="m3uUrl" placeholder="M3U URL girin">
-  <button id="loadBtn">Kanalları Yükle</button>
+  <input type="text" id="username" placeholder="Xtream Username">
+  <input type="text" id="password" placeholder="Xtream Password">
+  <input type="url" id="xtreamUrl" placeholder="Xtream URL / M3U">
+  <button id="loginBtn">Giriş Yap</button>
   <div id="msg"></div>
 
   <input type="text" id="searchInput" placeholder="Kanal ara...">
@@ -67,27 +67,26 @@ video{width:100%;border-radius:12px;background:#000;}
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-const player=document.getElementById('player');
-const grid=document.getElementById('channelGrid');
-const msg=document.getElementById('msg');
-const searchInput=document.getElementById('searchInput');
-const categoryFilter=document.getElementById('categoryFilter');
-const sortSelect=document.getElementById('sortSelect');
+let player=document.getElementById('player');
 let channels=[],filteredChannels=[],currentHls=null,currentIndex=0;
 
-function showMessage(text,type){msg.textContent=text;msg.className='message '+type;setTimeout(()=>{msg.textContent='';msg.className='';},4000);}
+// Mesaj göster
+function showMessage(text,type){const msg=document.getElementById('msg');msg.textContent=text;msg.className='message '+type;setTimeout(()=>{msg.textContent='';msg.className='';},4000);}
 
-// Load M3U
-document.getElementById('loadBtn').addEventListener('click',async()=>{
-  const m3uUrl=document.getElementById('m3uUrl').value.trim();
-  if(!m3uUrl){showMessage("M3U URL girin!","error");return;}
-  showMessage("Yükleniyor...","success");
+// Login
+document.getElementById('loginBtn').addEventListener('click',async()=>{
+  const username=document.getElementById('username').value;
+  const password=document.getElementById('password').value;
+  const url=document.getElementById('xtreamUrl').value;
+  if(!url){showMessage("URL girin!","error"); return;}
   try{
-    const proxyUrl=`https://senin-sunucu.com/m3u?url=${encodeURIComponent(m3uUrl)}`;
-    const res=await fetch(proxyUrl);
-    if(!res.ok)throw new Error("Sunucu hatası: "+res.status);
+    const res=await fetch('https://senin-sunucu.com/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'xtream',username,password,url})
+    });
     const text=await res.text();
-    if(!text.includes('#EXTINF:'))throw new Error("Geçerli M3U değil!");
+    // Kanal parse
     channels=[]; let current={};
     text.split('\n').forEach(line=>{
       line=line.trim();
@@ -105,40 +104,37 @@ document.getElementById('loadBtn').addEventListener('click',async()=>{
       }
     });
     filteredChannels=channels.slice(); renderChannels(); showMessage("Kanallar yüklendi!","success");
-  }catch(err){console.error(err); showMessage("M3U yükleme hatası: "+err.message,"error");}
+  }catch(err){console.error(err);showMessage("Login hatası: "+err.message,"error");}
 });
 
-// Render channels
+// Render
 function renderChannels(){
-  const query=searchInput.value.toLowerCase();
-  const cat=categoryFilter.value;
+  const query=document.getElementById('searchInput').value.toLowerCase();
+  const cat=document.getElementById('categoryFilter').value;
+  const sort=document.getElementById('sortSelect').value;
   filteredChannels=channels.filter(ch=>(ch.name.toLowerCase().includes(query))&&(cat?ch.category===cat:true));
-  if(sortSelect.value==='name')filteredChannels.sort((a,b)=>a.name.localeCompare(b.name));
-  else if(sortSelect.value==='category')filteredChannels.sort((a,b)=>a.category.localeCompare(b.category));
-  grid.innerHTML="";
-  if(filteredChannels.length===0){grid.innerHTML="<div style='text-align:center;color:#ccc;padding:1rem;'>Kanal bulunamadı</div>"; return;}
+  if(sort==='name')filteredChannels.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sort==='category')filteredChannels.sort((a,b)=>a.category.localeCompare(b.category));
+  const grid=document.getElementById('channelGrid'); grid.innerHTML="";
+  if(filteredChannels.length===0){grid.innerHTML="<div style='text-align:center;color:#ccc;padding:1rem;'>Kanal bulunamadı</div>";return;}
   filteredChannels.forEach((ch,i)=>{
     const card=document.createElement('div'); card.className='card'; card.innerText=ch.name;
-    card.onclick=()=>playChannel(i);
-    grid.appendChild(card);
+    card.onclick=()=>playStream(ch.url); grid.appendChild(card);
   });
 }
 
-// Play channel
-function playChannel(index){
-  currentIndex=index;
-  const ch=filteredChannels[index];
-  if(!ch||!ch.url)return;
+// Play
+function playStream(url){
   if(currentHls){currentHls.destroy();currentHls=null;}
-  player.src=""; document.getElementById('nowPlaying').textContent=`Şu an: ${ch.name}`;
-  if(Hls.isSupported()){currentHls=new Hls();currentHls.loadSource(ch.url);currentHls.attachMedia(player);currentHls.on(Hls.Events.MANIFEST_PARSED,()=>player.play());}
-  else if(player.canPlayType('application/vnd.apple.mpegurl')){player.src=ch.url; player.play();}
+  if(Hls.isSupported()){currentHls=new Hls();currentHls.loadSource(url);currentHls.attachMedia(player);currentHls.on(Hls.Events.MANIFEST_PARSED,()=>player.play());}
+  else{player.src=url;player.play();}
+  document.getElementById('nowPlaying').textContent=`Şu an: ${url}`;
 }
 
 // Search / filter / sort
-searchInput.addEventListener('input',renderChannels);
-categoryFilter.addEventListener('change',renderChannels);
-sortSelect.addEventListener('change',renderChannels);
+document.getElementById('searchInput').addEventListener('input',renderChannels);
+document.getElementById('categoryFilter').addEventListener('change',renderChannels);
+document.getElementById('sortSelect').addEventListener('change',renderChannels);
 </script>
 </body>
 </html>
