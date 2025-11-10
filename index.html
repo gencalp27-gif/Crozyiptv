@@ -2,28 +2,35 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Croz IPTV Pro - M3U Pro</title>
+<title>Croz IPTV Pro - Full</title>
 <style>
-body { font-family:sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; padding:1rem; }
-input, button, select { padding:0.5rem; margin:0.3rem 0; border-radius:5px; border:none; }
+:root {
+    --bg:#111;
+    --card:#222;
+    --text:#fff;
+    --accent:#e50914;
+}
+body { font-family:sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; align-items:center; padding:1rem; transition:all 0.3s; }
+input, button, select { padding:0.5rem; margin:0.3rem 0; border-radius:5px; border:none; transition:all 0.3s; }
 input, select { width:90%; max-width:350px; }
-button { background:#e50914; color:#fff; cursor:pointer; }
+button { background:var(--accent); color:#fff; cursor:pointer; }
 #playerContainer { width:90%; max-width:600px; margin-top:1rem; position:relative; }
 video { width:100%; border-radius:10px; background:#000; }
 #nowPlaying { margin-top:0.5rem; font-size:0.9rem; color:#00d46a; text-align:center; }
 .controls { display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:0.3rem; margin-top:1rem; width:90%; }
-.card { background:#222; padding:0.5rem; border-radius:5px; cursor:pointer; text-align:center; font-size:0.9rem; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:0.3rem; margin-top:1rem; width:90%; transition:all 0.3s; }
+.card { background:var(--card); padding:0.5rem; border-radius:5px; cursor:pointer; text-align:center; font-size:0.9rem; transition:all 0.3s; }
 .card:hover { background:#333; }
-.card.playing { background:#e50914; color:#fff; }
+.card.playing { background:var(--accent); color:#fff; }
 </style>
 </head>
 <body>
 
-<h2>Croz IPTV Pro - M3U Pro</h2>
+<h2>Croz IPTV Pro - Full</h2>
 
 <input type="url" id="m3uUrl" placeholder="M3U URL girin">
 <button id="loadBtn">Kanalları Yükle</button>
+
 <input type="text" id="searchInput" placeholder="Kanal ara...">
 <select id="categoryFilter">
     <option value="">Tüm Kategoriler</option>
@@ -33,6 +40,14 @@ video { width:100%; border-radius:10px; background:#000; }
     <option value="sport">Spor</option>
     <option value="music">Müzik</option>
 </select>
+
+<select id="sortSelect">
+    <option value="">Sırala</option>
+    <option value="name">Alfabetik</option>
+    <option value="category">Kategori</option>
+</select>
+
+<button id="themeBtn">Gece / Gündüz Modu</button>
 
 <div id="playerContainer">
     <video id="player" controls></video>
@@ -48,10 +63,13 @@ const grid = document.getElementById('channelGrid');
 const nowPlaying = document.getElementById('nowPlaying');
 const searchInput = document.getElementById('searchInput');
 const categoryFilter = document.getElementById('categoryFilter');
+const sortSelect = document.getElementById('sortSelect');
+const themeBtn = document.getElementById('themeBtn');
 
 let channels = [];
 let filteredChannels = [];
 let currentHls = null;
+let darkMode = true;
 
 // Load M3U
 document.getElementById('loadBtn').addEventListener('click', async () => {
@@ -72,7 +90,6 @@ document.getElementById('loadBtn').addEventListener('click', async () => {
             if(line.startsWith('#EXTINF:')){
                 const nameMatch = line.match(/,(.*)$/);
                 current.name = nameMatch ? nameMatch[1] : "Bilinmeyen";
-                // Kategori tahmini
                 const lower = current.name.toLowerCase();
                 if(lower.includes('film')||lower.includes('movie')) current.category='movie';
                 else if(lower.includes('dizi')||lower.includes('series')) current.category='series';
@@ -88,7 +105,7 @@ document.getElementById('loadBtn').addEventListener('click', async () => {
 
         filteredChannels = channels.slice();
         renderChannels();
-        alert("Kanallar yüklendi! Bir kanal seçip izleyebilirsiniz.");
+        alert("Kanallar yüklendi!");
 
     } catch(err){
         console.error(err);
@@ -100,13 +117,18 @@ document.getElementById('loadBtn').addEventListener('click', async () => {
 function renderChannels(){
     const query = searchInput.value.toLowerCase();
     const category = categoryFilter.value;
-    grid.innerHTML = "";
     filteredChannels = channels.filter(ch=>{
         const matchSearch = ch.name.toLowerCase().includes(query);
         const matchCategory = category ? ch.category===category : true;
         return matchSearch && matchCategory;
     });
 
+    // Sıralama
+    const sort = sortSelect.value;
+    if(sort==='name') filteredChannels.sort((a,b)=>a.name.localeCompare(b.name));
+    else if(sort==='category') filteredChannels.sort((a,b)=>a.category.localeCompare(b.category));
+
+    grid.innerHTML="";
     if(filteredChannels.length===0){
         grid.innerHTML="<div style='text-align:center;color:#ccc;padding:1rem;'>Kanal bulunamadı</div>";
         return;
@@ -114,8 +136,8 @@ function renderChannels(){
 
     filteredChannels.forEach((ch,i)=>{
         const card = document.createElement('div');
-        card.className = "card";
-        card.innerText = ch.name;
+        card.className="card";
+        card.innerText=ch.name;
         card.onclick = ()=>playChannel(i);
         grid.appendChild(card);
     });
@@ -147,9 +169,26 @@ function playChannel(index){
     }
 }
 
-// Search & filter
+// Search, filter, sort
 searchInput.addEventListener('input', renderChannels);
 categoryFilter.addEventListener('change', renderChannels);
+sortSelect.addEventListener('change', renderChannels);
+
+// Tema toggle
+themeBtn.addEventListener('click', ()=>{
+    darkMode = !darkMode;
+    if(darkMode){
+        document.documentElement.style.setProperty('--bg','#111');
+        document.documentElement.style.setProperty('--card','#222');
+        document.documentElement.style.setProperty('--text','#fff');
+        document.documentElement.style.setProperty('--accent','#e50914');
+    } else {
+        document.documentElement.style.setProperty('--bg','#fff');
+        document.documentElement.style.setProperty('--card','#eee');
+        document.documentElement.style.setProperty('--text','#111');
+        document.documentElement.style.setProperty('--accent','#00a8ff');
+    }
+});
 </script>
 
 </body>
