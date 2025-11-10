@@ -2,9 +2,9 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Croz IPTV Pro (Mobil Test)</title>
+<title>Croz IPTV Pro - M3U</title>
 <style>
-body { font-family: sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; padding:1rem; }
+body { font-family:sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; padding:1rem; }
 input, button { padding:0.5rem; margin:0.3rem 0; border-radius:5px; border:none; }
 input { width:90%; max-width:350px; }
 button { background:#e50914; color:#fff; cursor:pointer; }
@@ -16,12 +16,10 @@ video { margin-top:1rem; border-radius:10px; width:90%; max-width:600px; }
 </head>
 <body>
 
-<h2>Croz IPTV Pro (Mobil)</h2>
+<h2>Croz IPTV Pro - M3U</h2>
 
-<input type="text" id="server" placeholder="Server URL">
-<input type="text" id="username" placeholder="Username">
-<input type="password" id="password" placeholder="Password">
-<button id="loginBtn">Login ve Kanalları Getir</button>
+<input type="url" id="m3uUrl" placeholder="M3U URL girin">
+<button id="loadBtn">Kanalları Yükle</button>
 
 <video id="player" controls></video>
 <div class="grid" id="channelGrid"></div>
@@ -31,39 +29,47 @@ video { margin-top:1rem; border-radius:10px; width:90%; max-width:600px; }
 const player = document.getElementById('player');
 const grid = document.getElementById('channelGrid');
 
-document.getElementById('loginBtn').addEventListener('click', async () => {
-    const server = document.getElementById('server').value.trim();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    if(!server || !username || !password){
-        alert("Tüm alanları doldurun!");
-        return;
-    }
+document.getElementById('loadBtn').addEventListener('click', async () => {
+    const url = document.getElementById('m3uUrl').value.trim();
+    if(!url){ alert("M3U URL girin!"); return; }
 
     try {
         const corsProxy = "https://api.allorigins.win/raw?url=";
+        const res = await fetch(corsProxy + encodeURIComponent(url));
+        const text = await res.text();
 
-        const liveURL = `${corsProxy}${encodeURIComponent(server+'/player_api.php?username='+username+'&password='+password+'&action=get_live_streams')}`;
-        const vodURL = `${corsProxy}${encodeURIComponent(server+'/player_api.php?username='+username+'&password='+password+'&action=get_vod_streams')}`;
+        // M3U parse
+        const lines = text.split('\n');
+        const channels = [];
+        let current = {};
 
-        const liveRes = await fetch(liveURL);
-        const liveData = await liveRes.json();
+        lines.forEach(line => {
+            line = line.trim();
+            if(line.startsWith('#EXTINF:')){
+                const nameMatch = line.match(/,(.*)$/);
+                current.name = nameMatch ? nameMatch[1] : "Bilinmeyen";
+            } else if(line.startsWith('http')){
+                current.url = line;
+                channels.push({...current});
+                current = {};
+            }
+        });
 
+        // Grid oluştur
         grid.innerHTML = "";
-        liveData.forEach(ch => {
+        channels.forEach(ch => {
             const card = document.createElement('div');
             card.className = "card";
             card.innerText = ch.name;
-            card.onclick = () => playStream(ch.stream_url);
+            card.onclick = () => playStream(ch.url);
             grid.appendChild(card);
         });
 
-        alert("Canlı kanallar yüklendi! Bir kanal seçip izleyebilirsin.");
+        alert("Kanallar yüklendi! Bir kanal seçip izleyebilirsiniz.");
 
     } catch(err){
         console.error(err);
-        alert("Giriş başarısız veya API hatası.");
+        alert("M3U yükleme hatası!");
     }
 });
 
@@ -72,8 +78,8 @@ function playStream(url){
         const hls = new Hls();
         hls.loadSource(url);
         hls.attachMedia(player);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => player.play());
-        hls.on(Hls.Events.ERROR, (event,data)=>console.error("HLS Error:", data));
+        hls.on(Hls.Events.MANIFEST_PARSED, ()=>player.play());
+        hls.on(Hls.Events.ERROR,(e,d)=>console.error("HLS Error:",d));
     } else if(player.canPlayType('application/vnd.apple.mpegurl')){
         player.src = url;
         player.play();
