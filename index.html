@@ -2,33 +2,58 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Croz IPTV Pro - M3U</title>
+<title>Croz IPTV Pro - M3U Pro</title>
 <style>
 body { font-family:sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; padding:1rem; }
-input, button { padding:0.5rem; margin:0.3rem 0; border-radius:5px; border:none; }
-input { width:90%; max-width:350px; }
+input, button, select { padding:0.5rem; margin:0.3rem 0; border-radius:5px; border:none; }
+input, select { width:90%; max-width:350px; }
 button { background:#e50914; color:#fff; cursor:pointer; }
-video { margin-top:1rem; border-radius:10px; width:90%; max-width:600px; }
+#playerContainer { width:90%; max-width:600px; margin-top:1rem; position:relative; }
+video { width:100%; border-radius:10px; background:#000; }
+#nowPlaying { margin-top:0.5rem; font-size:0.9rem; color:#00d46a; text-align:center; }
+.controls { display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:0.3rem; margin-top:1rem; width:90%; }
 .card { background:#222; padding:0.5rem; border-radius:5px; cursor:pointer; text-align:center; font-size:0.9rem; }
 .card:hover { background:#333; }
+.card.playing { background:#e50914; color:#fff; }
 </style>
 </head>
 <body>
 
-<h2>Croz IPTV Pro - M3U</h2>
+<h2>Croz IPTV Pro - M3U Pro</h2>
 
 <input type="url" id="m3uUrl" placeholder="M3U URL girin">
 <button id="loadBtn">Kanalları Yükle</button>
+<input type="text" id="searchInput" placeholder="Kanal ara...">
+<select id="categoryFilter">
+    <option value="">Tüm Kategoriler</option>
+    <option value="live">Canlı</option>
+    <option value="movie">Film</option>
+    <option value="series">Dizi</option>
+    <option value="sport">Spor</option>
+    <option value="music">Müzik</option>
+</select>
 
-<video id="player" controls></video>
+<div id="playerContainer">
+    <video id="player" controls></video>
+    <div id="nowPlaying">Şu an: -</div>
+</div>
+
 <div class="grid" id="channelGrid"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 const player = document.getElementById('player');
 const grid = document.getElementById('channelGrid');
+const nowPlaying = document.getElementById('nowPlaying');
+const searchInput = document.getElementById('searchInput');
+const categoryFilter = document.getElementById('categoryFilter');
 
+let channels = [];
+let filteredChannels = [];
+let currentHls = null;
+
+// Load M3U
 document.getElementById('loadBtn').addEventListener('click', async () => {
     const url = document.getElementById('m3uUrl').value.trim();
     if(!url){ alert("M3U URL girin!"); return; }
@@ -38,16 +63,22 @@ document.getElementById('loadBtn').addEventListener('click', async () => {
         const res = await fetch(corsProxy + encodeURIComponent(url));
         const text = await res.text();
 
-        // M3U parse
+        // Parse M3U
         const lines = text.split('\n');
-        const channels = [];
+        channels = [];
         let current = {};
-
         lines.forEach(line => {
             line = line.trim();
             if(line.startsWith('#EXTINF:')){
                 const nameMatch = line.match(/,(.*)$/);
                 current.name = nameMatch ? nameMatch[1] : "Bilinmeyen";
+                // Kategori tahmini
+                const lower = current.name.toLowerCase();
+                if(lower.includes('film')||lower.includes('movie')) current.category='movie';
+                else if(lower.includes('dizi')||lower.includes('series')) current.category='series';
+                else if(lower.includes('spor')||lower.includes('sport')) current.category='sport';
+                else if(lower.includes('müzik')||lower.includes('music')) current.category='music';
+                else current.category='live';
             } else if(line.startsWith('http')){
                 current.url = line;
                 channels.push({...current});
@@ -55,16 +86,8 @@ document.getElementById('loadBtn').addEventListener('click', async () => {
             }
         });
 
-        // Grid oluştur
-        grid.innerHTML = "";
-        channels.forEach(ch => {
-            const card = document.createElement('div');
-            card.className = "card";
-            card.innerText = ch.name;
-            card.onclick = () => playStream(ch.url);
-            grid.appendChild(card);
-        });
-
+        filteredChannels = channels.slice();
+        renderChannels();
         alert("Kanallar yüklendi! Bir kanal seçip izleyebilirsiniz.");
 
     } catch(err){
@@ -73,20 +96,60 @@ document.getElementById('loadBtn').addEventListener('click', async () => {
     }
 });
 
-function playStream(url){
+// Render channels
+function renderChannels(){
+    const query = searchInput.value.toLowerCase();
+    const category = categoryFilter.value;
+    grid.innerHTML = "";
+    filteredChannels = channels.filter(ch=>{
+        const matchSearch = ch.name.toLowerCase().includes(query);
+        const matchCategory = category ? ch.category===category : true;
+        return matchSearch && matchCategory;
+    });
+
+    if(filteredChannels.length===0){
+        grid.innerHTML="<div style='text-align:center;color:#ccc;padding:1rem;'>Kanal bulunamadı</div>";
+        return;
+    }
+
+    filteredChannels.forEach((ch,i)=>{
+        const card = document.createElement('div');
+        card.className = "card";
+        card.innerText = ch.name;
+        card.onclick = ()=>playChannel(i);
+        grid.appendChild(card);
+    });
+}
+
+// Play channel
+function playChannel(index){
+    const channel = filteredChannels[index];
+    if(!channel || !channel.url) return;
+
+    if(currentHls){ currentHls.destroy(); currentHls=null; }
+    player.src="";
+    nowPlaying.textContent = `Şu an: ${channel.name}`;
+
+    document.querySelectorAll('.card').forEach((c,i)=>c.classList.remove('playing'));
+    document.querySelectorAll('.card')[index].classList.add('playing');
+
     if(Hls.isSupported()){
-        const hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(player);
-        hls.on(Hls.Events.MANIFEST_PARSED, ()=>player.play());
-        hls.on(Hls.Events.ERROR,(e,d)=>console.error("HLS Error:",d));
+        currentHls = new Hls();
+        currentHls.loadSource(channel.url);
+        currentHls.attachMedia(player);
+        currentHls.on(Hls.Events.MANIFEST_PARSED, ()=>player.play());
+        currentHls.on(Hls.Events.ERROR,(e,d)=>console.error("HLS Error:",d));
     } else if(player.canPlayType('application/vnd.apple.mpegurl')){
-        player.src = url;
+        player.src = channel.url;
         player.play();
     } else {
         alert("HLS desteklenmiyor!");
     }
 }
+
+// Search & filter
+searchInput.addEventListener('input', renderChannels);
+categoryFilter.addEventListener('change', renderChannels);
 </script>
 
 </body>
