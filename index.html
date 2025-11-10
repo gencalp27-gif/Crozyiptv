@@ -1,64 +1,67 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Croz IPTV — Offline Pro Player</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-:root{
-  --bg:#0b0d10; --panel:#0f1417; --muted:#94a3b8; --card:#101418;
-  --accent:#e50914; --accent-2:#00a8ff; --success:#00d46a; --radius:12px;
-  --glass: rgba(255,255,255,0.03);
-}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-body{background:linear-gradient(180deg,#050607 0%,var(--bg) 100%);color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
-.app{max-width:1100px;margin:24px auto;padding:20px;}
-.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff7a7a);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
-.title{font-weight:700;font-size:1.15rem}
-.sub{color:var(--muted);font-size:.9rem;margin-top:2px}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Croz IPTV Pro — Offline M3U Player</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>TV</text></svg>">
+  <meta name="theme-color" content="#e50914">
+  <style>
+    :root{
+      --bg:#0b0d10; --panel:#0f1417; --muted:#94a3b8; --card:#101418;
+      --accent:#e50914; --accent-2:#00a8ff; --success:#00d46a; --radius:12px;
+      --glass: rgba(255,255,255,0.03); --text:#e6eef6;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{background:linear-gradient(180deg,#050607 0%,var(--bg) 100%);color:var(--text); -webkit-font-smoothing:antialiased;}
+    .app{max-width:1100px;margin:20px auto;padding:16px;}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff7a7a);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
+    .title{font-weight:700;font-size:1.2rem}
+    .sub{color:var(--muted);font-size:.85rem;margin-top:2px}
 
-.controls{display:grid;grid-template-columns:1fr 160px;gap:12px;margin-bottom:14px;}
-@media (max-width:700px){ .controls{grid-template-columns:1fr; } }
+    .controls{display:grid;grid-template-columns:1fr 160px;gap:12px;margin-bottom:14px;}
+    @media (max-width:700px){ .controls{grid-template-columns:1fr;} }
 
-.card{background:var(--panel);border-radius:var(--radius);padding:14px;box-shadow: 0 6px 20px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03);}
-.upload-row{display:flex;gap:10px;align-items:center;}
-.file-input{display:flex;gap:8px;align-items:center;width:100%}
-.input, textarea, select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:inherit; font-size:0.95rem; }
-.smallbtn{padding:10px 12px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
-.smallbtn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-.file-label{cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-weight:600}
+    .card{background:var(--panel);border-radius:var(--radius);padding:16px;box-shadow:0 6px 20px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);}
+    .upload-row{display:flex;gap:10px;align-items:center;}
+    .input, textarea, select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:inherit; font-size:0.95rem; }
+    .smallbtn{padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:0.9rem;}
+    .smallbtn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .file-label{cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--accent)}
 
-.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+    .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:14px;}
+    @media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr)} }
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:14px}
-@media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr)} }
+    .channel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); padding:10px;border-radius:12px;cursor:pointer;display:flex;gap:10px;align-items:center;border:1px solid rgba(255,255,255,0.02);transition:all .16s}
+    .channel:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.04)}
+    .logo-thumb{width:84px;height:56px;border-radius:8px;background:#071018;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+    .logo-thumb img{width:100%;height:100%;object-fit:cover;loading:lazy}
+    .info{flex:1;min-width:0}
+    .name{font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta{color:var(--muted);font-size:0.82rem;margin-top:4px}
+    .badges{display:flex;gap:8px;align-items:center;margin-left:8px}
+    .badge{font-size:0.78rem;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted);border:1px solid rgba(255,255,255,0.02)}
 
-.channel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); padding:10px;border-radius:12px;cursor:pointer;display:flex;gap:10px;align-items:center;border:1px solid rgba(255,255,255,0.02);transition:all .16s}
-.channel:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.04)}
-.logo-thumb{width:84px;height:56px;border-radius:8px;background:#071018;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
-.logo-thumb img{width:100%;height:100%;object-fit:cover}
-.info{flex:1;min-width:0}
-.name{font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meta{color:var(--muted);font-size:0.85rem;margin-top:6px}
-.badges{display:flex;gap:8px;align-items:center;margin-left:8px}
-.badge{font-size:0.8rem;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted);border:1px solid rgba(255,255,255,0.02)}
+    .nowplaying{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .nowplaying .title{font-weight:700;font-size:0.95rem}
+    .actions{display:flex;gap:8px;align-items:center}
 
-.nowplaying{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.nowplaying .title{font-weight:700}
-.actions{display:flex;gap:8px;align-items:center}
+    .favorite{font-size:18px;cursor:pointer;color:rgba(255,255,255,0.6)}
+    .favorite.active{color:var(--accent)}
 
-.favorite{font-size:18px;cursor:pointer;color:rgba(255,255,255,0.6)}
-.favorite.active{color:var(--accent)}
+    .footer-note{color:var(--muted);font-size:0.82rem;margin-top:16px;text-align:center;line-height:1.5;}
+    .empty{padding:28px;border-radius:12px;border:1px dashed rgba(255,255,255,0.03);text-align:center;color:var(--muted);font-size:0.9rem}
 
-.footer-note{color:var(--muted);font-size:0.85rem;margin-top:14px;text-align:center}
-
-/* empty state */
-.empty{padding:28px;border-radius:12px;border:1px dashed rgba(255,255,255,0.03);text-align:center;color:var(--muted)}
-</style>
+    /* PWA Install Button */
+    .install-btn{margin-top:12px;text-align:center}
+    .install-btn button{background:var(--success);padding:10px 16px;}
+  </style>
 </head>
 <body>
 <div class="app">
@@ -67,12 +70,13 @@ body{background:linear-gradient(180deg,#050607 0%,var(--bg) 100%);color:#e6eef6;
       <div class="logo"><i class="fas fa-broadcast-tower"></i></div>
       <div>
         <div class="title">Croz IPTV Pro</div>
-        <div class="sub">Offline M3U yükleyip yerel veya native oynatıcı ile izle</div>
+        <div class="sub">Offline M3U Player • Yerel & Native Destek</div>
       </div>
     </div>
 
-    <div style="display:flex;gap:8px;align-items:center">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <button id="themeToggle" class="smallbtn secondary" title="Tema değiştir"><i class="fas fa-adjust"></i></button>
+      <button id="installBtn" class="smallbtn secondary" style="display:none"><i class="fas fa-mobile-alt"></i> Uygulama Yükle</button>
       <button id="exportBtn" class="smallbtn" title="Playlist dışa aktar"><i class="fas fa-file-export"></i> Dışa Aktar</button>
     </div>
   </div>
@@ -80,57 +84,50 @@ body{background:linear-gradient(180deg,#050607 0%,var(--bg) 100%);color:#e6eef6;
   <!-- controls -->
   <div class="controls">
     <div class="card">
-      <div style="font-weight:700;margin-bottom:8px">M3U yükle</div>
-
+      <div style="font-weight:700;margin-bottom:8px">M3U Yükle</div>
       <div class="upload-row">
-        <label class="file-label" for="fileInput"><i class="fas fa-file-upload"></i> Dosyadan yükle</label>
-        <input id="fileInput" type="file" accept=".m3u,.txt" style="display:none">
+        <label class="file-label" for="fileInput"><i class="fas fa-file-upload"></i> Dosyadan Yükle</label>
+        <input id="fileInput" type="file" accept=".m3u,.m3u8,.txt" style="display:none">
       </div>
-
       <div style="margin-top:10px">
-        <div style="font-weight:600;margin-bottom:6px">Ya da M3U içeriğini yapıştır</div>
-        <textarea id="pasteArea" class="input" rows="5" placeholder="#EXTM3U satırlarını buraya yapıştır veya dosya yükle"></textarea>
+        <div style="font-weight:600;margin-bottom:6px">veya M3U İçeriğini Yapıştır</div>
+        <textarea id="pasteArea" class="input" rows="5" placeholder="#EXTM3U ile başlayan içeriği buraya yapıştır..."></textarea>
       </div>
-
       <div class="tools">
         <button id="parseBtn" class="smallbtn"><i class="fas fa-magnifying-glass"></i> Ayrıştır</button>
         <button id="clearBtn" class="smallbtn secondary"><i class="fas fa-trash"></i> Temizle</button>
       </div>
-
-      <div style="margin-top:8px;color:var(--muted);font-size:0.9rem">Not: Web üzerinden doğrudan M3U URL fetch CORS nedeniyle güvenilmez. Dosya yükle veya içeriği yapıştır.</div>
+      <div style="margin-top:8px;color:var(--muted);font-size:0.85rem">
+        <i class="fas fa-info-circle"></i> Web CORS nedeniyle URL çekemez. Dosya yükle veya içeriği yapıştır.
+      </div>
     </div>
 
     <div class="card">
-      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
-        <div style="min-width:0">
-          <div style="font-weight:700">Filtre & Ara</div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="search" class="input" placeholder="Kanal adı ara..." />
-            <select id="category" class="input" style="width:160px">
-              <option value="">Tüm Kategoriler</option>
-            </select>
-          </div>
-        </div>
+      <div style="font-weight:700">Filtre & Ara</div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <input id="search" class="input" placeholder="Kanal ara..." />
+        <select id="category" class="input" style="min-width:140px">
+          <option value="">Tüm Kategoriler</option>
+        </select>
       </div>
-
-      <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-        <select id="sort" class="input" style="width:160px">
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="sort" class="input" style="min-width:130px">
           <option value="">Sırala</option>
-          <option value="name">Alfabetik</option>
-          <option value="group">Gruba Göre</option>
+          <option value="name">İsim</option>
+          <option value="group">Grup</option>
         </select>
         <button id="showFavs" class="smallbtn secondary"><i class="fas fa-heart"></i> Favoriler</button>
-        <button id="resetView" class="smallbtn secondary"><i class="fas fa-list"></i> Tümünü Göster</button>
+        <button id="resetView" class="smallbtn secondary"><i class="fas fa-list"></i> Tüm</button>
       </div>
 
-      <div class="nowplaying" style="margin-top:10px">
+      <div class="nowplaying" style="margin-top:12px">
         <div>
-          <div style="font-size:0.85rem;color:var(--muted)">Şu an</div>
+          <div style="font-size:0.82rem;color:var(--muted)">Şu an oynuyor</div>
           <div id="nowTitle" class="title">-</div>
         </div>
         <div class="actions">
-          <button id="openNative" class="smallbtn secondary"><i class="fas fa-external-link-alt"></i> Native Aç</button>
-          <button id="playInline" class="smallbtn"><i class="fas fa-play"></i> Tarayıcıda Oyna</button>
+          <button id="openNative" class="smallbtn secondary"><i class="fas fa-external-link-alt"></i> Native</button>
+          <button id="playInline" class="smallbtn"><i class="fas fa-play"></i> Tarayıcıda</button>
         </div>
       </div>
     </div>
@@ -142,23 +139,25 @@ body{background:linear-gradient(180deg,#050607 0%,var(--bg) 100%);color:#e6eef6;
       <div style="font-weight:700">Kanallar</div>
       <div style="color:var(--muted);font-size:0.9rem" id="countLabel">0 kanal</div>
     </div>
-
     <div id="channelContainer" style="margin-top:12px">
-      <div class="empty">Henüz kanal yok — M3U yükle veya içeriği yapıştırıp "Ayrıştır" butonuna bas.</div>
+      <div class="empty">M3U yükleyip "Ayrıştır" butonuna bas.</div>
     </div>
   </div>
 
-  <div class="footer-note">Croz IPTV Pro — Dosya tabanlı offline kullanım. GitHub Pages’de çalışır. İçerik paylaşımına dikkat et.</div>
+  <!-- User Info Footer -->
+  <div class="footer-note">
+    <strong>@ibrahimgenctr34</strong> • Türkiye <span id="liveTime"></span><br>
+    Croz IPTV Pro v2.0 — <a href="https://github.com/ibrahimgenctr34/croz-iptv" style="color:var(--accent);text-decoration:none">GitHub</a> • 
+    <a href="https://x.com/ibrahimgenctr34" style="color:var(--accent-2);text-decoration:none">X</a>
+  </div>
+
+  <div class="install-btn" id="installPrompt" style="display:none">
+    <button id="installAction" class="smallbtn">Croz IPTV’yi Ana Ekrana Ekle</button>
+  </div>
 </div>
 
 <script>
-/* Croz IPTV - Offline Pro Player
-   - Dosyadan M3U yükle veya içeriği yapıştır
-   - #EXTINF parsing: tvg-logo / group-title / name
-   - Favoriler localStorage'da
-   - Kanal tıklayınca window.location.href açar (native player tercih edilir)
-*/
-
+/* Croz IPTV Pro v2.0 — @ibrahimgenctr34 */
 const fileInput = document.getElementById('fileInput');
 const pasteArea = document.getElementById('pasteArea');
 const parseBtn = document.getElementById('parseBtn');
@@ -174,276 +173,212 @@ const openNativeBtn = document.getElementById('openNative');
 const playInlineBtn = document.getElementById('playInline');
 const exportBtn = document.getElementById('exportBtn');
 const themeToggle = document.getElementById('themeToggle');
+const installBtn = document.getElementById('installBtn');
+const installPrompt = document.getElementById('installPrompt');
+const installAction = document.getElementById('installAction');
+const liveTime = document.getElementById('liveTime');
 
-let channels = [];        // tüm kanallar
-let viewList = [];       // şu an görüntülenenler
-let favorites = JSON.parse(localStorage.getItem('croz_favs') || '[]');
-let current = null;      // şu an oynanan kanal objesi
+let channels = [], viewList = [], favorites = JSON.parse(localStorage.getItem('croz_favs_v2') || '[]');
+let current = null, lastStreamUrl = null;
+let deferredPrompt;
 
-// helpers
-function showChannels(list){
-  viewList = list;
-  document.getElementById('countLabel').textContent = `${list.length} kanal`;
-  if(list.length === 0){
-    channelContainer.innerHTML = '<div class="empty">Filtreye uygun kanal bulunamadı.</div>';
-    return;
-  }
-  const grid = document.createElement('div');
-  grid.className = 'grid';
-  list.forEach((ch, idx) => {
-    const c = document.createElement('div');
-    c.className = 'channel';
-    c.dataset.index = idx;
+// Live Time (Türkiye)
+function updateTime() {
+  const now = new Date();
+  const trTime = now.toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' });
+  liveTime.textContent = `• ${trTime.split(' ')[1].slice(0,5)}`;
+}
+updateTime();
+setInterval(updateTime, 1000);
 
-    // logo
-    const logoWrap = document.createElement('div');
-    logoWrap.className = 'logo-thumb';
-    if(ch.logo){
-      const img = document.createElement('img');
-      img.src = ch.logo;
-      img.alt = ch.name;
-      logoWrap.appendChild(img);
-    } else {
-      logoWrap.innerHTML = `<div style="padding:6px;color:var(--muted);font-size:12px;text-align:center">No Logo</div>`;
-    }
-
-    const info = document.createElement('div');
-    info.className = 'info';
-    info.innerHTML = `<div class="name">${ch.name}</div><div class="meta">${ch.group || ''} • ${ch.category || 'live'}</div>`;
-
-    const badges = document.createElement('div');
-    badges.className = 'badges';
-
-    const fav = document.createElement('span');
-    fav.className = 'favorite' + (favorites.includes(ch.name) ? ' active' : '');
-    fav.innerHTML = favorites.includes(ch.name) ? '❤️' : '🤍';
-    fav.onclick = (e) => {
-      e.stopPropagation();
-      toggleFav(ch);
-      fav.className = 'favorite' + (favorites.includes(ch.name) ? ' active' : '');
-      fav.innerHTML = favorites.includes(ch.name) ? '❤️' : '🤍';
-      renderFavCount();
-    };
-
-    badges.appendChild(fav);
-
-    c.appendChild(logoWrap);
-    c.appendChild(info);
-    c.appendChild(badges);
-
-    // click -> open native player
-    c.addEventListener('click', () => {
-      playChannel(ch);
-    });
-
-    grid.appendChild(c);
+// PWA Install
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'inline-flex';
+  installPrompt.style.display = 'block';
+});
+installBtn.onclick = installAction.onclick = () => {
+  installPrompt.style.display = 'none';
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
   });
-  channelContainer.innerHTML = '';
-  channelContainer.appendChild(grid);
-  renderFavCount();
-}
+};
 
-function renderFavCount(){
-  showFavsBtn.innerHTML = `<i class="fas fa-heart"></i> Favoriler (${favorites.length})`;
-}
+// Theme Toggle
+let dark = true;
+themeToggle.addEventListener('click', () => {
+  dark = !dark;
+  document.documentElement.style.setProperty('--bg', dark ? '#0b0d10' : '#f6f9fc');
+  document.documentElement.style.setProperty('--panel', dark ? '#0f1417' : '#ffffff');
+  document.documentElement.style.setProperty('--card', dark ? '#101418' : '#ffffff');
+  document.documentElement.style.setProperty('--text', dark ? '#e6eef6' : '#0b1220');
+  document.documentElement.style.setProperty('--muted', dark ? '#94a3b8' : '#536278');
+});
 
-function toggleFav(ch){
-  if(favorites.includes(ch.name)){
-    favorites = favorites.filter(x => x !== ch.name);
-  } else {
-    favorites.push(ch.name);
-  }
-  localStorage.setItem('croz_favs', JSON.stringify(favorites));
-}
-
-// parsing
-function parseM3U(text){
-  const lines = text.split(/\r?\n/);
+// Parse M3U
+function parseM3U(text) {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const result = [];
   let current = null;
-  for(const raw of lines){
-    const line = raw.trim();
-    if(!line) continue;
-    if(line.startsWith('#EXTINF:')){
-      // parse attrs and name
-      current = { name: 'Bilinmeyen', logo: '', group:'', category:'live', raw: line };
-      // attrs like: #EXTINF:-1 tvg-id="..." tvg-logo="..." group-title="News",Channel Name
-      const attrPart = line.substring(8); // after #EXTINF:
-      // try to extract tvg-logo / group-title
-      const logoMatch = attrPart.match(/tvg-logo="([^"]+)"/i);
-      const groupMatch = attrPart.match(/group-title="([^"]+)"/i);
-      if(logoMatch) current.logo = logoMatch[1];
-      if(groupMatch) current.group = groupMatch[1];
-      // name after last comma
+  for (const line of lines) {
+    if (line.startsWith('#EXTINF:')) {
+      current = { name: 'Bilinmeyen', logo: '', group: '', category: 'live', url: '' };
+      const after = line.substring(8);
+      const logoMatch = after.match(/tvg-logo="([^"]+)"/i);
+      const groupMatch = after.match(/group-title="([^"]+)"/i);
+      if (logoMatch) current.logo = logoMatch[1];
+      if (groupMatch) current.group = groupMatch[1];
       const nameMatch = line.match(/,(.*)$/);
-      if(nameMatch) current.name = nameMatch[1].trim();
-      // category guess
-      const ln = current.name.toLowerCase();
-      if(ln.includes('film')||ln.includes('movie')) current.category='movie';
-      else if(ln.includes('dizi')||ln.includes('series')) current.category='series';
-      else if(ln.includes('spor')||ln.includes('sport')) current.category='sport';
-      else if(ln.includes('müzik')||ln.includes('music')) current.category='music';
-    } else if(line.startsWith('http') || line.startsWith('rtmp') || line.startsWith('udp://') || line.includes('.ts') || line.includes('.mpg')){
-      if(current){
-        current.url = line;
-        result.push(current);
-        current = null;
-      } else {
-        // sometimes playlists only have urls - add generic
-        result.push({ name: line, url: line, logo:'', group:'', category:'live' });
-      }
+      if (nameMatch) current.name = nameMatch[1].trim();
+
+      const lower = current.name.toLowerCase();
+      if (lower.includes('film') || lower.includes('movie')) current.category = 'movie';
+      else if (lower.includes('dizi') || lower.includes('series')) current.category = 'series';
+      else if (lower.includes('spor') || lower.includes('sport')) current.category = 'sport';
+      else if (lower.includes('müzik') || lower.includes('music')) current.category = 'music';
+    } else if ((line.startsWith('http') || line.includes('.m3u8') || line.includes('.ts')) && current) {
+      current.url = line;
+      result.push(current);
+      current = null;
     }
   }
   return result;
 }
 
-// file load
-fileInput.addEventListener('change', (e) => {
-  const f = e.target.files[0];
-  if(!f) return;
+// File & Parse
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
   const reader = new FileReader();
-  reader.onload = () => {
-    pasteArea.value = reader.result;
-  };
-  reader.readAsText(f);
+  reader.onload = () => pasteArea.value = reader.result;
+  reader.readAsText(file);
 });
 
-// parse button
 parseBtn.addEventListener('click', () => {
   const content = pasteArea.value.trim();
-  if(!content){
-    alert('Lütfen M3U içeriğini yapıştırın veya dosya seçin.');
-    return;
-  }
+  if (!content) return alert('Lütfen M3U içeriği yapıştırın veya dosya yükleyin.');
   channels = parseM3U(content);
   populateCategoryFilter();
   applyView();
 });
 
-// clear
 clearBtn.addEventListener('click', () => {
-  pasteArea.value = '';
-  channels = [];
-  viewList = [];
-  channelContainer.innerHTML = '<div class="empty">Henüz kanal yok — M3U yükle veya içeriği yapıştırıp "Ayrıştır" butonuna bas.</div>';
+  pasteArea.value = ''; channels = []; applyView();
+  channelContainer.innerHTML = '<div class="empty">M3U yükleyip "Ayrıştır" butonuna bas.</div>';
   document.getElementById('countLabel').textContent = '0 kanal';
 });
 
-// filtering & UI
-function populateCategoryFilter(){
-  const cats = Array.from(new Set(channels.map(c => c.category || 'live'))).sort();
+// View & Filters
+function populateCategoryFilter() {
+  const cats = [...new Set(channels.map(c => c.category))].sort();
   categoryEl.innerHTML = '<option value="">Tüm Kategoriler</option>';
-  for(const c of cats){
-    const o = document.createElement('option');
-    o.value = c;
-    o.textContent = c.charAt(0).toUpperCase()+c.slice(1);
-    categoryEl.appendChild(o);
-  }
+  cats.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c.charAt(0).toUpperCase() + c.slice(1);
+    categoryEl.appendChild(opt);
+  });
 }
 
-function applyView(){
+function applyView() {
   let list = [...channels];
   const q = searchEl.value.trim().toLowerCase();
   const cat = categoryEl.value;
-  if(q) list = list.filter(ch => ch.name.toLowerCase().includes(q));
-  if(cat) list = list.filter(ch => (ch.category||'live') === cat);
-  if(sortEl.value === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
-  if(sortEl.value === 'group') list.sort((a,b) => (a.group||'').localeCompare(b.group||''));
+  if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
+  if (cat) list = list.filter(c => c.category === cat);
+  if (sortEl.value === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+  if (sortEl.value === 'group') list.sort((a,b) => (a.group||'').localeCompare(b.group||''));
   showChannels(list);
 }
 
 searchEl.addEventListener('input', applyView);
 categoryEl.addEventListener('change', applyView);
 sortEl.addEventListener('change', applyView);
-
-// show only favs
-showFavsBtn.addEventListener('click', () => {
-  const list = channels.filter(c => favorites.includes(c.name));
-  showChannels(list);
-});
-
-// reset view
+showFavsBtn.addEventListener('click', () => showChannels(channels.filter(c => favorites.includes(c.name))));
 resetViewBtn.addEventListener('click', applyView);
 
-// play channel
-function playChannel(ch){
-  current = ch;
-  nowTitle.textContent = ch.name;
-  // set the native open url
-  lastStreamUrl = ch.url;
-  // set the inline video src (if supported)
-  const v = document.getElementById('player');
-  // We intentionally don't replace player inline here by default; user chooses.
+// Show Channels
+function showChannels(list) {
+  viewList = list;
+  document.getElementById('countLabel').textContent = `${list.length} kanal`;
+  if (!list.length) {
+    channelContainer.innerHTML = '<div class="empty">Filtreye uygun kanal yok.</div>';
+    return;
+  }
+  const grid = document.createElement('div'); grid.className = 'grid';
+  list.forEach(ch => {
+    const c = document.createElement('div'); c.className = 'channel';
+    const logo = document.createElement('div'); logo.className = 'logo-thumb';
+    if (ch.logo) { const img = new Image(); img.src = ch.logo; img.loading = 'lazy'; logo.appendChild(img); }
+    else logo.innerHTML = `<div style="font-size:11px;color:#555">No Logo</div>`;
+
+    const info = document.createElement('div'); info.className = 'info';
+    info.innerHTML = `<div class="name">${ch.name}</div><div class="meta">${ch.group || 'Genel'} • ${ch.category}</div>`;
+
+    const badges = document.createElement('div'); badges.className = 'badges';
+    const fav = document.createElement('span'); fav.className = 'favorite' + (favorites.includes(ch.name) ? ' active' : '');
+    fav.innerHTML = favorites.includes(ch.name) ? '❤️' : '🤍';
+    fav.onclick = e => { e.stopPropagation(); toggleFav(ch); fav.classList.toggle('active'); fav.innerHTML = favorites.includes(ch.name) ? '❤️' : '🤍'; };
+    badges.appendChild(fav);
+
+    c.append(logo, info, badges);
+    c.onclick = () => playChannel(ch);
+    grid.appendChild(c);
+  });
+  channelContainer.innerHTML = ''; channelContainer.appendChild(grid);
 }
 
-// open native (external)
-let lastStreamUrl = null;
-openNativeBtn.addEventListener('click', () => {
-  if(!lastStreamUrl){ alert('Önce bir kanal seçin.'); return; }
-  // open via location -> native player / app will handle if associated
+function toggleFav(ch) {
+  if (favorites.includes(ch.name)) favorites = favorites.filter(n => n !== ch.name);
+  else favorites.push(ch.name);
+  localStorage.setItem('croz_favs_v2', JSON.stringify(favorites));
+  showFavsBtn.innerHTML = `<i class="fas fa-heart"></i> Favoriler (${favorites.length})`;
+}
+
+// Play
+function playChannel(ch) {
+  current = ch; lastStreamUrl = ch.url; nowTitle.textContent = ch.name;
+}
+
+openNativeBtn.onclick = () => {
+  if (!lastStreamUrl) return alert('Kanal seçin.');
   window.location.href = lastStreamUrl;
-});
+};
 
-// play inline (may or may not work depending on format and browser)
-playInlineBtn.addEventListener('click', () => {
-  if(!lastStreamUrl){ alert('Önce bir kanal seçin.'); return; }
-  // Create a temporary video element overlay and attempt to play
+playInlineBtn.onclick = () => {
+  if (!lastStreamUrl) return alert('Kanal seçin.');
   const overlay = document.createElement('div');
-  overlay.style.position='fixed';overlay.style.inset='0';overlay.style.background='rgba(0,0,0,0.85)';overlay.style.display='flex';overlay.style.alignItems='center';overlay.style.justifyContent='center';overlay.style.zIndex='9999';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:9999';
   const vid = document.createElement('video');
-  vid.controls = true; vid.autoplay = true; vid.style.width='92%'; vid.style.maxWidth='900px'; vid.style.borderRadius='10px'; vid.style.background='#000';
-  const source = document.createElement('source');
-  source.src = lastStreamUrl; source.type = 'video/mp2t';
-  vid.appendChild(source);
+  vid.controls = true; vid.autoplay = true; vid.style.cssText = 'width:92%;max-width:900px;border-radius:12px;background:#000';
+  vid.innerHTML = `<source src="${lastStreamUrl}" type="video/mp2t">`;
   overlay.appendChild(vid);
-  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) document.body.removeChild(overlay); });
+  overlay.onclick = e => e.target === overlay && document.body.removeChild(overlay);
   document.body.appendChild(overlay);
-  vid.play().catch(err => {
-    alert('Tarayıcı bu formatı doğrudan oynatamayabilir. Lütfen "Native Aç" butonunu kullanın.');
-    console.error(err);
-  });
-});
+  vid.play().catch(() => alert('Tarayıcı bu formatı oynatamayabilir. Native Aç kullanın.'));
+};
 
-// export playlist (as plain text)
-exportBtn.addEventListener('click', () => {
-  if(!channels.length){ alert('Dışa aktarılacak kanal yok.'); return; }
+// Export
+exportBtn.onclick = () => {
+  if (!channels.length) return alert('Dışa aktarılacak kanal yok.');
   let txt = '#EXTM3U\n';
   channels.forEach(c => {
     const attrs = [];
-    if(c.logo) attrs.push(`tvg-logo="${c.logo}"`);
-    if(c.group) attrs.push(`group-title="${c.group}"`);
-    txt += `#EXTINF:-1 ${attrs.join(' ' )},${c.name}\n${c.url}\n`;
+    if (c.logo) attrs.push(`tvg-logo="${c.logo}"`);
+    if (c.group) attrs.push(`group-title="${c.group}"`);
+    txt += `#EXTINF:-1 ${attrs.join(' ')},${c.name}\n${c.url}\n`;
   });
-  const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+  const blob = new Blob([txt], {type: 'text/plain'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'croz_playlist_export.m3u';
+  a.download = 'croz_export.m3u';
   a.click();
-  URL.revokeObjectURL(a.href);
-});
+};
 
-// theme toggle
-let dark = true;
-themeToggle.addEventListener('click', () => {
-  dark = !dark;
-  if(!dark){
-    document.documentElement.style.setProperty('--bg','#f6f9fc');
-    document.documentElement.style.setProperty('--panel','#ffffff');
-    document.documentElement.style.setProperty('--card','#ffffff');
-    document.documentElement.style.setProperty('--text','#0b1220');
-    document.documentElement.style.setProperty('--muted','#536278');
-  } else {
-    document.documentElement.style.setProperty('--bg','#0b0d10');
-    document.documentElement.style.setProperty('--panel','#0f1417');
-    document.documentElement.style.setProperty('--card','#101418');
-    document.documentElement.style.setProperty('--text','#e6eef6');
-    document.documentElement.style.setProperty('--muted','#94a3b8');
-  }
-});
-
-// init
-renderFavCount();
-channelContainer.innerHTML = '<div class="empty">Henüz kanal yok — M3U yükle veya içeriği yapıştırıp "Ayrıştır" butonuna bas.</div>';
+// Init
+showFavsBtn.innerHTML = `<i class="fas fa-heart"></i> Favoriler (${favorites.length})`;
+applyView();
 </script>
 </body>
 </html>
