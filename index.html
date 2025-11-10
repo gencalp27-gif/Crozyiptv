@@ -11,7 +11,7 @@ body{background:var(--bg);color:var(--text);font-family:sans-serif;margin:0;padd
 .container{max-width:1200px;margin:auto;padding:1rem;}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
 .header h1{color:var(--primary);}
-input,select,button{padding:0.5rem 1rem;border-radius:8px;border:none;font-size:1rem;margin-bottom:0.5rem;}
+input,button,select{padding:0.5rem 1rem;border-radius:8px;border:none;margin-bottom:0.5rem;font-size:1rem;}
 button{background:var(--primary);color:#fff;cursor:pointer;transition:all 0.3s;}
 button:hover{background:var(--primary-dark);}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.5rem;margin-top:1rem;}
@@ -50,14 +50,9 @@ video{width:100%;border-radius:12px;background:#000;}
     <option value="sport">Spor</option>
     <option value="music">Müzik</option>
   </select>
-  <select id="sortSelect">
-    <option value="">Sırala</option>
-    <option value="name">Alfabetik</option>
-    <option value="category">Kategori</option>
-  </select>
 
   <div id="playerContainer">
-    <video id="player" controls></video>
+    <video id="player" controls autoplay></video>
     <div id="nowPlaying">Şu an: -</div>
   </div>
 
@@ -65,10 +60,9 @@ video{width:100%;border-radius:12px;background:#000;}
   <div class="grid" id="channelGrid"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
 let player=document.getElementById('player');
-let channels=[],filteredChannels=[],currentHls=null,currentIndex=0;
+let channels=[],filteredChannels=[],currentIndex=0;
 
 // Mesaj göster
 function showMessage(text,type){const msg=document.getElementById('msg');msg.textContent=text;msg.className='message '+type;setTimeout(()=>{msg.textContent='';msg.className='';},4000);}
@@ -86,7 +80,6 @@ document.getElementById('loginBtn').addEventListener('click',async()=>{
       body:JSON.stringify({type:'xtream',username,password,url})
     });
     const text=await res.text();
-    // Kanal parse
     channels=[]; let current={};
     text.split('\n').forEach(line=>{
       line=line.trim();
@@ -111,10 +104,7 @@ document.getElementById('loginBtn').addEventListener('click',async()=>{
 function renderChannels(){
   const query=document.getElementById('searchInput').value.toLowerCase();
   const cat=document.getElementById('categoryFilter').value;
-  const sort=document.getElementById('sortSelect').value;
   filteredChannels=channels.filter(ch=>(ch.name.toLowerCase().includes(query))&&(cat?ch.category===cat:true));
-  if(sort==='name')filteredChannels.sort((a,b)=>a.name.localeCompare(b.name));
-  else if(sort==='category')filteredChannels.sort((a,b)=>a.category.localeCompare(b.category));
   const grid=document.getElementById('channelGrid'); grid.innerHTML="";
   if(filteredChannels.length===0){grid.innerHTML="<div style='text-align:center;color:#ccc;padding:1rem;'>Kanal bulunamadı</div>";return;}
   filteredChannels.forEach((ch,i)=>{
@@ -123,18 +113,16 @@ function renderChannels(){
   });
 }
 
-// Play
+// Play MPG
 function playStream(url){
-  if(currentHls){currentHls.destroy();currentHls=null;}
-  if(Hls.isSupported()){currentHls=new Hls();currentHls.loadSource(url);currentHls.attachMedia(player);currentHls.on(Hls.Events.MANIFEST_PARSED,()=>player.play());}
-  else{player.src=url;player.play();}
+  player.src=`https://senin-sunucu.com/stream?url=${encodeURIComponent(url)}`;
+  player.play().catch(e=>console.error(e));
   document.getElementById('nowPlaying').textContent=`Şu an: ${url}`;
 }
 
-// Search / filter / sort
+// Search / filter
 document.getElementById('searchInput').addEventListener('input',renderChannels);
 document.getElementById('categoryFilter').addEventListener('change',renderChannels);
-document.getElementById('sortSelect').addEventListener('change',renderChannels);
 </script>
 </body>
 </html>
