@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Croz IPTV Pro - Modern UI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --primary:#e50914;
+  --primary-dark:#b80710;
+  --bg:#111;
+  --card:#1a1a1a;
+  --text:#fff;
+  --accent:#00a8ff;
+  --success:#00d46a;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
+body{background:var(--bg);color:var(--text);}
+.container{max-width:1200px;margin:auto;padding:1rem;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+.header h1{color:var(--primary);font-size:1.5rem;}
+input,select,button{padding:0.5rem 1rem;border-radius:8px;border:none;font-size:1rem;}
+input,select{width:100%;margin-bottom:0.5rem;}
+button{background:var(--primary);color:#fff;cursor:pointer;transition:all 0.3s;}
+button:hover{background:var(--primary-dark);}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.5rem;margin-top:1rem;}
+.card{background:var(--card);border-radius:12px;padding:0.5rem;cursor:pointer;transition:all 0.3s;position:relative;text-align:center;}
+.card:hover{transform:translateY(-3px);border:2px solid var(--primary);}
+.card.playing{border:2px solid var(--accent);}
+.card img{width:100%;height:100px;object-fit:cover;border-radius:8px;}
+.favorite{position:absolute;top:5px;right:5px;font-size:1.2rem;cursor:pointer;}
+#playerContainer{margin-top:1rem;position:relative;}
+video{width:100%;border-radius:12px;background:#000;}
+#nowPlaying{margin-top:0.5rem;text-align:center;color:var(--accent);}
+.message{padding:0.5rem 1rem;border-radius:8px;margin-top:0.5rem;text-align:center;}
+.error{background:#e50914;color:#fff;}
+.success{background:var(--success);color:#fff;}
+@media(max-width:768px){.grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-tv"></i> Croz IPTV Pro</h1>
+    <button id="themeBtn">Gece/Gündüz</button>
+  </div>
+
+  <input type="url" id="m3uUrl" placeholder="M3U URL girin">
+  <button id="loadBtn">Kanalları Yükle</button>
+  <div id="msg"></div>
+
+  <input type="text" id="searchInput" placeholder="Kanal ara...">
+  <select id="categoryFilter">
+    <option value="">Tüm Kategoriler</option>
+    <option value="live">Canlı</option>
+    <option value="movie">Film</option>
+    <option value="series">Dizi</option>
+    <option value="sport">Spor</option>
+    <option value="music">Müzik</option>
+  </select>
+  <select id="sortSelect">
+    <option value="">Sırala</option>
+    <option value="name">Alfabetik</option>
+    <option value="category">Kategori</option>
+  </select>
+
+  <div id="playerContainer">
+    <video id="player" controls></video>
+    <div id="nowPlaying">Şu an: -</div>
+  </div>
+
+  <h3>Kanallar</h3>
+  <div class="grid" id="channelGrid"></div>
+
+  <h3>Favoriler</h3>
+  <div class="grid" id="favGrid"></div>
+
+  <h3>VOD / Film & Dizi</h3>
+  <div class="grid" id="vodGrid"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+const player=document.getElementById('player');
+const grid=document.getElementById('channelGrid');
+const favGrid=document.getElementById('favGrid');
+const vodGrid=document.getElementById('vodGrid');
+const msg=document.getElementById('msg');
+const searchInput=document.getElementById('searchInput');
+const categoryFilter=document.getElementById('categoryFilter');
+const sortSelect=document.getElementById('sortSelect');
+let channels=[],filteredChannels=[],favorites=[],currentHls=null,currentIndex=0;
+let darkMode=true;
+
+function showMessage(text,type){msg.textContent=text;msg.className='message '+type;setTimeout(()=>{msg.textContent='';msg.className='';},4000);}
+
+// Theme toggle
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  darkMode=!darkMode;
+  if(darkMode){document.documentElement.style.setProperty('--bg','#111');document.documentElement.style.setProperty('--card','#1a1a1a');document.documentElement.style.setProperty('--text','#fff');document.documentElement.style.setProperty('--primary','#e50914');}
+  else{document.documentElement.style.setProperty('--bg','#fff');document.documentElement.style.setProperty('--card','#eee');document.documentElement.style.setProperty('--text','#111');document.documentElement.style.setProperty('--primary','#00a8ff');}
+});
+
+// Load M3U
+document.getElementById('loadBtn').addEventListener('click',async()=>{
+  const url=document.getElementById('m3uUrl').value.trim();
+  if(!url){ showMessage("M3U URL girin!","error"); return;}
+  showMessage("Yükleniyor...","success");
+  try{
+    const proxy="https://corsproxy.io/?"+encodeURIComponent(url);
+    const res=await fetch(proxy);
+    if(!res.ok)throw new Error("Sunucu hatası: "+res.status);
+    const text=await res.text();
+    if(!text.includes('#EXTINF:')) throw new Error("Geçerli M3U değil!");
+    channels=[]; let current={};
+    text.split('\n').forEach(line=>{
+      line=line.trim();
+      if(line.startsWith('#EXTINF:')){
+        const nameMatch=line.match(/,(.*)$/);
+        current.name=nameMatch?nameMatch[1]:"Bilinmeyen";
+        const lower=current.name.toLowerCase();
+        if(lower.includes('film')||lower.includes('movie'))current.category='movie';
+        else if(lower.includes('dizi')||lower.includes('series'))current.category='series';
+        else if(lower.includes('spor')||lower.includes('sport'))current.category='sport';
+        else if(lower.includes('müzik')||lower.includes('music'))current.category='music';
+        else current.category='live';
+      }else if(line.startsWith('http')){
+        current.url=line; channels.push({...current}); current={};
+      }
+    });
+    if(channels.length===0)throw new Error("Kanal bulunamadı!");
+    filteredChannels=channels.slice(); renderChannels(); showMessage("Kanallar yüklendi!","success");
+  }catch(err){console.error(err); showMessage("M3U yükleme hatası: "+err.message,"error");}
+});
+
+// Render channels
+function renderChannels(){
+  const query=searchInput.value.toLowerCase();
+  const cat=categoryFilter.value;
+  filteredChannels=channels.filter(ch=>(ch.name.toLowerCase().includes(query))&&(cat?ch.category===cat:true));
+  if(sortSelect.value==='name')filteredChannels.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sortSelect.value==='category')filteredChannels.sort((a,b)=>a.category.localeCompare(b.category));
+  grid.innerHTML="";
+  if(filteredChannels.length===0){grid.innerHTML="<div style='text-align:center;color:#ccc;padding:1rem;'>Kanal bulunamadı</div>"; return;}
+  filteredChannels.forEach((ch,i)=>{
+    const card=document.createElement('div'); card.className='card'; card.innerText=ch.name;
+    const fav=document.createElement('span'); fav.className='favorite'; fav.innerHTML=favorites.includes(ch.name)?'❤️':'🤍';
+    fav.onclick=(e)=>{e.stopPropagation(); toggleFav(ch,fav);}
+    card.appendChild(fav);
+    card.onclick=()=>playChannel(i);
+    grid.appendChild(card);
+  });
+  renderFavs(); renderVOD();
+}
+
+// Play channel
+function playChannel(index){
+  currentIndex=index;
+  const ch=filteredChannels[index];
+  if(!ch||!ch.url)return;
+  if(currentHls){currentHls.destroy();currentHls=null;}
+  player.src=""; nowPlaying.textContent=`Şu an: ${ch.name}`;
+  document.querySelectorAll('.card').forEach((c,i)=>c.classList.remove('playing'));
+  document.querySelectorAll('.card')[index].classList.add('playing');
+  if(Hls.isSupported()){currentHls=new Hls();currentHls.loadSource(ch.url);currentHls.attachMedia(player);currentHls.on(Hls.Events.MANIFEST_PARSED,()=>player.play());}
+  else if(player.canPlayType('application/vnd.apple.mpegurl')){player.src=ch.url; player.play();}
+  player.onended=()=>{currentIndex++; if(currentIndex<filteredChannels.length)playChannel(currentIndex);}
+}
+
+// Favorites
+function toggleFav(ch,span){
+  if(favorites.includes(ch.name))favorites=favorites.filter(f=>f!==ch.name); else favorites.push(ch.name);
+  span.innerHTML=favorites.includes(ch.name)?'❤️':'🤍';
+  renderFavs();
+}
+function renderFavs(){favGrid.innerHTML=""; favorites.forEach(f=>{
+  const ch=channels.find(c=>c.name===f); if(!ch)return;
+  const card=document.createElement('div'); card.className='card'; card.innerText=ch.name; card.onclick=()=>playChannel(channels.indexOf(ch));
+  favGrid.appendChild(card);
+});}
+
+// VOD
+function renderVOD(){vodGrid.innerHTML=""; channels.filter(c=>c.category==='movie'||c.category==='series').forEach(ch=>{
+  const card=document.createElement('div'); card.className='card'; card.innerText=ch.name;
+  card.onclick=()=>playChannel(filteredChannels.indexOf(ch)); vodGrid.appendChild(card);
+});}
+
+// Search / filter / sort
+searchInput.addEventListener('input',renderChannels);
+categoryFilter.addEventListener('change',renderChannels);
+sortSelect.addEventListener('change',renderChannels);
+</script>
+</body>
+</html>
