@@ -1,112 +1,95 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Croz IPTV Pro — Offline M3U Player</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>TV</text></svg>">
-  <meta name="theme-color" content="#e50914">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Sitem</title>
   <style>
-    :root{
-      --bg:#0b0d10; --panel:#0f1417; --muted:#94a3b8; --card:#101418;
-      --accent:#e50914; --accent-2:#00a8ff; --success:#00d46a; --radius:12px;
-      --glass: rgba(255,255,255,0.03); --text:#e6eef6;
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 20px;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-    body{background:linear-gradient(180deg,#050607 0%,var(--bg) 100%);color:var(--text); -webkit-font-smoothing:antialiased;}
-    .app{max-width:1100px;margin:20px auto;padding:16px;}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff7a7a);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
-    .title{font-weight:700;font-size:1.2rem}
-    .sub{color:var(--muted);font-size:.85rem;margin-top:2px}
-
-    .controls{display:grid;grid-template-columns:1fr 160px;gap:12px;margin-bottom:14px;}
-    @media (max-width:700px){ .controls{grid-template-columns:1fr;} }
-
-    .card{background:var(--panel);border-radius:var(--radius);padding:16px;box-shadow:0 6px 20px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);}
-    .upload-row{display:flex;gap:10px;align-items:center;}
-    .input, textarea, select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:inherit; font-size:0.95rem; }
-    .smallbtn{padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:0.9rem;}
-    .smallbtn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-    .file-label{cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--accent)}
-
-    .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:14px;}
-    @media (max-width:640px){ .grid{grid-template-columns:repeat(2,1fr)} }
-
-    .channel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); padding:10px;border-radius:12px;cursor:pointer;display:flex;gap:10px;align-items:center;border:1px solid rgba(255,255,255,0.02);transition:all .16s}
-    .channel:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.04)}
-    .logo-thumb{width:84px;height:56px;border-radius:8px;background:#071018;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
-    .logo-thumb img{width:100%;height:100%;object-fit:cover;loading:lazy}
-    .info{flex:1;min-width:0}
-    .name{font-weight:700;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .meta{color:var(--muted);font-size:0.82rem;margin-top:4px}
-    .badges{display:flex;gap:8px;align-items:center;margin-left:8px}
-    .badge{font-size:0.78rem;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted);border:1px solid rgba(255,255,255,0.02)}
-
-    .nowplaying{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .nowplaying .title{font-weight:700;font-size:0.95rem}
-    .actions{display:flex;gap:8px;align-items:center}
-
-    .favorite{font-size:18px;cursor:pointer;color:rgba(255,255,255,0.6)}
-    .favorite.active{color:var(--accent)}
-
-    .footer-note{color:var(--muted);font-size:0.82rem;margin-top:16px;text-align:center;line-height:1.5;}
-    .empty{padding:28px;border-radius:12px;border:1px dashed rgba(255,255,255,0.03);text-align:center;color:var(--muted);font-size:0.9rem}
-
-    /* PWA Install Button */
-    .install-btn{margin-top:12px;text-align:center}
-    .install-btn button{background:var(--success);padding:10px 16px;}
+    h1 {
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .card {
+      background: #1c1c1c;
+      border-radius: 14px;
+      overflow: hidden;
+      text-decoration: none;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    }
+    .card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+    .card .content {
+      padding: 14px;
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    .card p {
+      margin: 0;
+      color: #bbb;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-<div class="app">
-  <div class="header">
-    <div class="brand">
-      <div class="logo"><i class="fas fa-broadcast-tower"></i></div>
-      <div>
-        <div class="title">Croz IPTV Pro</div>
-        <div class="sub">Offline M3U Player • Yerel & Native Destek</div>
-      </div>
-    </div>
+  <h1>🎬 Video Sitem</h1>
+  <div class="grid" id="videoList"></div>
 
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button id="themeToggle" class="smallbtn secondary" title="Tema değiştir"><i class="fas fa-adjust"></i></button>
-      <button id="installBtn" class="smallbtn secondary" style="display:none"><i class="fas fa-mobile-alt"></i> Uygulama Yükle</button>
-      <button id="exportBtn" class="smallbtn" title="Playlist dışa aktar"><i class="fas fa-file-export"></i> Dışa Aktar</button>
-    </div>
-  </div>
+  <script>
+    const videos = [
+      {
+        id: 1,
+        title: "Örnek Video 1",
+        description: "Tanıtım videosu",
+        thumbnail: "https://picsum.photos/400/220?1",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4"
+      },
+      {
+        id: 2,
+        title: "Örnek Video 2",
+        description: "İkinci video",
+        thumbnail: "https://picsum.photos/400/220?2",
+        videoUrl: "https://www.w3schools.com/html/movie.mp4"
+      }
+    ];
 
-  <!-- controls -->
-  <div class="controls">
-    <div class="card">
-      <div style="font-weight:700;margin-bottom:8px">M3U Yükle</div>
-      <div class="upload-row">
-        <label class="file-label" for="fileInput"><i class="fas fa-file-upload"></i> Dosyadan Yükle</label>
-        <input id="fileInput" type="file" accept=".m3u,.m3u8,.txt" style="display:none">
-      </div>
-      <div style="margin-top:10px">
-        <div style="font-weight:600;margin-bottom:6px">veya M3U İçeriğini Yapıştır</div>
-        <textarea id="pasteArea" class="input" rows="5" placeholder="#EXTM3U ile başlayan içeriği buraya yapıştır..."></textarea>
-      </div>
-      <div class="tools">
-        <button id="parseBtn" class="smallbtn"><i class="fas fa-magnifying-glass"></i> Ayrıştır</button>
-        <button id="clearBtn" class="smallbtn secondary"><i class="fas fa-trash"></i> Temizle</button>
-      </div>
-      <div style="margin-top:8px;color:var(--muted);font-size:0.85rem">
-        <i class="fas fa-info-circle"></i> Web CORS nedeniyle URL çekemez. Dosya yükle veya içeriği yapıştır.
-      </div>
-    </div>
+    const list = document.getElementById("videoList");
 
-    <div class="card">
-      <div style="font-weight:700">Filtre & Ara</div>
-      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-        <input id="search" class="input" placeholder="Kanal ara..." />
-        <select id="category" class="input" style="min-width:140px">
+    videos.forEach(video => {
+      const a = document.createElement("a");
+      a.className = "card";
+      a.href = `player.html?video=${encodeURIComponent(video.videoUrl)}&title=${encodeURIComponent(video.title)}`;
+
+      a.innerHTML = `
+        <img src="${video.thumbnail}" alt="${video.title}">
+        <div class="content">
+          <h3>${video.title}</h3>
+          <p>${video.description}</p>
+        </div>
+      `;
+      list.appendChild(a);
+    });
+  </script>
+</body>
+</html        <select id="category" class="input" style="min-width:140px">
           <option value="">Tüm Kategoriler</option>
         </select>
       </div>
