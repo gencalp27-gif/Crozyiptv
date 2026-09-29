@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IHS MOBİL TV</title>
+  <title>IHS TV - PRO</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -24,182 +24,192 @@
       color: var(--text-main);
       font-family: system-ui, -apple-system, sans-serif; 
       height: 100vh; 
-      display: flex;
-      flex-direction: column;
       overflow: hidden; 
     }
 
-    /* 1. ÜST SABİT OYNATICI VE BİLGİ ALANI */
+    /* PC İÇİN ÖZEL SCROLLBAR (KAYDIRMA ÇUBUĞU) */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-main); }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--ihs-red); }
+
+    /* ANA EKRAN DÜZENİ */
+    .app-wrapper {
+      display: flex;
+      height: 100vh;
+      flex-direction: column; /* Mobilde alt alta */
+    }
+
+    /* 1. OYNATICI ALANI (SOL/ÜST) */
     .player-section {
-      flex-shrink: 0;
       background: var(--bg-main);
       z-index: 10;
-      border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
     }
 
     .video-container { 
       width: 100%; 
       background: #000; 
-      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    
+    /* PC'de tam sığması, mobilde 16:9 olması için ayar */
     .video-container video { 
       width: 100%; 
       height: 100%;
-      object-fit: cover; 
+      object-fit: contain; /* Masaüstünde haber alt yazılarının kesilmesini engeller */
       display: block;
     }
 
-    /* Şu An Oynatılan Kanal Bilgisi (Gerçekçi ve Temiz) */
+    /* Aktif Kanal Bilgisi (Canlı İbaresi) */
     .now-playing-bar {
       display: none; 
-      padding: 12px 15px;
+      padding: 15px 20px;
       align-items: center;
-      gap: 12px;
+      gap: 15px;
       background: #0a0a0a;
+      border-bottom: 1px solid var(--border-color);
     }
     .now-playing-logo {
-      width: 38px; height: 38px;
-      border-radius: 6px;
+      width: 45px; height: 45px;
+      border-radius: 8px;
       background: #fff;
-      padding: 2px;
+      padding: 3px;
       object-fit: contain;
     }
     .now-playing-info { flex: 1; }
-    .now-playing-title { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+    .now-playing-title { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
     .live-badge { 
-      font-size: 11px; font-weight: bold; color: var(--ihs-red); 
-      display: flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: bold; color: var(--ihs-red); 
+      display: flex; align-items: center; gap: 5px;
     }
-    .live-dot { width: 6px; height: 6px; background: var(--ihs-red); border-radius: 50%; animation: pulse 1.5s infinite; }
+    .live-dot { width: 8px; height: 8px; background: var(--ihs-red); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-    /* Arama Kutusu */
-    .search-container {
-      padding: 10px 15px;
-      background: var(--bg-main);
-    }
-    .search-box { 
-      display: flex; align-items: center; 
-      background: var(--bg-card); border: 1px solid var(--border-color); 
-      border-radius: 8px; padding: 10px 12px; 
-    }
-    .search-box input { background: transparent; border: none; color: white; width: 100%; margin-left: 10px; font-size: 14px; }
 
-    /* 2. KAYDIRILABİLİR ALT ALAN (Kategoriler ve Kanallar) */
-    .content-section {
-      flex: 1;
+    /* 2. KANAL LİSTESİ VE MENÜ ALANI (SAĞ/ALT) */
+    .sidebar-section {
       display: flex;
       flex-direction: column;
+      background: var(--bg-main);
       overflow: hidden;
     }
 
-    /* Yatay Kaydırılabilir Kategoriler (Mobil TV Tarzı) */
+    /* Arama Kutusu */
+    .search-container { padding: 15px; background: var(--bg-main); }
+    .search-box { 
+      display: flex; align-items: center; 
+      background: var(--bg-card); border: 1px solid var(--border-color); 
+      border-radius: 8px; padding: 10px 15px; 
+    }
+    .search-box input { background: transparent; border: none; color: white; width: 100%; margin-left: 10px; font-size: 14px; }
+    .search-box:focus-within { border-color: var(--ihs-red); }
+
+    /* Kategoriler */
     .categories-bar {
-      display: flex;
-      overflow-x: auto;
-      padding: 5px 15px 10px 15px;
-      gap: 8px;
+      display: flex; overflow-x: auto; padding: 0 15px 15px 15px; gap: 8px;
       border-bottom: 1px solid var(--border-color);
     }
-    .categories-bar::-webkit-scrollbar { display: none; }
     .cat-btn {
-      background: var(--bg-card);
-      color: var(--text-muted);
-      border: 1px solid var(--border-color);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 13px;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: 0.2s;
+      background: var(--bg-card); color: var(--text-muted);
+      border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px;
+      font-weight: 600; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s;
     }
-    .cat-btn.active {
-      background: var(--ihs-red);
-      color: #fff;
-      border-color: var(--ihs-red);
-    }
+    .cat-btn:hover { color: #fff; border-color: #555; }
+    .cat-btn.active { background: var(--ihs-red); color: #fff; border-color: var(--ihs-red); }
 
-    /* Dikey Kanal Listesi (Telefonda okuması en kolay yapı) */
+    /* Dikey Kanal Listesi */
     .channel-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      flex: 1; overflow-y: auto; padding: 10px 15px;
+      display: flex; flex-direction: column; gap: 8px;
     }
     .channel-row {
-      display: flex;
-      align-items: center;
-      background: var(--bg-card);
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: 0.2s;
+      display: flex; align-items: center; background: var(--bg-card);
+      padding: 10px 15px; border-radius: 10px; border: 1px solid transparent;
+      cursor: pointer; transition: 0.2s;
     }
-    .channel-row:active {
-      background: rgba(229, 9, 20, 0.1);
-      border-color: var(--ihs-red);
-      transform: scale(0.98);
-    }
+    .channel-row:hover { background: #1a1a1a; border-color: #333; }
+    .channel-row:active { background: rgba(229, 9, 20, 0.15); border-color: var(--ihs-red); transform: scale(0.98); }
     .channel-row img {
-      width: 45px; height: 45px;
-      object-fit: contain;
-      background: #fff;
-      border-radius: 6px;
-      padding: 3px;
-      margin-right: 15px;
+      width: 45px; height: 45px; object-fit: contain; background: #fff;
+      border-radius: 6px; padding: 3px; margin-right: 15px;
     }
-    .channel-row-name {
-      flex: 1;
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--text-main);
+    .channel-row-name { flex: 1; font-weight: 600; font-size: 14px; color: var(--text-main); }
+    .channel-row i { color: var(--text-muted); font-size: 14px; transition: 0.2s; }
+    .channel-row:hover i { color: var(--ihs-red); }
+
+
+    /* =========================================
+       RESPONSIVE (PC VE MOBİL AYRIMI) 
+       ========================================= */
+       
+    /* MOBİL GÖRÜNÜM (Genişlik 899px'den küçükse) */
+    @media (max-width: 899px) {
+      .player-section { flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+      .video-container { aspect-ratio: 16/9; }
+      .sidebar-section { flex: 1; }
     }
-    .channel-row i {
-      color: var(--text-muted);
-      font-size: 14px;
+
+    /* MASAÜSTÜ / PC GÖRÜNÜMÜ (Genişlik 900px ve üzeriyse) */
+    @media (min-width: 900px) {
+      .app-wrapper { flex-direction: row; }
+      
+      /* Sol Taraf: Video Alanı Genişler */
+      .player-section { 
+        flex: 1; /* Kalan tüm boşluğu doldur */
+        border-right: 1px solid var(--border-color); 
+        box-shadow: none;
+      }
+      .video-container { flex: 1; overflow: hidden; background: #000; }
+      
+      /* Sağ Taraf: Yan Menü (Sidebar) Sabit Genişlik Alır */
+      .sidebar-section { 
+        width: 400px; /* PC'de menü genişliği */
+        flex-shrink: 0; 
+      }
+      .now-playing-bar { border-bottom: none; border-top: 1px solid var(--border-color); }
     }
   </style>
 </head>
 <body>
 
-  <!-- SABİT OYNATICI ALANI -->
-  <div class="player-section">
-    <div class="video-container">
-      <video id="video-player" controls autoplay playsinline></video>
-    </div>
+  <div class="app-wrapper">
     
-    <!-- Aktif Kanal Bilgisi (Sahte EPG Yok, Sadece Canlı İbaresi) -->
-    <div class="now-playing-bar" id="now-playing-bar">
-      <img id="np-logo" class="now-playing-logo" src="" alt="logo">
-      <div class="now-playing-info">
-        <div class="now-playing-title" id="np-title">-</div>
-        <div class="live-badge">
-          <div class="live-dot"></div> CANLI
+    <!-- OYNATICI ALANI (Mobilde üstte, PC'de solda) -->
+    <div class="player-section">
+      <div class="video-container">
+        <video id="video-player" controls autoplay playsinline></video>
+      </div>
+      
+      <div class="now-playing-bar" id="now-playing-bar">
+        <img id="np-logo" class="now-playing-logo" src="" alt="logo">
+        <div class="now-playing-info">
+          <div class="now-playing-title" id="np-title">-</div>
+          <div class="live-badge">
+            <div class="live-dot"></div> CANLI YAYIN
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Arama -->
-    <div class="search-container">
-      <div class="search-box">
-        <i class="fas fa-search" style="color: var(--text-muted);"></i>
-        <input type="text" id="search-input" placeholder="Kanal ara..." onkeyup="searchChannels()">
+    <!-- KANAL LİSTESİ VE MENÜ (Mobilde altta, PC'de sağda) -->
+    <div class="sidebar-section">
+      
+      <div class="search-container">
+        <div class="search-box">
+          <i class="fas fa-search" style="color: var(--text-muted);"></i>
+          <input type="text" id="search-input" placeholder="Kanal ara..." onkeyup="searchChannels()">
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- KAYDIRILABİLİR KANAL VE KATEGORİ ALANI -->
-  <div class="content-section">
-    <!-- Yatay Kategoriler -->
-    <div class="categories-bar" id="categories-bar"></div>
-    
-    <!-- Dikey Kanal Listesi -->
-    <div class="channel-list" id="channel-list"></div>
+      <div class="categories-bar" id="categories-bar"></div>
+      <div class="channel-list" id="channel-list"></div>
+      
+    </div>
+
   </div>
 
 
@@ -303,8 +313,8 @@ function renderCategories() {
     btn.innerText = cat;
     btn.onclick = () => {
       currentCategory = cat;
-      document.getElementById('search-input').value = ''; // Arama kutusunu sıfırla
-      renderCategories(); // Aktif butonu güncellemek için
+      document.getElementById('search-input').value = ''; 
+      renderCategories(); 
       renderChannels();
     };
     bar.appendChild(btn);
@@ -340,7 +350,6 @@ function renderChannels(searchQuery = '') {
 }
 
 function playStream(channelObj, url) {
-  // Aktif Kanal Bilgisini Göster
   document.getElementById('now-playing-bar').style.display = 'flex';
   document.getElementById('np-logo').src = channelObj.logo;
   document.getElementById('np-title').innerText = channelObj.name;
