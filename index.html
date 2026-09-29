@@ -1,715 +1,468 @@
 <!DOCTYPE html>
-<html lang="tr" translate="no">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IHS TV - ULTIMATE</title>
+  <title>IHS PRO PLAYER</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #000000; 
-      --bg-card: #121212;
-      --ihs-red: #e50914;
-      --text-main: #ffffff; 
-      --text-muted: #888888;
-      --border-color: #262626;
+      --bg-main: #09090b; --panel-bg: rgba(24, 24, 27, 0.7);
+      --ihs-red: #ff1e27; --ihs-dark-red: #8b0000;
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --text-main: #ededed; --text-muted: #a1a1aa;
     }
-    
-    * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
-    
+    * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
     body {
       background-color: var(--bg-main); color: var(--text-main);
-      font-family: system-ui, -apple-system, sans-serif; 
-      height: 100dvh; overflow: hidden; 
+      font-family: 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden;
     }
-
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg-main); }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--ihs-red); }
-
-    /* GÜVENLİK VE BAN EKRANI */
-    .security-screen, .ban-screen {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-      background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; text-align: center;
+    .glass-panel {
+      background: var(--panel-bg); backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
     }
-    .ban-screen { display: none; background: #050505; }
-    .security-logo {
-      width: 70px; height: 70px; background: linear-gradient(135deg, #ff4b4b, #8b0000);
-      transform: rotate(45deg); box-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
-      border: 2px solid #ff7a7a; margin-bottom: 40px;
-    }
-    .security-title { font-size: 22px; font-weight: 900; letter-spacing: 3px; margin-bottom: 25px; }
-    .password-input {
-      background: var(--bg-card); border: 1px solid #333; border-radius: 8px;
-      color: white; padding: 12px 20px; font-size: 16px; width: 250px; text-align: center;
-      margin-bottom: 15px; letter-spacing: 2px;
-    }
-    .password-input:focus { border-color: var(--ihs-red); }
-    .login-btn {
-      background: var(--ihs-red); color: white; border: none; padding: 12px 40px;
-      border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;
-    }
-    .login-btn:active { transform: scale(0.95); }
-    .error-msg { color: var(--ihs-red); font-size: 13px; font-weight: bold; margin-top: 15px; display: none; }
-    .ban-screen i { font-size: 70px; color: var(--ihs-red); margin-bottom: 20px; }
-    .ban-screen h1 { color: #fff; font-size: 24px; letter-spacing: 2px; margin-bottom: 10px;}
-    .ban-screen p { color: var(--text-muted); font-size: 14px; }
-
-    /* ANA UYGULAMA */
-    .app-wrapper { display: none; height: 100dvh; flex-direction: column; }
-
-    /* OYNATICI ALANI */
-    .player-section { background: var(--bg-main); z-index: 10; display: flex; flex-direction: column; position: relative;}
+    .ihs-pro-dashboard { display: flex; flex-direction: column; height: 100vh; }
     
-    .video-container { width: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .brand-container { padding: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 1px solid var(--glass-border); }
+    .crystal-logo {
+      width: 25px; height: 25px; background: linear-gradient(135deg, #ff4b4b, var(--ihs-dark-red));
+      transform: rotate(45deg); box-shadow: 0 0 15px rgba(255, 30, 39, 0.5); border: 1px solid #ff7a7a;
+    }
+    .brand-container h2 { font-size: 18px; font-weight: 800; letter-spacing: 2px; color: var(--ihs-red); }
     
-    .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer; }
-    video::-webkit-media-controls { display: none !important; }
-    video::-webkit-media-controls-enclosure { display: none !important; }
-
-    .video-container.pseudo-fullscreen {
-      position: fixed !important;
-      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-      width: 100vw !important; height: 100dvh !important;
-      z-index: 999999 !important;
-      background: #000 !important;
-    }
-
-    /* TEKNİK İSTATİSTİK PANELİ */
-    .stats-panel {
-      position: absolute; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.85);
-      border: 1px solid #333; border-radius: 8px; padding: 12px 15px; z-index: 22;
-      display: none; flex-direction: column; gap: 8px; backdrop-filter: blur(5px);
-      min-width: 180px; box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-    }
-    .stats-header { font-size: 11px; font-weight: bold; color: var(--text-muted); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 5px; display: flex; justify-content: space-between;}
-    .stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-    .stat-label { color: #aaa; }
-    .stat-value { font-family: monospace; font-weight: bold; color: #4CAF50; letter-spacing: 0.5px;}
-
-    /* TV Zapping OSD */
-    .tv-osd {
-      position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8);
-      border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px 20px;
-      display: flex; align-items: center; gap: 15px; z-index: 30;
-      opacity: 0; transform: translateX(-20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
-    }
-    .tv-osd.show { opacity: 1; transform: translateX(0); }
-    .osd-logo { width: 50px; height: 50px; background: #fff; padding: 3px; border-radius: 8px; object-fit: contain; }
-    .osd-info h2 { font-size: 22px; margin: 0 0 5px 0; color: #fff; text-shadow: 2px 2px 4px #000;}
-    .osd-info span { font-size: 12px; font-weight: bold; color: var(--ihs-red); background: rgba(229,9,20,0.1); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(229,9,20,0.3); }
-
-    /* VİDEO İÇİ KANAL MENÜSÜ */
-    .video-channel-menu {
-      position: absolute; top: 0; right: -320px; width: 300px; height: 100%;
-      background: rgba(10, 10, 10, 0.95); z-index: 25; padding: 15px;
-      display: flex; flex-direction: column; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-left: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);
-    }
-    .video-channel-menu.open { right: 0; }
-    .vcm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-    .vcm-header h3 { font-size: 16px; margin: 0; color: #fff; display: flex; align-items: center; gap: 10px;}
-    .vcm-close { background: none; border: none; color: #fff; cursor: pointer; font-size: 20px; transition: 0.2s; }
-    .vcm-close:hover { color: var(--ihs-red); transform: scale(1.1); }
+    .top-bar { padding: 10px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+    .search-box { display: flex; align-items: center; flex: 1; background: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 8px; padding: 10px; }
+    .search-box input { background: transparent; border: none; color: white; width: 100%; margin-left: 10px; font-size: 14px; }
     
-    .vcm-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 5px; }
-    .vcm-list::-webkit-scrollbar { width: 4px; }
-    .vcm-list .channel-row { background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 8px; padding: 8px 10px; cursor: pointer; }
-    .vcm-list .channel-row:hover { background: rgba(255,255,255,0.1); border-color: #444; }
-    .vcm-list .channel-row.active-channel { background: rgba(229, 9, 20, 0.25); border-left: 3px solid var(--ihs-red); border-radius: 4px; }
-    .vcm-list img { width: 35px; height: 35px; object-fit: contain; margin-right: 12px; border-radius: 4px; background: #fff; padding: 2px; }
-    .vcm-list .channel-row-name { font-size: 13px; font-weight: 600; color: #ddd; }
-
-    /* Video Hata ve Yükleme */
-    .loading-spinner {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2);
-      border-top-color: var(--ihs-red); border-radius: 50%;
-      animation: spin 1s linear infinite; z-index: 15; display: none;
-    }
-    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
     
-    .error-overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85); z-index: 16; display: none; 
-      flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    /* VİDEO SABİTLEME ALANI */
+    .player-wrapper { 
+      padding: 10px; 
+      position: sticky; 
+      top: 0; 
+      z-index: 10; 
+      background-color: var(--bg-main);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.7); 
     }
-    .error-overlay i { font-size: 45px; color: var(--ihs-red); margin-bottom: 15px; }
-    .error-overlay p { color: #fff; font-weight: bold; font-size: 16px; margin-bottom: 8px;}
-    .error-overlay span { color: var(--text-muted); font-size: 13px; }
-
-    /* Özel Kontroller */
-    .custom-controls {
-      position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-      display: flex; align-items: center; justify-content: space-between; padding: 25px 20px 15px 20px; z-index: 20; opacity: 1; transition: opacity 0.4s ease;
-    }
-    .video-container.idle .custom-controls { opacity: 0; pointer-events: none; }
-    .video-container.menu-open .custom-controls { opacity: 1; pointer-events: auto; }
-
-    .controls-left, .controls-right { display: flex; align-items: center; gap: 20px; }
-    .control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-    .control-btn:hover { color: var(--ihs-red); transform: scale(1.1); }
-    .control-btn.play-btn { font-size: 24px; margin: 0 5px; }
-
-    .now-playing-bar { display: none; padding: 10px 15px; align-items: center; gap: 12px; background: #0a0a0a; border-bottom: 1px solid var(--border-color); }
-    .now-playing-logo { width: 35px; height: 35px; border-radius: 6px; background: #fff; padding: 2px; object-fit: contain; }
-    .now-playing-info { flex: 1; }
-    .now-playing-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
-    .live-badge { font-size: 10px; font-weight: bold; color: var(--ihs-red); display: flex; align-items: center; gap: 4px; }
-    .live-dot { width: 6px; height: 6px; background: var(--ihs-red); border-radius: 50%; animation: pulse 1.5s infinite; }
-
-    /* YAN MENÜ VE LİSTE */
-    .sidebar-section { display: flex; flex-direction: column; background: var(--bg-main); overflow: hidden; flex:1;}
-    .search-container { padding: 10px 15px; background: var(--bg-main); }
-    .search-box { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px; }
-    .search-box input { background: transparent; border: none; color: white; width: 100%; margin-left: 10px; font-size: 13px; }
-
-    .categories-bar { display: flex; overflow-x: auto; padding: 0 15px 10px 15px; gap: 6px; border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; }
-    .cat-btn { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 15px; font-weight: 600; font-size: 12px; white-space: nowrap; cursor: pointer; }
-    .cat-btn.active { background: var(--ihs-red); color: #fff; border-color: var(--ihs-red); }
-    .cat-btn-fav { color: #ffeb3b; border-color: #333; }
-    .cat-btn-fav.active { background: #ffeb3b; color: #000; border-color: #ffeb3b; }
-
-    .channel-list { flex: 1; overflow-y: auto; padding: 5px 10px; display: flex; flex-direction: column; gap: 4px; -webkit-overflow-scrolling: touch; position: relative;}
+    .video-container { position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #222; }
+    .video-container video { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
     
-    /* Film Yükleniyor Uyarısı */
-    .loading-external { text-align: center; padding: 15px; color: var(--ihs-red); font-size: 12px; font-weight: bold; display: none; }
+    .nav-bar { display: flex; align-items: center; padding: 10px 15px; gap: 10px; background: var(--panel-bg); border-bottom: 1px solid #222; border-top: 1px solid #222; }
+    .back-btn { background: #222; color: #fff; border: 1px solid #333; padding: 6px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; }
+    .back-btn:hover { background: rgba(255, 30, 39, 0.2); border-color: var(--ihs-red); }
+    .nav-title { font-weight: bold; font-size: 14px; color: var(--ihs-red); flex: 1; text-align: right;}
     
-    .channel-row { display: flex; align-items: center; background: transparent; padding: 6px 10px; border-radius: 6px; cursor: pointer; transition: 0.1s; }
-    .channel-row.active-channel { background: rgba(229, 9, 20, 0.2); border-left: 3px solid var(--ihs-red); }
-    .channel-row:hover { background: rgba(255,255,255,0.05); }
-    .channel-row img { width: 32px; height: 32px; object-fit: contain; background: #fff; border-radius: 4px; padding: 2px; margin-right: 12px; }
-    .channel-row-name { flex: 1; font-weight: 500; font-size: 13px; color: #ddd; }
-    .fav-icon { font-size: 15px; color: #333; padding: 8px; }
-    .fav-icon.active { color: var(--ihs-red); }
+    .folder-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
+    .folder-card { background: var(--panel-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 25px 15px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .folder-card:active { transform: scale(0.95); border-color: var(--ihs-red); background: rgba(255,30,39,0.1); }
+    .folder-card i { font-size: 35px; color: var(--ihs-red); margin-bottom: 12px; }
+    .folder-name { font-weight: bold; font-size: 13px; color: white; }
+    .folder-count { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
 
-    @media (max-width: 899px) {
-      .player-section { flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-bottom: 1px solid #222;}
-      .video-container { aspect-ratio: 16/9; }
-      .tv-osd { top: 10px; left: 10px; padding: 10px; }
-      .osd-logo { width: 35px; height: 35px; }
-      .osd-info h2 { font-size: 16px; }
-      .video-channel-menu { width: 240px; right: -260px; }
-    }
-    @media (min-width: 900px) {
-      .app-wrapper { flex-direction: row; }
-      .player-section { flex: 1; border-right: 1px solid var(--border-color); }
-      .video-container { flex: 1; overflow: hidden; background: #000; }
-      .sidebar-section { width: 350px; flex-shrink: 0; }
-    }
+    .channels-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+    .channel-card { background: var(--panel-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+    .channel-card:active { transform: scale(0.95); border-color: var(--ihs-red); }
+    .channel-card img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 50%; background: #fff; padding: 5px; }
+    .channel-name { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   </style>
 </head>
 <body>
 
-  <div class="ban-screen" id="ban-screen">
-    <i class="fas fa-ban"></i>
-    <h1>ERİŞİM ENGELLENDİ</h1>
-    <p>Güvenlik ihlali sebebiyle bu cihaz engellendi.</p>
-  </div>
-  
-  <div class="security-screen" id="security-screen">
-    <div class="security-logo"></div>
-    <div class="security-title">IHS PRIVATE</div>
-    <input type="password" id="pass-input" class="password-input" placeholder="Şifrenizi Girin">
-    <button class="login-btn" onclick="checkPassword()">GİRİŞ YAP</button>
-    <div class="error-msg" id="error-msg"></div>
+<div class="ihs-pro-dashboard">
+  <div class="brand-container glass-panel">
+    <div class="crystal-logo"></div>
+    <h2>IHS PRO</h2>
   </div>
 
-  <div class="app-wrapper" id="app-wrapper">
-    <div class="player-section">
-      <div class="video-container" id="video-container">
-        
-        <div class="stats-panel" id="stats-panel">
-          <div class="stats-header"><span>YAYIN BİLGİSİ</span> <i class="fas fa-satellite-dish" style="color:var(--ihs-red)"></i></div>
-          <div class="stat-row"><span class="stat-label">Çözünürlük:</span><span class="stat-value" id="stat-res">Bekleniyor</span></div>
-          <div class="stat-row"><span class="stat-label">Kare Hızı (FPS):</span><span class="stat-value" id="stat-fps">Bekleniyor</span></div>
-          <div class="stat-row"><span class="stat-label">Bit Hızı:</span><span class="stat-value" id="stat-bit">Bekleniyor</span></div>
-        </div>
+  <header class="top-bar glass-panel">
+    <div class="search-box">
+      <i class="fas fa-search" style="color: var(--text-muted);"></i>
+      <input type="text" id="search-input" placeholder="Kanal ara..." onkeyup="searchChannels()">
+    </div>
+  </header>
 
-        <div class="video-channel-menu" id="video-channel-menu">
-          <div class="vcm-header">
-            <h3><i class="fas fa-list-ul"></i> İçerikler</h3>
-            <button class="vcm-close" id="vcm-close-btn"><i class="fas fa-times"></i></button>
-          </div>
-          <div class="vcm-list" id="vcm-list"></div>
-        </div>
-
-        <div class="tv-osd" id="tv-osd">
-          <img id="osd-logo" class="osd-logo" src="" alt="logo">
-          <div class="osd-info">
-            <h2 id="osd-title">Kanal</h2>
-            <span><i class="fas fa-circle" style="font-size: 8px;"></i> CANLI</span>
-          </div>
-        </div>
-
-        <div class="loading-spinner" id="loading-spinner"></div>
-        <div class="error-overlay" id="error-overlay">
-          <i class="fas fa-exclamation-triangle"></i>
-          <p>Bağlantı Koptu</p>
-          <span id="error-countdown">Sonraki içeriğe geçiliyor... (3)</span>
-        </div>
-
-        <video id="video-player" playsinline webkit-playsinline disablePictureInPicture></video>
-        
-        <div class="custom-controls" id="custom-controls">
-          <div class="controls-left">
-            <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
-            <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
-            <button class="control-btn" id="channel-menu-btn" title="Kanal Listesi" style="margin-left: 10px;"><i class="fas fa-list-ul"></i></button>
-          </div>
-          <div class="controls-right">
-            <button class="control-btn" id="stats-btn" title="Yayın İstatistikleri"><i class="fas fa-info-circle"></i></button>
-            <button class="control-btn" id="pip-btn" title="Pencere Modu"><i class="fas fa-clone"></i></button>
-            <button class="control-btn" id="fullscreen-btn" title="Tam Ekran"><i class="fas fa-expand"></i></button>
-          </div>
-        </div>
-      </div>
-      
-      <div class="now-playing-bar" id="now-playing-bar">
-        <img id="np-logo" class="now-playing-logo" src="" alt="logo">
-        <div class="now-playing-info">
-          <div class="now-playing-title" id="np-title">-</div>
-          <div class="live-badge"><div class="live-dot"></div> CANLI</div>
-        </div>
+  <main class="main-content">
+    
+    <div class="player-wrapper">
+      <div class="video-container">
+        <video id="video-player" controls autoplay playsinline></video>
       </div>
     </div>
-
-    <div class="sidebar-section">
-      <div class="search-container">
-        <div class="search-box">
-          <i class="fas fa-search" style="color: var(--text-muted);"></i>
-          <input type="text" id="search-input" placeholder="İçerik ara..." oninput="searchChannels()">
-        </div>
-      </div>
-      <div class="categories-bar" id="categories-bar"></div>
-      
-      <div class="channel-list" id="channel-list">
-        <!-- Film Yükleniyor Uyarı Barı -->
-        <div id="loading-external" class="loading-external">
-          <i class="fas fa-spinner fa-spin"></i> Dış Kaynak (Filmler) Yükleniyor...
-        </div>
-        <div id="channels-container"></div>
-      </div>
+    
+    <div class="nav-bar">
+      <button class="back-btn" id="back-btn" onclick="showFolders()"><i class="fas fa-arrow-left"></i> Geri</button>
+      <div class="nav-title" id="nav-title">Kategoriler</div>
     </div>
-  </div>
+
+    <div class="folder-grid" id="folder-grid"></div>
+    <div class="channels-grid" id="channels-grid" style="display: none;"></div>
+  </main>
+</div>
+
+<!-- KANAL LİSTESİ (GÜVENLİ ALAN) -->
+<script type="text/template" id="m3u-data">
+#EXTM3U
+#EXTINF:-1 tvg-logo="https://i.imgur.com/PexhKwp.png" group-title="Turkey",4U TV (720p)
+https://hls.4utv.live/hls/stream.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/8FO41es.png" group-title="Turkey",24 TV (720p)
+https://turkmedya-live.ercdn.net/tv24/tv24.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/agn47sQ.png" group-title="Turkey",360 (720p) [Not 24/7]
+https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
+#EXTINF:-1 tvg-logo="https://iatv.tmgrup.com.tr/site/v2/a2tv/i/a2tv-logo.png" group-title="Turkey",A2TV (1080p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/7c/Ahaber_Logo.png" group-title="Turkey",A Haber (1080p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/ZhkZzLf.png" group-title="Turkey",A Spor SD (1080p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/mgDCKiy.png" group-title="Turkey",Aksu TV (720p)
+https://live.artidijitalmedya.com/artidijital_aksutv/aksutv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/QEHKGnG.png" group-title="Turkey",Al-Zahra TV Turkic (720p) [Not 24/7]
+https://live.al-zahratv.com/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/a3w9eFe.png" group-title="Turkey",Alanya Posta TV (1080p)
+https://api-tv3.yayin.com.tr/postatv/postatv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/GgEeTNr.png" group-title="Turkey",Almahriah TV (576p)
+https://starmenajo.com/hls/almahriah/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/XaJ7fp6.png" group-title="Turkey",Altas TV (1080p)
+https://edge1.socialsmart.tv/altastv/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.anadolunettv.com/d/r/logo.png" group-title="Turkey",Anadolu Net TV (1080p)
+https://live.artidijitalmedya.com/artidijital_anadolunet/anadolunet/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/JsDCyWG.png" group-title="Turkey",Aras TV (576p) [Not 24/7]
+http://1.rtmp.org/tv217/yayin.stream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://asset.artidijitalmedya.com/image/188x188/channels/v1/logo_13.png" group-title="Turkey",AS TV (900p)
+https://live.artidijitalmedya.com/artidijital_astv/astv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/HyVUwFC.png" group-title="Turkey",ATV (Turkiye) (1080p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/bUwarR0.png" group-title="Turkey",ATV Alanya (1080p)
+https://cdn-alanyatv.yayin.com.tr/alanyatv/alanyatv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://birtv.tv/assets/upload/637f83951df60.png" group-title="Turkey",Bir TV (720p)
+https://edge.taksimbilisim.com/birtv/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/U3qlEAp.png" group-title="Turkey",BRTV (Turkiye) (720p) [Geo-blocked]
+https://live.artidijitalmedya.com/artidijital_brtv/brtv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/ndupxwu.png" group-title="Turkey",Cay TV (720p)
+https://edge1.socialsmart.tv/caytv/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/CLzP4vL.png" group-title="Turkey",Ciftci TV (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_ciftcitv/ciftcitv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://s.cnbce.com/dist/images/logo-nav.png" group-title="Turkey",CNBC-e
+https://hnpsechtsc.turknet.ercdn.net/xpnvudnlsv/cnbc-e/cnbc-e.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Mm8hdfx.png" group-title="Turkey",Deniz Postasi TV (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_denizpostasi/denizpostasi/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/VZhag2x.png" group-title="Turkey",DHA (720p) [Not 24/7]
+https://603c568fccdf5.streamlock.net/live/dhaweb1_C5efC/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Diyanet_TV_logo.svg/960px-Diyanet_TV_logo.svg.png" group-title="Turkey",Diyanet TV (1080p)
+https://eustr73.mediatriple.net/videoonlylive/mtikoimxnztxlive/broadcast_5e3bf95a47e07.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/qWkHjRA.png" group-title="Turkey",Diyar TV (720p)
+https://live.artidijitalmedya.com/artidijital_diyartv/diyartv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://dosttv.com/wp-content/uploads/2022/02/dost_logo.png" group-title="Turkey",Dost TV (576p)
+https://dost.stream.emsal.im/tv/live.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/vJ8VaZi.png" group-title="Turkey",Dream Turk (720p)
+https://live.duhnet.tv/S2/HLS_LIVE/dreamturknp/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/rhU6j9I.png" group-title="Turkey",Edessa TV (1080p)
+https://canli.edessatv.com/hls/stream.m3u8
+#EXTINF:-1 tvg-logo="https://www.dsmart.com.tr/epg/images/0x60/5ffc18c6cfef0b15933a8b65" group-title="Turkey",Ekoturk (720p)
+https://cdn.ekoturk.net/hls/master.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/8vmfZb5.png" group-title="Turkey",Elsharq TV (1080p) [Not 24/7]
+https://mn-nl.mncdn.com/elsharq_live/live/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/VDGEPrD.png" group-title="Turkey",ERTV (1080p) [Geo-blocked]
+https://live.artidijitalmedya.com/artidijital_ertv_new/ertv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/HF7N4Li.png" group-title="Turkey",Erzurum Web TV (720p)
+https://win29.yayin.com.tr/erzurumwebtv/erzurumwebtv/iptvdelisi.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/epAEBrp.png" group-title="Turkey",ES TV (720p)
+https://live.artidijitalmedya.com/artidijital_estv/estv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://yt3.googleusercontent.com/ytc/AIdro_msPtG6zfPKIJIIdvG4dehXLoVoXcHM2-2HL9YxsNYzGQ=s512-c-k-c0x00ffffff-no-rj" group-title="Turkey",ETV Kayseri (720p)
+https://live.artidijitalmedya.com/artidijital_etv/etv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.ibb.co/QKXtdkz/sOd3INg.png" group-title="Turkey",ETV Manisa (1080p) [Not 24/7]
+https://edge1.socialsmart.tv/manisaetv/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/x9kHsXo.png" group-title="Turkey",Euro D (720p)
+https://live.duhnet.tv/S2/HLS_LIVE/eurodnp/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/qBVqtYd.png" group-title="Turkey",FB TV
+http://1hskrdto.rocketcdn.com/fenerbahcetv.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.ibb.co/wBwmB1T/iY0osc7.png" group-title="Turkey",Finans Turk TV (720p)
+https://yayin30.haber100.com/live/finansturk/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/ZbUSlOC.png" group-title="Turkey",Fortuna TV (720p)
+https://edge1.socialsmart.tv/ftvturk/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/JT5pp3Y.png" group-title="Turkey",Guneydogu TV (720p)
+https://edge1.socialsmart.tv/gtv/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/GZT_logo.svg/960px-GZT_logo.svg.png" group-title="Turkey",GZT (1080p)
+https://gzttv-live.lg.mncdn.com/gzttv/gzttv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/2a2XUKl.png" group-title="Turkey",Haber61 TV (720p) [Not 24/7]
+https://cdn-haber61tv.yayin.com.tr/haber61tv/smil:haber61tv.smil/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/xM0HA30.png" group-title="Turkey",Halk TV SD (1080p)
+https://halktv-live.daioncdn.net/halktv/halktv.m3u8
+#EXTINF:-1 tvg-logo="https://www.htspor.com/images/manifest/social-share-logo.png" group-title="Turkey",HTSpor TV (1080p)
+https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web
+#EXTINF:-1 tvg-logo="https://i.imgur.com/CGwImKv.png" group-title="Turkey",Icel TV (720p) [Not 24/7]
+https://edge1.socialsmart.tv/iceltv/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://ilketv.com.tr/wp-content/uploads/2024/06/logo.png" group-title="Turkey",Ilke TV (1080p)
+https://stream.ilketv.com.tr/hls/ilkecanli.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/eXErSv0.png" group-title="Turkey",Kanal 3 (1080p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_kanal3/kanal3/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/wlfyj5l.png" group-title="Turkey",Kanal 7 Avrupa (720p) [Not 24/7]
+https://livetv.radyotvonline.net/kanal7live/kanal7avr/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/51xCkXG.png" group-title="Turkey",Kanal 12 (720p)
+https://live.artidijitalmedya.com/artidijital_kanal12/kanal12/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/wb1Cdc9.png" group-title="Turkey",Kanal 15 (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_kanal15/kanal15/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/3br8RCq.png" group-title="Turkey",Kanal 23 (1080p)
+https://cdn-kanal23.yayin.com.tr/kanal23/index.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Mr7XPii.png" group-title="Turkey",Kanal 26 (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_kanal26/kanal26/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/5WYaoFZ.png" group-title="Turkey",Kanal 33 (720p) [Not 24/7]
+https://edge1.socialsmart.tv/kanal33/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Rgc66sv.png" group-title="Turkey",Kanal 58 (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_kanal58/kanal58/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/9o1atM6.png" group-title="Turkey",Kanal D (Turkiye) (1080p)
+https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web&ce=3
+#EXTINF:-1 tvg-logo="https://i.imgur.com/3o8Rokp.png" group-title="Turkey",Kanal Firat (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_kanalfirat/kanalfirat/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/eikZj19.png" group-title="Turkey",Kanal Hayat (1080p)
+https://tbn02a.ltnschedule.com/hls/nx21i.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/7RNjTno.png" group-title="Turkey",Kanal V (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_kanalv/kanalv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/MymuDJ1.png" group-title="Turkey",Kay TV (576p) [Geo-blocked]
+https://live.artidijitalmedya.com/artidijital_kaytv/kaytv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/FQKPjsm.png" group-title="Turkey",Kent Turk (1080p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_kentturktv/kentturktv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.knmusictv.com/wp-content/uploads/2026/01/LOGO2112.png" group-title="Turkey",KN Music TV
+https://cdn4.yayin.com.tr/kntv/tracks-v1a1/mono.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/LeTP4zq.png" group-title="Turkey",Kocaeli TV (1080p)
+https://edge.taksimbilisim.com/kocaelitv/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.konyaolaytv.com/upload/tema/20230307__5154687762.jpg" group-title="Turkey",Konya Olay TV (720p)
+https://live.artidijitalmedya.com/artidijital_konyaolaytv/konyaolaytv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/wwCysFs.png" group-title="Turkey",Lalegul TV (1080p)
+https://lbl.netmedya.net/hls/lalegultv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/lWeJxm0.png" group-title="Turkey",Life TV (Turkiye) (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_lifetv/lifetv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/6GNp7f8.png" group-title="Turkey",Line TV (720p) [Not 24/7]
+https://edge1.socialsmart.tv/linetv/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/9EruWIQ.png" group-title="Turkey",Luys TV (1080p)
+https://b01c02nl.mediatriple.net/videoonlylive/mtpayqrfkgirxelive/broadcast_5e91c5ac96898.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/wyWappU.png" group-title="Turkey",MaviKaradeniz TV (1080p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_mavikaradeniz/mavikaradeniz/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/gtUFmCD.png" group-title="Turkey",Med Muzik (1080p)
+http://54.36.110.140/live3/live3.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/q7iVchl.png" group-title="Turkey",Mekameleen TV (1080p)
+https://mn-nl.mncdn.com/mekameleen/smil:mekameleentv.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/C3m6w5S.png" group-title="Turkey",Meltem TV (1080p)
+https://vhxyrsly.rocketcdn.com/meltemtv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/3CWV8bS.png" group-title="Turkey",Mercan TV (576p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_mercantv/mercantv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/VCywMTv.png" group-title="Turkey",Minika Cocuk (720p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago_cocuk/minikago_cocuk.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/qIoipDq.png" group-title="Turkey",Minika Go (720p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/minikago/minikago.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/xj1gvrq.png" group-title="Turkey",MTurk TV (1080p)
+https://edge1.socialsmart.tv/muglaturk/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/5EYjWK7.png" group-title="Turkey",NOW TV (720p)
+https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/NTV_%28Turkey%29_logo.svg/960px-NTV_%28Turkey%29_logo.svg.png" group-title="Turkey",NTV (Turkiye)
+https://dogus.daioncdn.net/ntv/ntv.m3u8?app=ntv_web
+#EXTINF:-1 tvg-logo="https://i.imgur.com/slwbux7.png" group-title="Turkey",Number 1 Ask (720p)
+https://b01c02nl.mediatriple.net/videoonlylive/mtkgeuihrlfwlive/u_stream_5c9e18f9cea15_1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/rYtbAGZ.png" group-title="Turkey",Number 1 Damar (720p)
+https://b01c02nl.mediatriple.net/videoonlylive/mtkgeuihrlfwlive/u_stream_5c9e198784bdc_1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/ZM4PSyq.png" group-title="Turkey",Number 1 Dance (720p)
+https://b01c02nl.mediatriple.net/videoonlylive/mtkgeuihrlfwlive/u_stream_5c9e2aa8acf44_1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/02cDIBi.png" group-title="Turkey",Number 1 TV (720p)
+https://b01c02nl.mediatriple.net/videoonlylive/mtkgeuihrlfwlive/broadcast_5c9e17cd59e8b.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/e9ca6gc.png" group-title="Turkey",OlayTurk TV (720p) [Geo-blocked]
+https://live.artidijitalmedya.com/artidijital_olayturk/olayturk/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/QpPteBO.png" group-title="Turkey",Power Dance (1080p)
+https://livetv.powerapp.com.tr/dance/dance.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/0RzUswR.png" group-title="Turkey",Power Love (1080p)
+https://livetv.powerapp.com.tr/plove/love.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/XSL1gd7.png" group-title="Turkey",Power TV (Turkiye) (1080p)
+https://livetv.powerapp.com.tr/powerTV/powerhd.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/driabBO.png" group-title="Turkey",PowerTurk Akustik (1080p)
+https://livetv.powerapp.com.tr/pturkakustik/akustik.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/tQSoQXW.png" group-title="Turkey",PowerTurk Slow (1080p)
+https://livetv.powerapp.com.tr/pturkslow/slow.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/a5nW3HU.png" group-title="Turkey",PowerTurk Taptaze (1080p)
+https://livetv.powerapp.com.tr/pturktaptaze/taptaze.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/9OPoXQG.png" group-title="Turkey",PowerTurk TV (720p)
+https://live.artidijitalmedya.com/artidijital_powerturktv/powerturktv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/cKQIK4i.png" group-title="Turkey",Sat 7 Turk (1080p)
+https://live.artidijitalmedya.com/artidijital_sat7turk/sat7turk/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/UVGGrQd.png" group-title="Turkey",Semerkand TV (1080p) [Not 24/7]
+https://b01c02nl.mediatriple.net/videoonlylive/mtisvwurbfcyslive/broadcast_58d915bd40efc.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/9O3DHRB.png" group-title="Turkey",Star TV (Turkiye) (720p)
+https://dogus.daioncdn.net/startv/startv_720p.m3u8?app=a20ac41e-bdc3-4aa1-934d-26b484480ac9&ce=3&sid=8l4w3lst4co5
+#EXTINF:-1 tvg-logo="https://i.imgur.com/64tph9N.png" group-title="Turkey",Sun RTV (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_sunrtv/sunrtv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/TBMM_TV_logo.svg/960px-TBMM_TV_logo.svg.png" group-title="Turkey",TBMM TV (720p)
+https://meclistv-live.ercdn.net/meclistv/meclistv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/tZpx32y.png" group-title="Turkey",Tempo TV (720p)
+https://live.artidijitalmedya.com/artidijital_tempotv/tempotv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/PrxwKDw.png" group-title="Turkey",TGRT Haber (720p)
+https://canli.tgrthaber.com/tgrt.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/Mbi0jbz.png" group-title="Turkey",Tivi 6 (720p)
+https://live.artidijitalmedya.com/artidijital_tivi6/tivi6/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/3zHdkYG.png" group-title="Turkey",TJK TV (1080p)
+https://tjktv-live.tjk.org/tjktv.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/f0Soeob.png" group-title="Turkey",Ton TV (720p) [Not 24/7]
+https://live.artidijitalmedya.com/artidijital_tontv/tontv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/TRT_1_logo_%282021-%29.svg/960px-TRT_1_logo_%282021-%29.svg.png" group-title="Turkey",TRT 1 (1440p)
+https://tv-trt1.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/TRT_Avaz_logo.svg/960px-TRT_Avaz_logo.svg.png" group-title="Turkey",TRT Avaz (720p)
+https://tv-trtavaz.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/TRT_%C3%87ocuk_logo_%282021%29.svg/960px-TRT_%C3%87ocuk_logo_%282021%29.svg.png" group-title="Turkey",TRT Cocuk (1440p)
+https://tv-trtcocuk.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/8PmXz9t.png" group-title="Turkey",TRT Diyanet Cocuk (720p)
+https://tv-trtdiyanetcocuk.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/TRT_EBA_TV_logo.svg/960px-TRT_EBA_TV_logo.svg.png" group-title="Turkey",TRT EBA (720p)
+https://tv-e-okul01.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/CRBfZi4.png" group-title="Turkey",TRT EBA Ilkokul (720p)
+https://tv-e-okul00.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/vj2L2L2.png" group-title="Turkey",TRT EBA Lise (720p)
+https://tv-e-okul02.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/fCHQYWS.png" group-title="Turkey",TRT Genc (1440p) [Geo-blocked]
+https://tv-trtgenc.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/TRT_Haber_Eyl%C3%BCl_2020_Logo.svg/960px-TRT_Haber_Eyl%C3%BCl_2020_Logo.svg.png" group-title="Turkey",TRT Haber (720p)
+https://tv-trthaber.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/TRT_Kurd%C3%AE_logo.svg/960px-TRT_Kurd%C3%AE_logo.svg.png" group-title="Turkey",TRT Kurdi (720p)
+https://tv-trtkurdi.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/JgUzRH8.png" group-title="Turkey",TRT Muzik (720p)
+https://tv-trtmuzik.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/TRT_Spor_Y%C4%B1ld%C4%B1z_Logo.svg/960px-TRT_Spor_Y%C4%B1ld%C4%B1z_Logo.svg.png" group-title="Turkey",TRT Spor Yildiz (1440p) [Geo-blocked]
+https://trt.daioncdn.net/trtspor-yildiz/master.m3u8?app=web&platform=trtspor
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/TRT_T%C3%BCrk_logo.svg/960px-TRT_T%C3%BCrk_logo.svg.png" group-title="Turkey",TRT Turk (720p)
+https://tv-trtturk.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/2AcRKdL.png" group-title="Turkey",TurkHaber TV (720p)
+https://edge1.socialsmart.tv/turkhaber/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/8CtrYVb.png" group-title="Turkey",TV 1 (720p)
+https://edge1.socialsmart.tv/tv1/bant1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://i.imgur.com/UpsQsbd.png" group-title="Turkey",TV 4 (720p)
+https://turkmedya-live.ercdn.net/tv4/tv4.m3u8
+</script>
 
 <script>
-// =========================================
-// 1. GÜVENLİK SİSTEMİ
-// =========================================
-const GECERLI_SIFRE = "ihspro"; 
-let hataliGirisSayisi = parseInt(localStorage.getItem('ihs_hata') || '0');
-const isBanned = localStorage.getItem('ihs_banned') === 'true';
-
-window.addEventListener('DOMContentLoaded', () => {
-  if (isBanned) {
-    document.getElementById('security-screen').style.display = 'none';
-    document.getElementById('ban-screen').style.display = 'flex';
-  }
-});
-document.getElementById("pass-input").addEventListener("keypress", (e) => { if (e.key === "Enter") checkPassword(); });
-
-function checkPassword() {
-  if (isBanned) return;
-  const girilenSifre = document.getElementById('pass-input').value;
-  const errorText = document.getElementById('error-msg');
-
-  if (girilenSifre === GECERLI_SIFRE) {
-    localStorage.setItem('ihs_hata', '0');
-    document.getElementById('security-screen').style.display = 'none';
-    document.getElementById('app-wrapper').style.display = 'flex';
-    initIptvApp(); 
-  } else {
-    hataliGirisSayisi++; localStorage.setItem('ihs_hata', hataliGirisSayisi.toString());
-    if (hataliGirisSayisi >= 2) {
-      localStorage.setItem('ihs_banned', 'true');
-      document.getElementById('security-screen').style.display = 'none'; document.getElementById('ban-screen').style.display = 'flex';
-    } else {
-      errorText.innerText = "Hatalı şifre! Son 1 hakkınız kaldı."; errorText.style.display = 'block';
-    }
-  }
-}
-
-// =========================================
-// 2. IPTV MOTORU & DIŞ KAYNAK ÇEKİCİ
-// =========================================
-let allChannels = []; let categories = new Set(); let currentCategory = 'Tüm Kanallar';
-let activeChannelIndex = -1; let currentDisplayList = [];
-let hls = null; let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
+let allChannels = [];
+let categories = new Set();
+let currentCategory = '';
+let hls = null;
 const video = document.getElementById('video-player');
-let osdTimeout; let skipTimeout; let statsInterval;
 
-const gomuluListe = `
-#EXTM3U
-#EXTINF:-1 tvg-logo="https://i.imgur.com/PexhKwp.png" group-title="Turkey",4U TV
-https://hls.4utv.live/hls/stream.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/8FO41es.png" group-title="Turkey",24 TV
-https://turkmedya-live.ercdn.net/tv24/tv24.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/agn47sQ.png" group-title="Turkey",360 TV
-https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
-#EXTINF:-1 tvg-logo="https://iatv.tmgrup.com.tr/site/v2/a2tv/i/a2tv-logo.png" group-title="Turkey",A2TV
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
-#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/7c/Ahaber_Logo.png" group-title="Turkey",A Haber
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/ZhkZzLf.png" group-title="Turkey",A Spor
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/mgDCKiy.png" group-title="Turkey",Aksu TV
-https://live.artidijitalmedya.com/artidijital_aksutv/aksutv/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/HyVUwFC.png" group-title="Turkey",ATV
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
-#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Diyanet_TV_logo.svg/960px-Diyanet_TV_logo.svg.png" group-title="Turkey",Diyanet TV
-https://eustr73.mediatriple.net/videoonlylive/mtikoimxnztxlive/broadcast_5e3bf95a47e07.smil/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://www.dsmart.com.tr/epg/images/0x60/5ffc18c6cfef0b15933a8b65" group-title="Turkey",Ekoturk
-https://cdn.ekoturk.net/hls/master.m3u8
-#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/GZT_logo.svg/960px-GZT_logo.svg.png" group-title="Turkey",GZT
-https://gzttv-live.lg.mncdn.com/gzttv/gzttv/playlist.m3u8
-#EXTINF:-1 tvg-logo="https://i.imgur.com/xM0HA30.png" group-title="Turkey",Halk TV
-https://halktv-live.daioncdn.net/halktv/halktv.m3u8
-#EXTINF:-1 tvg-logo="https://www.htspor.com/images/manifest/social-share-logo.png" group-title="Turkey",HTSpor
-https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web
-#EXTINF:-1 tvg-logo="https://i.imgur.com/9o1atM6.png" group-title="Turkey",Kanal D
-https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web&ce=3
-#EXTINF:-1 tvg-logo="https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8" group-title="Turkey",NOW TV
-https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8
-#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/NTV_%28Turkey%29_logo.svg/960px-NTV_%28Turkey%29_logo.svg.png" group-title="Turkey",NTV
-https://dogus.daioncdn.net/ntv/ntv.m3u8?app=ntv_web
-#EXTINF:-1 tvg-logo="https://i.imgur.com/9O3DHRB.png" group-title="Turkey",Star TV
-https://dogus.daioncdn.net/startv/startv_720p.m3u8?app=a20ac41e-bdc3-4aa1-934d-26b484480ac9&ce=3&sid=8l4w3lst4co5
-#EXTINF:-1 tvg-logo="https://i.imgur.com/PrxwKDw.png" group-title="Turkey",TGRT Haber
-https://canli.tgrthaber.com/tgrt.m3u8
-#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/TRT_1_logo_%282021-%29.svg/960px-TRT_1_logo_%282021-%29.svg.png" group-title="Turkey",TRT 1
-https://tv-trt1.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/TRT_Haber_Eyl%C3%BCl_2020_Logo.svg/960px-TRT_Haber_Eyl%C3%BCl_2020_Logo.svg.png" group-title="Turkey",TRT Haber
-https://tv-trthaber.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="TRT",TRT 1
-https://tv-trt1.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT 2
-https://tv-trt2.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Haber
-https://tv-trthaber.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Spor
-https://tv-trtspor1.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Spor Yıldız
-https://tv-trtspor2.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Türk
-https://tv-trtturk.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Avaz
-https://tv-trtavaz.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Belgesel
-https://tv-trtbelgesel.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Müzik
-https://tv-trtmuzik.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Kurdî
-https://tv-trtkurdi.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Arabi
-https://tv-trtarabi.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT World
-https://tv-trtworld.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Çocuk
-https://tv-trtcocuk.medya.trt.com.tr/master_1440.m3u8
-#EXTINF:-1 group-title="TRT",TRT Diyanet Çocuk
-https://tv-trtdiyanetcocuk.medya.trt.com.tr/master_1440.m3u8
-`;
+// Sayfa yüklendiğinde yukarıdaki m3u-data alanını okur
+window.addEventListener('DOMContentLoaded', () => {
+  const rawData = document.getElementById('m3u-data').textContent;
+  parseContent(rawData);
+});
 
-function initIptvApp() {
-  parseM3UString(gomuluListe);
-  renderCategories(); 
-  renderChannels(); 
-  initPlayerControls(); 
-  initKeyboardControls();
-  
-  // Dış Kaynağı Arka Planda Çek (Yeni Güçlendirilmiş Motor)
-  fetchExternalSource('https://tinyurl.com/zerkfilm2');
-}
-
-function parseM3UString(content) {
+function parseContent(content) {
   const lines = content.split('\n');
-  let currentChannel = null;
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim();
+  allChannels = []; 
+  categories.clear(); 
+  categories.add('Tümü'); 
+
+  let currentChannel = {};
+
+  for (let line of lines) {
+    line = line.trim();
     if (!line) continue;
-    
     if (line.startsWith('#EXTINF:')) {
-      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-      const groupMatch = line.match(/group-title="([^"]+)"/);
-      const logo = logoMatch ? logoMatch[1] : 'https://via.placeholder.com/150?text=TV';
-      const group = groupMatch ? groupMatch[1] : 'Diğer';
+      const logo = (line.match(/tvg-logo="([^"]+)"/) || [])[1] || 'https://via.placeholder.com/50?text=TV';
+      const group = (line.match(/group-title="([^"]+)"/) || [])[1] || 'Diğer';
       const name = line.split(',').pop().trim();
-      currentChannel = { id: allChannels.length, name: name, logo: logo, group: group };
-      categories.add(group);
+      currentChannel = { name, logo, group: group.trim() };
+      categories.add(currentChannel.group);
     } else if (line.startsWith('http')) {
-      if (currentChannel) {
-        currentChannel.url = line;
-        allChannels.push(currentChannel);
-        currentChannel = null;
-      } else {
-         allChannels.push({ id: allChannels.length, name: "Bilinmeyen İçerik", logo: "https://via.placeholder.com/150?text=İçerik", group: "Filmler", url: line });
-      }
+      currentChannel.url = line;
+      allChannels.push(currentChannel);
+      currentChannel = {};
     }
   }
+  showFolders(); 
 }
 
-// ÇOKLU PROXY DESTEKLİ GELİŞMİŞ DIŞ KAYNAK ÇEKİCİ
-async function fetchExternalSource(url) {
-  const loadingIndicator = document.getElementById('loading-external');
-  loadingIndicator.style.display = 'block'; // Yükleniyor Uyarısını Göster
+function showFolders() {
+  document.getElementById('folder-grid').style.display = 'grid';
+  document.getElementById('channels-grid').style.display = 'none';
+  document.getElementById('back-btn').style.display = 'none';
+  document.getElementById('nav-title').innerText = 'Kategoriler';
+  document.getElementById('search-input').value = ''; 
 
-  try {
-    // 1. Önce yönlendirmeleri çok iyi çözen corsproxy.io'yu dene
-    let proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-    let response = await fetch(proxyUrl);
-    
-    // 2. Eğer başarısız olursa AllOrigins proxy'sine geç
-    if (!response.ok) {
-       proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-       response = await fetch(proxyUrl);
-    }
+  const grid = document.getElementById('folder-grid');
+  grid.innerHTML = '';
 
-    if (response.ok) {
-        const data = await response.text();
-        if (data.includes('#EXTINF')) {
-          parseM3UString(data); 
-        } else {
-          // Gelen veri doğrudan bir mp4/mkv linkiyse
-          allChannels.push({ id: allChannels.length, name: "Zerk (Film)", logo: "https://via.placeholder.com/150?text=Film", group: "Filmler", url: url });
-          categories.add("Filmler");
-        }
-    }
-  } catch (error) { 
-    console.error("Dış kaynak çekilemedi:", error); 
-  } finally {
-    // İşlem bitince (başarılı veya başarısız) yükleme uyarısını gizle ve listeyi yenile
-    loadingIndicator.style.display = 'none';
-    renderCategories(); 
-    renderChannels(document.getElementById('search-input').value.toLowerCase());
-  }
+  categories.forEach(cat => {
+    const count = cat === 'Tümü' ? allChannels.length : allChannels.filter(c => c.group === cat).length;
+    const card = document.createElement('div');
+    card.className = 'folder-card';
+    card.innerHTML = `
+      <i class="fas fa-folder-open"></i>
+      <div class="folder-name">${cat}</div>
+      <div class="folder-count">${count} Kanal</div>
+    `;
+    card.onclick = () => openFolder(cat);
+    grid.appendChild(card);
+  });
 }
 
-function renderCategories() {
-  const bar = document.getElementById('categories-bar'); bar.innerHTML = '';
-  const fragment = document.createDocumentFragment();
-  const createBtn = (txt, icon, catName, isFav) => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (isFav ? ' cat-btn-fav' : '') + (currentCategory===catName ? ' active' : '');
-    btn.innerHTML = icon ? `<i class="fas ${icon}"></i> ${txt}` : txt;
-    btn.onclick = () => { currentCategory = catName; document.getElementById('search-input').value = ''; renderCategories(); renderChannels(); };
-    fragment.appendChild(btn);
-  };
-  createBtn('Favoriler', 'fa-heart', 'Favorilerim', true);
-  createBtn('Tüm Kanallar', null, 'Tüm Kanallar', false);
-  categories.forEach(cat => createBtn(cat, null, cat, false));
-  bar.appendChild(fragment);
-}
-
-function toggleFavorite(e, channelName) {
-  e.stopPropagation(); 
-  const index = favorites.indexOf(channelName);
-  if (index > -1) favorites.splice(index, 1); else favorites.push(channelName);
-  localStorage.setItem('ihs_favorites', JSON.stringify(favorites));
-  renderChannels(document.getElementById('search-input').value.toLowerCase()); 
-}
-
-function searchChannels() { renderChannels(document.getElementById('search-input').value.toLowerCase()); }
-
-function renderChannels(searchQuery = '') {
-  const list = document.getElementById('channels-container'); list.innerHTML = '';
-  currentDisplayList = currentCategory === 'Favorilerim' ? allChannels.filter(c => favorites.includes(c.name)) 
-               : currentCategory === 'Tüm Kanallar' ? allChannels : allChannels.filter(c => c.group === currentCategory);
-  if (searchQuery) currentDisplayList = currentDisplayList.filter(c => c.name.toLowerCase().includes(searchQuery));
+function openFolder(cat) {
+  currentCategory = cat;
+  document.getElementById('folder-grid').style.display = 'none';
+  document.getElementById('channels-grid').style.display = 'grid';
+  document.getElementById('back-btn').style.display = 'block';
+  document.getElementById('nav-title').innerText = cat;
   
-  const fragment = document.createDocumentFragment();
-  currentDisplayList.forEach((c, index) => {
-    const isFav = favorites.includes(c.name);
-    const isActive = (activeChannelIndex === index);
-    const row = document.createElement('div');
-    row.className = 'channel-row' + (isActive ? ' active-channel' : '');
-    row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'">
-                     <div class="channel-row-name">${c.name}</div>
-                     <i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${c.name.replace(/'/g, "\\'")}')"></i>`;
-    row.onclick = () => playStream(c, index);
-    fragment.appendChild(row);
-  });
-  list.appendChild(fragment);
-  populateVideoChannelMenu();
+  renderChannels();
 }
 
-function playStream(channelObj, indexInList) {
-  activeChannelIndex = indexInList;
-  renderChannels(document.getElementById('search-input').value.toLowerCase()); 
-  clearTimeout(skipTimeout);
-  document.getElementById('error-overlay').style.display = 'none';
-  document.getElementById('loading-spinner').style.display = 'block';
-  document.getElementById('now-playing-bar').style.display = 'flex';
-  document.getElementById('np-logo').src = channelObj.logo;
-  document.getElementById('np-title').innerText = channelObj.name;
+function searchChannels() {
+  const query = document.getElementById('search-input').value.toLowerCase();
+  
+  if(query.trim() === '') {
+     if(currentCategory) openFolder(currentCategory);
+     else showFolders();
+     return;
+  }
+  
+  document.getElementById('folder-grid').style.display = 'none';
+  document.getElementById('channels-grid').style.display = 'grid';
+  document.getElementById('back-btn').style.display = 'block';
+  document.getElementById('nav-title').innerText = 'Arama Sonuçları';
+  
+  const grid = document.getElementById('channels-grid');
+  grid.innerHTML = '';
+  
+  const filtered = allChannels.filter(c => c.name.toLowerCase().includes(query));
+  
+  filtered.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'channel-card';
+    card.innerHTML = `<img src="${c.logo}" onerror="this.src='https://via.placeholder.com/50?text=TV'"><div class="channel-name" title="${c.name}">${c.name}</div>`;
+    card.onclick = () => playStream(c.url);
+    grid.appendChild(card);
+  });
+}
 
-  showOSD(channelObj.name, channelObj.logo);
+function renderChannels() {
+  const grid = document.getElementById('channels-grid');
+  grid.innerHTML = '';
+  
+  const filtered = currentCategory === 'Tümü' ? allChannels : allChannels.filter(c => c.group === currentCategory);
+  
+  filtered.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'channel-card';
+    card.innerHTML = `<img src="${c.logo}" onerror="this.src='https://via.placeholder.com/50?text=TV'"><div class="channel-name" title="${c.name}">${c.name}</div>`;
+    card.onclick = () => playStream(c.url);
+    grid.appendChild(card);
+  });
+}
 
+function playStream(url) {
   if (hls) hls.destroy();
-  if (Hls.isSupported() && channelObj.url.includes('.m3u8')) {
-    hls = new Hls({enableWorker: true, lowLatencyMode: true});
-    hls.on(Hls.Events.ERROR, function (event, data) {
-      if (data.fatal) {
-        document.getElementById('loading-spinner').style.display = 'none';
-        document.getElementById('error-overlay').style.display = 'flex';
-        let countdown = 3;
-        document.getElementById('error-countdown').innerText = `Sonraki içeriğe geçiliyor... (${countdown})`;
-        skipTimeout = setInterval(() => {
-          countdown--;
-          document.getElementById('error-countdown').innerText = `Sonraki içeriğe geçiliyor... (${countdown})`;
-          if(countdown <= 0) { clearInterval(skipTimeout); playNextChannel(); }
-        }, 1000);
-      }
-    });
-    hls.loadSource(channelObj.url); hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play(); document.getElementById('loading-spinner').style.display = 'none';});
-  } else { 
-    video.src = channelObj.url; video.play(); 
-    document.getElementById('loading-spinner').style.display = 'none';
+  if (Hls.isSupported() && url.includes('.m3u8')) {
+    hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+  } else {
+    video.src = url;
+    video.play();
   }
-}
-
-function playNextChannel() {
-  if(currentDisplayList.length === 0) return;
-  let nextIdx = activeChannelIndex + 1;
-  if (nextIdx >= currentDisplayList.length) nextIdx = 0; 
-  playStream(currentDisplayList[nextIdx], nextIdx);
-}
-function playPrevChannel() {
-  if(currentDisplayList.length === 0) return;
-  let prevIdx = activeChannelIndex - 1;
-  if (prevIdx < 0) prevIdx = currentDisplayList.length - 1; 
-  playStream(currentDisplayList[prevIdx], prevIdx);
-}
-
-function showOSD(name, logo) {
-  const osd = document.getElementById('tv-osd');
-  document.getElementById('osd-logo').src = logo;
-  document.getElementById('osd-title').innerText = name;
-  osd.classList.add('show');
-  clearTimeout(osdTimeout);
-  osdTimeout = setTimeout(() => { osd.classList.remove('show'); }, 3000);
-}
-
-function initKeyboardControls() {
-  document.addEventListener('keydown', (e) => {
-    if(document.activeElement.tagName === 'INPUT') return; 
-    switch(e.code) {
-      case 'Space': e.preventDefault(); if (video.paused) video.play(); else video.pause(); break;
-      case 'KeyF': e.preventDefault(); document.getElementById('fullscreen-btn').click(); break;
-      case 'KeyM': e.preventDefault(); document.getElementById('mute-btn').click(); break;
-      case 'ArrowUp': e.preventDefault(); playPrevChannel(); break;
-      case 'ArrowDown': e.preventDefault(); playNextChannel(); break;
-    }
-  });
-}
-
-const vcmMenu = document.getElementById('video-channel-menu');
-const vContainer = document.getElementById('video-container');
-
-document.getElementById('channel-menu-btn').onclick = (e) => {
-  e.stopPropagation(); 
-  populateVideoChannelMenu();
-  vcmMenu.classList.add('open');
-  vContainer.classList.add('menu-open'); 
-};
-document.getElementById('vcm-close-btn').onclick = (e) => {
-  e.stopPropagation();
-  vcmMenu.classList.remove('open');
-  vContainer.classList.remove('menu-open');
-};
-
-function populateVideoChannelMenu() {
-  const vList = document.getElementById('vcm-list'); vList.innerHTML = '';
-  const fragment = document.createDocumentFragment();
-  currentDisplayList.forEach((c, index) => {
-    const isActive = (activeChannelIndex === index);
-    const row = document.createElement('div');
-    row.className = 'channel-row' + (isActive ? ' active-channel' : '');
-    row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'"><div class="channel-row-name">${c.name}</div>`;
-    row.onclick = (e) => { 
-      e.stopPropagation(); playStream(c, index); 
-      vcmMenu.classList.remove('open'); vContainer.classList.remove('menu-open');
-    };
-    fragment.appendChild(row);
-  });
-  vList.appendChild(fragment);
-}
-
-function initPlayerControls() {
-  const playBtn = document.getElementById('play-pause-btn');
-  const muteBtn = document.getElementById('mute-btn');
-  const fsBtn = document.getElementById('fullscreen-btn');
-  const pipBtn = document.getElementById('pip-btn');
-  const statsBtn = document.getElementById('stats-btn');
-  const statsPanel = document.getElementById('stats-panel');
-
-  if (!document.pictureInPictureEnabled) pipBtn.style.display = 'none';
-
-  function togglePlay(e) {
-    if (vcmMenu.classList.contains('open')) { vcmMenu.classList.remove('open'); vContainer.classList.remove('menu-open'); return; }
-    if (video.paused) video.play(); else video.pause(); 
-  }
-  playBtn.onclick = (e) => { e.stopPropagation(); togglePlay(); };
-  video.onclick = togglePlay;
-
-  muteBtn.onclick = (e) => { e.stopPropagation(); video.muted = !video.muted; muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; };
-
-  fsBtn.onclick = (e) => {
-    e.stopPropagation();
-    const isPseudoFS = vContainer.classList.contains('pseudo-fullscreen');
-    
-    if (!document.fullscreenElement && !isPseudoFS) {
-      if (vContainer.requestFullscreen) {
-          vContainer.requestFullscreen().catch(() => vContainer.classList.add('pseudo-fullscreen'));
-      } else if (vContainer.webkitRequestFullscreen) {
-          vContainer.webkitRequestFullscreen();
-      } else {
-          vContainer.classList.add('pseudo-fullscreen'); 
-      }
-      if (screen.orientation && screen.orientation.lock) { screen.orientation.lock('landscape').catch(()=>{}); }
-    } else {
-      if (document.exitFullscreen && document.fullscreenElement) { document.exitFullscreen(); } 
-      else if (document.webkitExitFullscreen && document.fullscreenElement) { document.webkitExitFullscreen(); }
-      vContainer.classList.remove('pseudo-fullscreen');
-      if (screen.orientation && screen.orientation.unlock) { screen.orientation.unlock(); }
-    }
-  };
-  video.ondblclick = fsBtn.onclick;
-
-  pipBtn.onclick = async (e) => { e.stopPropagation(); try { if (document.pictureInPictureElement) await document.exitPictureInPicture(); else await video.requestPictureInPicture(); } catch (err) {} };
-
-  statsBtn.onclick = (e) => {
-    e.stopPropagation();
-    if (statsPanel.style.display === 'flex') { statsPanel.style.display = 'none'; clearInterval(statsInterval); } 
-    else { statsPanel.style.display = 'flex'; statsInterval = setInterval(updateStats, 1000); updateStats(); }
-  };
-
-  function updateStats() {
-    if (statsPanel.style.display !== 'flex') return;
-    document.getElementById('stat-res').innerText = video.videoWidth ? `${video.videoWidth} x ${video.videoHeight}` : 'Hesaplanıyor...';
-    if (hls && hls.levels && hls.currentLevel >= 0) {
-      const level = hls.levels[hls.currentLevel];
-      document.getElementById('stat-bit').innerText = level.bitrate ? (level.bitrate / 1000).toFixed(0) + ' kbps' : 'Otomatik';
-      document.getElementById('stat-fps').innerText = level.frameRate ? level.frameRate + ' fps' : (level.attrs && level.attrs['FRAME-RATE'] ? level.attrs['FRAME-RATE'] + ' fps' : (video.videoWidth ? 'Stabilize Ediliyor' : 'Akıllı Uyum'));
-    } else { document.getElementById('stat-bit').innerText = 'Doğrudan Akış'; document.getElementById('stat-fps').innerText = 'Orijinal Kaynak'; }
-  }
-
-  video.addEventListener('play', () => { playBtn.innerHTML = '<i class="fas fa-pause"></i>'; });
-  video.addEventListener('pause', () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; });
-
-  let timeout;
-  function resetControls() {
-    vContainer.classList.remove('idle'); clearTimeout(timeout);
-    timeout = setTimeout(() => { if (!video.paused && !vcmMenu.classList.contains('open')) vContainer.classList.add('idle'); }, 3000);
-  }
-  vContainer.addEventListener('mousemove', resetControls); vContainer.addEventListener('touchstart', resetControls);
-  vContainer.addEventListener('mouseleave', () => { if (!video.paused && !vcmMenu.classList.contains('open')) vContainer.classList.add('idle'); });
 }
 </script>
 </body>
