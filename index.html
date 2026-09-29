@@ -67,7 +67,7 @@
     .video-container { width: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer; }
 
-    /* TEKNİK İSTATİSTİK PANELİ (YENİ EKLENDİ) */
+    /* TEKNİK İSTATİSTİK PANELİ */
     .stats-panel {
       position: absolute; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.85);
       border: 1px solid #333; border-radius: 8px; padding: 12px 15px; z-index: 22;
@@ -108,7 +108,7 @@
     
     .vcm-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 5px; }
     .vcm-list::-webkit-scrollbar { width: 4px; }
-    .vcm-list .channel-row { background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 8px; padding: 8px 10px; }
+    .vcm-list .channel-row { background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 8px; padding: 8px 10px; cursor: pointer; }
     .vcm-list .channel-row:hover { background: rgba(255,255,255,0.1); border-color: #444; }
     .vcm-list .channel-row.active-channel { background: rgba(229, 9, 20, 0.25); border-left: 3px solid var(--ihs-red); border-radius: 4px; }
     .vcm-list img { width: 35px; height: 35px; object-fit: contain; margin-right: 12px; border-radius: 4px; background: #fff; padding: 2px; }
@@ -191,12 +191,12 @@
 </head>
 <body>
 
-  <!-- BAN & GÜVENLİK EKRANI -->
   <div class="ban-screen" id="ban-screen">
     <i class="fas fa-ban"></i>
     <h1>ERİŞİM ENGELLENDİ</h1>
     <p>Güvenlik ihlali sebebiyle bu cihaz engellendi.</p>
   </div>
+  
   <div class="security-screen" id="security-screen">
     <div class="security-logo"></div>
     <div class="security-title">IHS PRIVATE</div>
@@ -205,29 +205,17 @@
     <div class="error-msg" id="error-msg"></div>
   </div>
 
-  <!-- ANA UYGULAMA -->
   <div class="app-wrapper" id="app-wrapper">
     <div class="player-section">
       <div class="video-container" id="video-container">
         
-        <!-- TEKNİK İSTATİSTİK PANELİ -->
         <div class="stats-panel" id="stats-panel">
           <div class="stats-header"><span>YAYIN BİLGİSİ</span> <i class="fas fa-satellite-dish" style="color:var(--ihs-red)"></i></div>
-          <div class="stat-row">
-            <span class="stat-label">Çözünürlük:</span>
-            <span class="stat-value" id="stat-res">Bekleniyor</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Kare Hızı (FPS):</span>
-            <span class="stat-value" id="stat-fps">Bekleniyor</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Bit Hızı:</span>
-            <span class="stat-value" id="stat-bit">Bekleniyor</span>
-          </div>
+          <div class="stat-row"><span class="stat-label">Çözünürlük:</span><span class="stat-value" id="stat-res">Bekleniyor</span></div>
+          <div class="stat-row"><span class="stat-label">Kare Hızı (FPS):</span><span class="stat-value" id="stat-fps">Bekleniyor</span></div>
+          <div class="stat-row"><span class="stat-label">Bit Hızı:</span><span class="stat-value" id="stat-bit">Bekleniyor</span></div>
         </div>
 
-        <!-- VİDEO İÇİ KANAL MENÜSÜ -->
         <div class="video-channel-menu" id="video-channel-menu">
           <div class="vcm-header">
             <h3><i class="fas fa-list-ul"></i> Kanallar</h3>
@@ -236,7 +224,6 @@
           <div class="vcm-list" id="vcm-list"></div>
         </div>
 
-        <!-- TV ZAPPING OSD -->
         <div class="tv-osd" id="tv-osd">
           <img id="osd-logo" class="osd-logo" src="" alt="logo">
           <div class="osd-info">
@@ -260,11 +247,9 @@
             <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
             <button class="control-btn" id="next-channel-btn" title="Sonraki Kanal"><i class="fas fa-step-forward"></i></button>
             <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
-            <!-- LİSTE AÇMA BUTONU -->
             <button class="control-btn" id="channel-menu-btn" title="Kanal Listesi" style="margin-left: 10px;"><i class="fas fa-list-ul"></i></button>
           </div>
           <div class="controls-right">
-            <!-- İSTATİSTİK BUTONU YENİ EKLENDİ -->
             <button class="control-btn" id="stats-btn" title="Yayın İstatistikleri"><i class="fas fa-info-circle"></i></button>
             <button class="control-btn" id="pip-btn" title="Pencere Modu"><i class="fas fa-clone"></i></button>
             <button class="control-btn" id="fullscreen-btn" title="Tam Ekran"><i class="fas fa-expand"></i></button>
@@ -294,9 +279,6 @@
   </div>
 
 <script>
-// =========================================
-// 1. GÜVENLİK SİSTEMİ
-// =========================================
 const GECERLI_SIFRE = "ihspro"; 
 let hataliGirisSayisi = parseInt(localStorage.getItem('ihs_hata') || '0');
 const isBanned = localStorage.getItem('ihs_banned') === 'true';
@@ -330,9 +312,6 @@ function checkPassword() {
   }
 }
 
-// =========================================
-// 2. IPTV MOTORU & OSD & AUTO-SKIP
-// =========================================
 let allChannels = []; let categories = new Set(); let currentCategory = 'Tüm Kanallar';
 let activeChannelIndex = -1; let currentDisplayList = [];
 let hls = null; let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
@@ -381,6 +360,48 @@ https://canli.tgrthaber.com/tgrt.m3u8
 https://tv-trt1.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/TRT_Haber_Eyl%C3%BCl_2020_Logo.svg/960px-TRT_Haber_Eyl%C3%BCl_2020_Logo.svg.png" group-title="Turkey",TRT Haber
 https://tv-trthaber.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 group-title="TRT",TRT 1
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trt1.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT 2
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trt2.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Haber
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trthaber.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Spor
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtspor1.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Spor Yıldız
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtspor2.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Türk
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtturk.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Avaz
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtavaz.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Belgesel
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtbelgesel.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Müzik
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtmuzik.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Kurdî
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtkurdi.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Arabi
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtarabi.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT World
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtworld.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Çocuk
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtcocuk.medya.trt.com.tr/master_1440.m3u8
+#EXTINF:-1 group-title="TRT",TRT Diyanet Çocuk
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+https://tv-trtdiyanetcocuk.medya.trt.com.tr/master_1440.m3u8
 `;
 
 function initIptvApp() {
@@ -527,7 +548,6 @@ function initKeyboardControls() {
   });
 }
 
-// VİDEO İÇİ KANAL MENÜSÜ FONKSİYONLARI
 const vcmMenu = document.getElementById('video-channel-menu');
 const vContainer = document.getElementById('video-container');
 
@@ -553,10 +573,8 @@ function populateVideoChannelMenu() {
     const isActive = (activeChannelIndex === index);
     const row = document.createElement('div');
     row.className = 'channel-row' + (isActive ? ' active-channel' : '');
-    row.innerHTML = `
-      <img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'">
-      <div class="channel-row-name">${c.name}</div>
-    `;
+    row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'">
+                     <div class="channel-row-name">${c.name}</div>`;
     row.onclick = (e) => { 
       e.stopPropagation();
       playStream(c, index); 
@@ -567,7 +585,6 @@ function populateVideoChannelMenu() {
   });
   vList.appendChild(fragment);
 }
-
 
 function initPlayerControls() {
   const playBtn = document.getElementById('play-pause-btn');
@@ -604,43 +621,24 @@ function initPlayerControls() {
 
   pipBtn.onclick = async (e) => { e.stopPropagation(); try { if (document.pictureInPictureElement) await document.exitPictureInPicture(); else await video.requestPictureInPicture(); } catch (err) {} };
 
-  // İSTATİSTİK PANELİ GÖSTER/GİZLE VE VERİ ÇEKME
   statsBtn.onclick = (e) => {
     e.stopPropagation();
     if (statsPanel.style.display === 'flex') {
-      statsPanel.style.display = 'none';
-      clearInterval(statsInterval);
+      statsPanel.style.display = 'none'; clearInterval(statsInterval);
     } else {
-      statsPanel.style.display = 'flex';
-      statsInterval = setInterval(updateStats, 1000);
-      updateStats(); // İlk tıklamada hemen güncellesin
+      statsPanel.style.display = 'flex'; statsInterval = setInterval(updateStats, 1000); updateStats(); 
     }
   };
 
   function updateStats() {
     if (statsPanel.style.display !== 'flex') return;
-    
-    // Çözünürlük Çekme
-    const resText = video.videoWidth ? `${video.videoWidth} x ${video.videoHeight}` : 'Hesaplanıyor...';
-    document.getElementById('stat-res').innerText = resText;
-
-    // HLS.js motorundan FPS ve Bitrate Çekme
+    document.getElementById('stat-res').innerText = video.videoWidth ? `${video.videoWidth} x ${video.videoHeight}` : 'Hesaplanıyor...';
     if (hls && hls.levels && hls.currentLevel >= 0) {
       const level = hls.levels[hls.currentLevel];
-      
-      const bitrate = level.bitrate ? (level.bitrate / 1000).toFixed(0) + ' kbps' : 'Otomatik';
-      document.getElementById('stat-bit').innerText = bitrate;
-
-      let fps = 'Akıllı Uyum';
-      if (level.frameRate) fps = level.frameRate + ' fps';
-      else if (level.attrs && level.attrs['FRAME-RATE']) fps = level.attrs['FRAME-RATE'] + ' fps';
-      else if (video.videoWidth) fps = 'Stabilize Ediliyor';
-      
-      document.getElementById('stat-fps').innerText = fps;
-      
+      document.getElementById('stat-bit').innerText = level.bitrate ? (level.bitrate / 1000).toFixed(0) + ' kbps' : 'Otomatik';
+      document.getElementById('stat-fps').innerText = level.frameRate ? level.frameRate + ' fps' : (level.attrs && level.attrs['FRAME-RATE'] ? level.attrs['FRAME-RATE'] + ' fps' : (video.videoWidth ? 'Stabilize Ediliyor' : 'Akıllı Uyum'));
     } else {
-      document.getElementById('stat-bit').innerText = 'Doğrudan Akış';
-      document.getElementById('stat-fps').innerText = 'Orijinal Kaynak';
+      document.getElementById('stat-bit').innerText = 'Doğrudan Akış'; document.getElementById('stat-fps').innerText = 'Orijinal Kaynak';
     }
   }
 
