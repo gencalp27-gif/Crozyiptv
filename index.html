@@ -41,17 +41,25 @@
     .video-container { position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #222; }
     .video-container video { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
     
-    .category-scroll { display: flex; overflow-x: auto; padding: 10px; gap: 10px; background: var(--panel-bg); }
-    .category-scroll button { background: #222; color: #fff; border: 1px solid #333; padding: 8px 15px; border-radius: 20px; white-space: nowrap; font-weight: bold; border:none; cursor:pointer;}
-    .category-scroll button.active { background: rgba(255, 30, 39, 0.2); border: 1px solid var(--ihs-red); }
+    /* Navigasyon Barı (Geri Butonu ve Başlık) */
+    .nav-bar { display: flex; align-items: center; padding: 10px 15px; gap: 10px; background: var(--panel-bg); border-bottom: 1px solid #222; border-top: 1px solid #222; }
+    .back-btn { background: #222; color: #fff; border: 1px solid #333; padding: 6px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; }
+    .back-btn:hover { background: rgba(255, 30, 39, 0.2); border-color: var(--ihs-red); }
+    .nav-title { font-weight: bold; font-size: 14px; color: var(--ihs-red); flex: 1; text-align: right;}
     
-    .channels-grid { padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-    .channel-card {
-      background: var(--panel-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px;
-      text-align: center; cursor: pointer; transition: 0.2s;
-    }
+    /* Klasör (Kategori) Tasarımı */
+    .folder-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
+    .folder-card { background: var(--panel-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 25px 15px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .folder-card:active { transform: scale(0.95); border-color: var(--ihs-red); background: rgba(255,30,39,0.1); }
+    .folder-card i { font-size: 35px; color: var(--ihs-red); margin-bottom: 12px; }
+    .folder-name { font-weight: bold; font-size: 13px; color: white; }
+    .folder-count { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+
+    /* Kanal Grid Tasarımı */
+    .channels-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+    .channel-card { background: var(--panel-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
     .channel-card:active { transform: scale(0.95); border-color: var(--ihs-red); }
-    .channel-card img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 10px; border-radius: 50%; background: #fff; padding: 5px; }
+    .channel-card img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 50%; background: #fff; padding: 5px; }
     .channel-name { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   </style>
 </head>
@@ -77,12 +85,19 @@
       </div>
     </div>
     
-    <div class="category-scroll" id="dynamic-categories"></div>
-    <div class="channels-grid" id="channels-grid"></div>
+    <div class="nav-bar">
+      <button class="back-btn" id="back-btn" onclick="showFolders()"><i class="fas fa-arrow-left"></i> Geri</button>
+      <div class="nav-title" id="nav-title">Kategoriler</div>
+    </div>
+
+    <!-- Klasörler ve Kanallar İçin Alanlar -->
+    <div class="folder-grid" id="folder-grid"></div>
+    <div class="channels-grid" id="channels-grid" style="display: none;"></div>
   </main>
 </div>
 
 <script>
+// Gömülü Listen
 const gomuluListe = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.imgur.com/PexhKwp.png" group-title="Turkey",4U TV (720p)
@@ -269,7 +284,6 @@ https://live.artidijitalmedya.com/artidijital_sat7turk/sat7turk/playlist.m3u8
 https://b01c02nl.mediatriple.net/videoonlylive/mtisvwurbfcyslive/broadcast_58d915bd40efc.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://i.imgur.com/9O3DHRB.png" group-title="Turkey",Star TV (Turkiye) (720p)
 https://dogus.daioncdn.net/startv/startv_720p.m3u8?app=a20ac41e-bdc3-4aa1-934d-26b484480ac9&ce=3&sid=8l4w3lst4co5
-https://dogus.daioncdn.net/startv/startv_720p.m3u8?app=a20ac41e-bdc3-4aa1-934d-26b484480ac9&ce=3&sid=8l4w3lst4co5
 #EXTINF:-1 tvg-logo="https://i.imgur.com/64tph9N.png" group-title="Turkey",Sun RTV (720p) [Not 24/7]
 https://live.artidijitalmedya.com/artidijital_sunrtv/sunrtv/playlist.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/TBMM_TV_logo.svg/960px-TBMM_TV_logo.svg.png" group-title="Turkey",TBMM TV (720p)
@@ -320,7 +334,7 @@ https://turkmedya-live.ercdn.net/tv4/tv4.m3u8
 
 let allChannels = [];
 let categories = new Set();
-let currentCategory = 'Tümü';
+let currentCategory = '';
 let hls = null;
 const video = document.getElementById('video-player');
 
@@ -330,7 +344,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function parseContent(content) {
   const lines = content.split('\n');
-  allChannels = []; categories.clear(); categories.add('Tümü');
+  allChannels = []; 
+  categories.clear(); 
+  categories.add('Tümü'); // Ana klasör
+
   let currentChannel = {};
 
   for (let line of lines) {
@@ -348,43 +365,78 @@ function parseContent(content) {
       currentChannel = {};
     }
   }
-  renderCategories();
-  filterByCategory('Tümü');
+  showFolders(); // Sayfa açılır açılmaz klasörleri göster
 }
 
-function renderCategories() {
-  const list = document.getElementById('dynamic-categories');
-  list.innerHTML = '';
+function showFolders() {
+  document.getElementById('folder-grid').style.display = 'grid';
+  document.getElementById('channels-grid').style.display = 'none';
+  document.getElementById('back-btn').style.display = 'none';
+  document.getElementById('nav-title').innerText = 'Kategoriler';
+  document.getElementById('search-input').value = ''; // Arama kutusunu temizle
+
+  const grid = document.getElementById('folder-grid');
+  grid.innerHTML = '';
+
   categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.innerText = cat;
-    btn.onclick = () => filterByCategory(cat);
-    if(cat === currentCategory) btn.className = 'active';
-    list.appendChild(btn);
+    const count = cat === 'Tümü' ? allChannels.length : allChannels.filter(c => c.group === cat).length;
+    const card = document.createElement('div');
+    card.className = 'folder-card';
+    card.innerHTML = `
+      <i class="fas fa-folder-open"></i>
+      <div class="folder-name">${cat}</div>
+      <div class="folder-count">${count} Kanal</div>
+    `;
+    card.onclick = () => openFolder(cat);
+    grid.appendChild(card);
   });
 }
 
-function filterByCategory(cat) {
+function openFolder(cat) {
   currentCategory = cat;
-  renderCategories();
+  document.getElementById('folder-grid').style.display = 'none';
+  document.getElementById('channels-grid').style.display = 'grid';
+  document.getElementById('back-btn').style.display = 'block';
+  document.getElementById('nav-title').innerText = cat;
+  
   renderChannels();
 }
 
 function searchChannels() {
-  renderChannels();
+  const query = document.getElementById('search-input').value.toLowerCase();
+  
+  // Arama kutusu boşsa eski yerine dön
+  if(query.trim() === '') {
+     if(currentCategory) openFolder(currentCategory);
+     else showFolders();
+     return;
+  }
+  
+  // Arama yapılıyorsa klasörleri gizle, tüm kanallarda arama yap
+  document.getElementById('folder-grid').style.display = 'none';
+  document.getElementById('channels-grid').style.display = 'grid';
+  document.getElementById('back-btn').style.display = 'block';
+  document.getElementById('nav-title').innerText = 'Arama Sonuçları';
+  
+  const grid = document.getElementById('channels-grid');
+  grid.innerHTML = '';
+  
+  const filtered = allChannels.filter(c => c.name.toLowerCase().includes(query));
+  
+  filtered.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'channel-card';
+    card.innerHTML = `<img src="${c.logo}" onerror="this.src='https://via.placeholder.com/50?text=TV'"><div class="channel-name" title="${c.name}">${c.name}</div>`;
+    card.onclick = () => playStream(c.url);
+    grid.appendChild(card);
+  });
 }
 
 function renderChannels() {
   const grid = document.getElementById('channels-grid');
   grid.innerHTML = '';
   
-  const query = document.getElementById('search-input').value.toLowerCase();
-  
-  let filtered = currentCategory === 'Tümü' ? allChannels : allChannels.filter(c => c.group === currentCategory);
-  
-  if (query) {
-    filtered = filtered.filter(c => c.name.toLowerCase().includes(query));
-  }
+  const filtered = currentCategory === 'Tümü' ? allChannels : allChannels.filter(c => c.group === currentCategory);
   
   filtered.forEach(c => {
     const card = document.createElement('div');
