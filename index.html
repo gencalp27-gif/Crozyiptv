@@ -104,10 +104,10 @@
       display: flex; align-items: center; justify-content: space-between; padding: 25px 20px 15px 20px; z-index: 20; opacity: 1; transition: opacity 0.4s ease;
     }
     .video-container.idle .custom-controls { opacity: 0; pointer-events: none; }
-    .controls-left, .controls-right { display: flex; align-items: center; gap: 20px; }
+    .controls-left, .controls-right { display: flex; align-items: center; gap: 15px; }
     .control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
     .control-btn:hover { color: var(--ihs-red); transform: scale(1.1); }
-    .control-btn.play-btn { font-size: 24px; }
+    .control-btn.play-btn { font-size: 24px; margin: 0 5px; }
 
     .now-playing-bar { display: none; padding: 10px 15px; align-items: center; gap: 12px; background: #0a0a0a; border-bottom: 1px solid var(--border-color); }
     .now-playing-logo { width: 35px; height: 35px; border-radius: 6px; background: #fff; padding: 2px; object-fit: contain; }
@@ -192,12 +192,14 @@
         <video id="video-player" playsinline></video>
         <div class="custom-controls" id="custom-controls">
           <div class="controls-left">
+            <button class="control-btn" id="prev-channel-btn" title="Önceki Kanal"><i class="fas fa-step-backward"></i></button>
             <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
+            <button class="control-btn" id="next-channel-btn" title="Sonraki Kanal"><i class="fas fa-step-forward"></i></button>
             <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
           </div>
           <div class="controls-right">
-            <button class="control-btn" id="pip-btn"><i class="fas fa-clone"></i></button>
-            <button class="control-btn" id="fullscreen-btn"><i class="fas fa-expand"></i></button>
+            <button class="control-btn" id="pip-btn" title="Pencere Modu"><i class="fas fa-clone"></i></button>
+            <button class="control-btn" id="fullscreen-btn" title="Tam Ekran"><i class="fas fa-expand"></i></button>
           </div>
         </div>
       </div>
@@ -331,7 +333,6 @@ function initIptvApp() {
   renderCategories(); renderChannels(); initPlayerControls(); initKeyboardControls();
 }
 
-// Menü ve Listeleme
 function renderCategories() {
   const bar = document.getElementById('categories-bar'); bar.innerHTML = '';
   const fragment = document.createDocumentFragment();
@@ -381,28 +382,24 @@ function renderChannels(searchQuery = '') {
   list.appendChild(fragment);
 }
 
-// Video Oynatma ve Hata Atlatma (Auto-Skip)
 function playStream(channelObj, indexInList) {
   activeChannelIndex = indexInList;
-  renderChannels(document.getElementById('search-input').value.toLowerCase()); // Aktif kanalı vurgula
+  renderChannels(document.getElementById('search-input').value.toLowerCase()); 
   
   clearTimeout(skipTimeout);
   document.getElementById('error-overlay').style.display = 'none';
   document.getElementById('loading-spinner').style.display = 'block';
   
-  // Alt Bar Güncelle
   document.getElementById('now-playing-bar').style.display = 'flex';
   document.getElementById('np-logo').src = channelObj.logo;
   document.getElementById('np-title').innerText = channelObj.name;
 
-  // TV OSD Göster
   showOSD(channelObj.name, channelObj.logo);
 
   if (hls) hls.destroy();
   if (Hls.isSupported() && channelObj.url.includes('.m3u8')) {
     hls = new Hls({enableWorker: true, lowLatencyMode: true});
     
-    // Hata Yakalama ve Oto-Geçiş
     hls.on(Hls.Events.ERROR, function (event, data) {
       if (data.fatal) {
         document.getElementById('loading-spinner').style.display = 'none';
@@ -425,21 +422,19 @@ function playStream(channelObj, indexInList) {
   }
 }
 
-// Zapping Fonksiyonları
 function playNextChannel() {
   if(currentDisplayList.length === 0) return;
   let nextIdx = activeChannelIndex + 1;
-  if (nextIdx >= currentDisplayList.length) nextIdx = 0; // Başa dön
+  if (nextIdx >= currentDisplayList.length) nextIdx = 0; 
   playStream(currentDisplayList[nextIdx], nextIdx);
 }
 function playPrevChannel() {
   if(currentDisplayList.length === 0) return;
   let prevIdx = activeChannelIndex - 1;
-  if (prevIdx < 0) prevIdx = currentDisplayList.length - 1; // Sona git
+  if (prevIdx < 0) prevIdx = currentDisplayList.length - 1; 
   playStream(currentDisplayList[prevIdx], prevIdx);
 }
 
-// OSD Gösterimi
 function showOSD(name, logo) {
   const osd = document.getElementById('tv-osd');
   document.getElementById('osd-logo').src = logo;
@@ -449,12 +444,9 @@ function showOSD(name, logo) {
   osdTimeout = setTimeout(() => { osd.classList.remove('show'); }, 3000);
 }
 
-// Klavye Kısayolları (TV Kumandası)
 function initKeyboardControls() {
   document.addEventListener('keydown', (e) => {
-    // Arama kutusuna yazı yazıyorsa kısayolları iptal et
     if(document.activeElement.tagName === 'INPUT') return; 
-    
     switch(e.code) {
       case 'Space': e.preventDefault(); if (video.paused) video.play(); else video.pause(); break;
       case 'KeyF': e.preventDefault(); document.getElementById('fullscreen-btn').click(); break;
@@ -465,18 +457,23 @@ function initKeyboardControls() {
   });
 }
 
-// Player UI İkonları ve Kontroller
 function initPlayerControls() {
   const playBtn = document.getElementById('play-pause-btn');
   const muteBtn = document.getElementById('mute-btn');
   const fsBtn = document.getElementById('fullscreen-btn');
   const pipBtn = document.getElementById('pip-btn');
+  const prevBtn = document.getElementById('prev-channel-btn');
+  const nextBtn = document.getElementById('next-channel-btn');
   const vContainer = document.getElementById('video-container');
 
   if (!document.pictureInPictureEnabled) pipBtn.style.display = 'none';
 
   function togglePlay() { if (video.paused) video.play(); else video.pause(); }
   playBtn.onclick = togglePlay; video.onclick = togglePlay;
+
+  // Yeni Eklenen İleri-Geri Butonları
+  prevBtn.onclick = playPrevChannel;
+  nextBtn.onclick = playNextChannel;
 
   muteBtn.onclick = () => { video.muted = !video.muted; muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; };
 
