@@ -80,6 +80,27 @@
     .osd-info h2 { font-size: 22px; margin: 0 0 5px 0; color: #fff; text-shadow: 2px 2px 4px #000;}
     .osd-info span { font-size: 12px; font-weight: bold; color: var(--ihs-red); background: rgba(229,9,20,0.1); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(229,9,20,0.3); }
 
+    /* VİDEO İÇİ KANAL MENÜSÜ (YENİ EKLENDİ) */
+    .video-channel-menu {
+      position: absolute; top: 0; right: -320px; width: 300px; height: 100%;
+      background: rgba(10, 10, 10, 0.95); z-index: 25; padding: 15px;
+      display: flex; flex-direction: column; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-left: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);
+    }
+    .video-channel-menu.open { right: 0; }
+    .vcm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+    .vcm-header h3 { font-size: 16px; margin: 0; color: #fff; display: flex; align-items: center; gap: 10px;}
+    .vcm-close { background: none; border: none; color: #fff; cursor: pointer; font-size: 20px; transition: 0.2s; }
+    .vcm-close:hover { color: var(--ihs-red); transform: scale(1.1); }
+    
+    .vcm-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 5px; }
+    .vcm-list::-webkit-scrollbar { width: 4px; }
+    .vcm-list .channel-row { background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 8px; padding: 8px 10px; }
+    .vcm-list .channel-row:hover { background: rgba(255,255,255,0.1); border-color: #444; }
+    .vcm-list .channel-row.active-channel { background: rgba(229, 9, 20, 0.25); border-left: 3px solid var(--ihs-red); border-radius: 4px; }
+    .vcm-list img { width: 35px; height: 35px; object-fit: contain; margin-right: 12px; border-radius: 4px; background: #fff; padding: 2px; }
+    .vcm-list .channel-row-name { font-size: 13px; font-weight: 600; color: #ddd; }
+
     /* Video Hata ve Yükleme */
     .loading-spinner {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -104,10 +125,13 @@
       display: flex; align-items: center; justify-content: space-between; padding: 25px 20px 15px 20px; z-index: 20; opacity: 1; transition: opacity 0.4s ease;
     }
     .video-container.idle .custom-controls { opacity: 0; pointer-events: none; }
-    .controls-left, .controls-right { display: flex; align-items: center; gap: 15px; }
+    /* Menu açıkken kontroller kaybolmasın */
+    .video-container.menu-open .custom-controls { opacity: 1; pointer-events: auto; }
+
+    .controls-left, .controls-right { display: flex; align-items: center; gap: 20px; }
     .control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
     .control-btn:hover { color: var(--ihs-red); transform: scale(1.1); }
-    .control-btn.play-btn { font-size: 24px; margin: 0 5px; }
+    .control-btn.play-btn { font-size: 24px; }
 
     .now-playing-bar { display: none; padding: 10px 15px; align-items: center; gap: 12px; background: #0a0a0a; border-bottom: 1px solid var(--border-color); }
     .now-playing-logo { width: 35px; height: 35px; border-radius: 6px; background: #fff; padding: 2px; object-fit: contain; }
@@ -143,6 +167,7 @@
       .tv-osd { top: 10px; left: 10px; padding: 10px; }
       .osd-logo { width: 35px; height: 35px; }
       .osd-info h2 { font-size: 16px; }
+      .video-channel-menu { width: 240px; right: -260px; }
     }
     @media (min-width: 900px) {
       .app-wrapper { flex-direction: row; }
@@ -173,6 +198,15 @@
     <div class="player-section">
       <div class="video-container" id="video-container">
         
+        <!-- VİDEO İÇİ KANAL MENÜSÜ -->
+        <div class="video-channel-menu" id="video-channel-menu">
+          <div class="vcm-header">
+            <h3><i class="fas fa-list-ul"></i> Kanallar</h3>
+            <button class="vcm-close" id="vcm-close-btn"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="vcm-list" id="vcm-list"></div>
+        </div>
+
         <!-- TV ZAPPING OSD -->
         <div class="tv-osd" id="tv-osd">
           <img id="osd-logo" class="osd-logo" src="" alt="logo">
@@ -192,17 +226,18 @@
         <video id="video-player" playsinline></video>
         <div class="custom-controls" id="custom-controls">
           <div class="controls-left">
-            <button class="control-btn" id="prev-channel-btn" title="Önceki Kanal"><i class="fas fa-step-backward"></i></button>
             <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
-            <button class="control-btn" id="next-channel-btn" title="Sonraki Kanal"><i class="fas fa-step-forward"></i></button>
             <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
+            <!-- LİSTE AÇMA BUTONU -->
+            <button class="control-btn" id="channel-menu-btn" title="Kanal Listesi" style="margin-left: 10px;"><i class="fas fa-list-ul"></i></button>
           </div>
           <div class="controls-right">
-            <button class="control-btn" id="pip-btn" title="Pencere Modu"><i class="fas fa-clone"></i></button>
-            <button class="control-btn" id="fullscreen-btn" title="Tam Ekran"><i class="fas fa-expand"></i></button>
+            <button class="control-btn" id="pip-btn"><i class="fas fa-clone"></i></button>
+            <button class="control-btn" id="fullscreen-btn"><i class="fas fa-expand"></i></button>
           </div>
         </div>
       </div>
+      
       <div class="now-playing-bar" id="now-playing-bar">
         <img id="np-logo" class="now-playing-logo" src="" alt="logo">
         <div class="now-playing-info">
@@ -380,6 +415,9 @@ function renderChannels(searchQuery = '') {
     fragment.appendChild(row);
   });
   list.appendChild(fragment);
+  
+  // VCM (Video İçin Menü) listesini de güncelle
+  populateVideoChannelMenu();
 }
 
 function playStream(channelObj, indexInList) {
@@ -457,33 +495,80 @@ function initKeyboardControls() {
   });
 }
 
+// =========================================
+// VİDEO İÇİ KANAL MENÜSÜ FONKSİYONLARI
+// =========================================
+const vcmMenu = document.getElementById('video-channel-menu');
+const vContainer = document.getElementById('video-container');
+
+document.getElementById('channel-menu-btn').onclick = (e) => {
+  e.stopPropagation(); // Videonun durmasını engelle
+  populateVideoChannelMenu();
+  vcmMenu.classList.add('open');
+  vContainer.classList.add('menu-open'); // Kontrollerin kaybolmasını engelle
+};
+
+document.getElementById('vcm-close-btn').onclick = (e) => {
+  e.stopPropagation();
+  vcmMenu.classList.remove('open');
+  vContainer.classList.remove('menu-open');
+};
+
+function populateVideoChannelMenu() {
+  const vList = document.getElementById('vcm-list');
+  vList.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  
+  currentDisplayList.forEach((c, index) => {
+    const isActive = (activeChannelIndex === index);
+    const row = document.createElement('div');
+    row.className = 'channel-row' + (isActive ? ' active-channel' : '');
+    row.innerHTML = `
+      <img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'">
+      <div class="channel-row-name">${c.name}</div>
+    `;
+    row.onclick = (e) => { 
+      e.stopPropagation();
+      playStream(c, index); 
+      vcmMenu.classList.remove('open'); 
+      vContainer.classList.remove('menu-open');
+    };
+    fragment.appendChild(row);
+  });
+  vList.appendChild(fragment);
+}
+
+
 function initPlayerControls() {
   const playBtn = document.getElementById('play-pause-btn');
   const muteBtn = document.getElementById('mute-btn');
   const fsBtn = document.getElementById('fullscreen-btn');
   const pipBtn = document.getElementById('pip-btn');
-  const prevBtn = document.getElementById('prev-channel-btn');
-  const nextBtn = document.getElementById('next-channel-btn');
-  const vContainer = document.getElementById('video-container');
 
   if (!document.pictureInPictureEnabled) pipBtn.style.display = 'none';
 
-  function togglePlay() { if (video.paused) video.play(); else video.pause(); }
-  playBtn.onclick = togglePlay; video.onclick = togglePlay;
+  function togglePlay(e) {
+    // Eğer video içi menü açıksa videoya tıklandığında menüyü kapat
+    if (vcmMenu.classList.contains('open')) {
+      vcmMenu.classList.remove('open');
+      vContainer.classList.remove('menu-open');
+      return;
+    }
+    if (video.paused) video.play(); else video.pause(); 
+  }
+  playBtn.onclick = (e) => { e.stopPropagation(); togglePlay(); };
+  video.onclick = togglePlay;
 
-  // Yeni Eklenen İleri-Geri Butonları
-  prevBtn.onclick = playPrevChannel;
-  nextBtn.onclick = playNextChannel;
+  muteBtn.onclick = (e) => { e.stopPropagation(); video.muted = !video.muted; muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; };
 
-  muteBtn.onclick = () => { video.muted = !video.muted; muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; };
-
-  fsBtn.onclick = () => {
+  fsBtn.onclick = (e) => {
+    e.stopPropagation();
     if (!document.fullscreenElement) { if (vContainer.requestFullscreen) vContainer.requestFullscreen(); else if (vContainer.webkitRequestFullscreen) vContainer.webkitRequestFullscreen(); } 
     else { if (document.exitFullscreen) document.exitFullscreen(); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); }
   };
   video.ondblclick = fsBtn.onclick;
 
-  pipBtn.onclick = async () => { try { if (document.pictureInPictureElement) await document.exitPictureInPicture(); else await video.requestPictureInPicture(); } catch (err) {} };
+  pipBtn.onclick = async (e) => { e.stopPropagation(); try { if (document.pictureInPictureElement) await document.exitPictureInPicture(); else await video.requestPictureInPicture(); } catch (err) {} };
 
   video.addEventListener('play', () => { playBtn.innerHTML = '<i class="fas fa-pause"></i>'; });
   video.addEventListener('pause', () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; });
@@ -491,10 +576,10 @@ function initPlayerControls() {
   let timeout;
   function resetControls() {
     vContainer.classList.remove('idle'); clearTimeout(timeout);
-    timeout = setTimeout(() => { if (!video.paused) vContainer.classList.add('idle'); }, 3000);
+    timeout = setTimeout(() => { if (!video.paused && !vcmMenu.classList.contains('open')) vContainer.classList.add('idle'); }, 3000);
   }
   vContainer.addEventListener('mousemove', resetControls); vContainer.addEventListener('touchstart', resetControls);
-  vContainer.addEventListener('mouseleave', () => { if (!video.paused) vContainer.classList.add('idle'); });
+  vContainer.addEventListener('mouseleave', () => { if (!video.paused && !vcmMenu.classList.contains('open')) vContainer.classList.add('idle'); });
 }
 </script>
 </body>
