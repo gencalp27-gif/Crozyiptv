@@ -191,12 +191,12 @@
 </head>
 <body>
 
-  <!-- BAN & GÜVENLİK EKRANI -->
   <div class="ban-screen" id="ban-screen">
     <i class="fas fa-ban"></i>
     <h1>ERİŞİM ENGELLENDİ</h1>
     <p>Güvenlik ihlali sebebiyle bu cihaz engellendi.</p>
   </div>
+  
   <div class="security-screen" id="security-screen">
     <div class="security-logo"></div>
     <div class="security-title">IHS PRIVATE</div>
@@ -205,12 +205,10 @@
     <div class="error-msg" id="error-msg"></div>
   </div>
 
-  <!-- ANA UYGULAMA -->
   <div class="app-wrapper" id="app-wrapper">
     <div class="player-section">
       <div class="video-container" id="video-container">
         
-        <!-- TEKNİK İSTATİSTİK PANELİ -->
         <div class="stats-panel" id="stats-panel">
           <div class="stats-header"><span>YAYIN BİLGİSİ</span> <i class="fas fa-satellite-dish" style="color:var(--ihs-red)"></i></div>
           <div class="stat-row"><span class="stat-label">Çözünürlük:</span><span class="stat-value" id="stat-res">Bekleniyor</span></div>
@@ -218,16 +216,14 @@
           <div class="stat-row"><span class="stat-label">Bit Hızı:</span><span class="stat-value" id="stat-bit">Bekleniyor</span></div>
         </div>
 
-        <!-- VİDEO İÇİ KANAL MENÜSÜ -->
         <div class="video-channel-menu" id="video-channel-menu">
           <div class="vcm-header">
-            <h3><i class="fas fa-list-ul"></i> Kanallar</h3>
+            <h3><i class="fas fa-list-ul"></i> İçerikler</h3>
             <button class="vcm-close" id="vcm-close-btn"><i class="fas fa-times"></i></button>
           </div>
           <div class="vcm-list" id="vcm-list"></div>
         </div>
 
-        <!-- TV ZAPPING OSD -->
         <div class="tv-osd" id="tv-osd">
           <img id="osd-logo" class="osd-logo" src="" alt="logo">
           <div class="osd-info">
@@ -239,15 +235,14 @@
         <div class="loading-spinner" id="loading-spinner"></div>
         <div class="error-overlay" id="error-overlay">
           <i class="fas fa-exclamation-triangle"></i>
-          <p>Yayın Bağlantısı Koptu</p>
-          <span id="error-countdown">Sonraki kanala geçiliyor... (3)</span>
+          <p>Bağlantı Koptu</p>
+          <span id="error-countdown">Sonraki içeriğe geçiliyor... (3)</span>
         </div>
 
         <video id="video-player" playsinline></video>
         
         <div class="custom-controls" id="custom-controls">
           <div class="controls-left">
-            <!-- İleri-Geri butonları tamamen kaldırıldı. Yerini sadece Play, Ses ve Kanal Menüsü aldı -->
             <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
             <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
             <button class="control-btn" id="channel-menu-btn" title="Kanal Listesi" style="margin-left: 10px;"><i class="fas fa-list-ul"></i></button>
@@ -264,7 +259,7 @@
         <img id="np-logo" class="now-playing-logo" src="" alt="logo">
         <div class="now-playing-info">
           <div class="now-playing-title" id="np-title">-</div>
-          <div class="live-badge"><div class="live-dot"></div> CANLI YAYIN</div>
+          <div class="live-badge"><div class="live-dot"></div> CANLI</div>
         </div>
       </div>
     </div>
@@ -273,7 +268,7 @@
       <div class="search-container">
         <div class="search-box">
           <i class="fas fa-search" style="color: var(--text-muted);"></i>
-          <input type="text" id="search-input" placeholder="Kanal ara..." oninput="searchChannels()">
+          <input type="text" id="search-input" placeholder="İçerik ara..." oninput="searchChannels()">
         </div>
       </div>
       <div class="categories-bar" id="categories-bar"></div>
@@ -319,7 +314,7 @@ function checkPassword() {
 }
 
 // =========================================
-// 2. IPTV MOTORU & OSD & AUTO-SKIP
+// 2. IPTV MOTORU & DIŞ KAYNAK ÇEKİCİ
 // =========================================
 let allChannels = []; let categories = new Set(); let currentCategory = 'Tüm Kanallar';
 let activeChannelIndex = -1; let currentDisplayList = [];
@@ -370,66 +365,105 @@ https://tv-trt1.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/TRT_Haber_Eyl%C3%BCl_2020_Logo.svg/960px-TRT_Haber_Eyl%C3%BCl_2020_Logo.svg.png" group-title="Turkey",TRT Haber
 https://tv-trthaber.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 group-title="TRT",TRT 1
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trt1.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT 2
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trt2.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Haber
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trthaber.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Spor
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtspor1.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Spor Yıldız
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtspor2.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Türk
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtturk.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Avaz
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtavaz.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Belgesel
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtbelgesel.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Müzik
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtmuzik.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Kurdî
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtkurdi.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Arabi
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtarabi.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT World
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtworld.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Çocuk
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtcocuk.medya.trt.com.tr/master_1440.m3u8
 #EXTINF:-1 group-title="TRT",TRT Diyanet Çocuk
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 https://tv-trtdiyanetcocuk.medya.trt.com.tr/master_1440.m3u8
 `;
 
 function initIptvApp() {
-  const lines = gomuluListe.split('\n');
-  let currentChannel = {};
+  // 1. Önce Gömülü Listeyi Parse Et (Sıfır Gecikme)
+  parseM3UString(gomuluListe);
+  renderCategories(); 
+  renderChannels(); 
+  initPlayerControls(); 
+  initKeyboardControls();
+
+  // 2. Arka Planda Özel Filmleri Çek (Uygulamayı dondurmaz)
+  fetchExternalSource('https://tinyurl.com/zerkfilm2');
+}
+
+function parseM3UString(content) {
+  const lines = content.split('\n');
+  let currentChannel = null;
+
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim();
     if (!line) continue;
+    
     if (line.startsWith('#EXTINF:')) {
-      const logo = (line.match(/tvg-logo="([^"]+)"/) || [])[1] || 'https://via.placeholder.com/150?text=TV';
-      const group = (line.match(/group-title="([^"]+)"/) || [])[1] || 'Diğer';
-      currentChannel = { id: i, name: line.split(',').pop().trim(), logo, group };
+      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+      const groupMatch = line.match(/group-title="([^"]+)"/);
+      
+      const logo = logoMatch ? logoMatch[1] : 'https://via.placeholder.com/150?text=TV';
+      const group = groupMatch ? groupMatch[1] : 'Diğer';
+      const name = line.split(',').pop().trim();
+      
+      currentChannel = { id: allChannels.length, name: name, logo: logo, group: group };
       categories.add(group);
     } else if (line.startsWith('http')) {
-      currentChannel.url = line;
-      allChannels.push(currentChannel);
+      if (currentChannel) {
+        currentChannel.url = line;
+        allChannels.push(currentChannel);
+        currentChannel = null;
+      } else {
+         // Eğer EXTINF yoksa doğrudan listeye ekle
+         allChannels.push({ id: allChannels.length, name: "Bilinmeyen İçerik", logo: "https://via.placeholder.com/150?text=İçerik", group: "Filmler", url: line });
+      }
     }
   }
-  renderCategories(); renderChannels(); initPlayerControls(); initKeyboardControls();
+}
+
+async function fetchExternalSource(url) {
+  try {
+    // Web tarayıcılarının CORS kısıtlamasını delmek için proxy kullanıyoruz
+    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+    const response = await fetch(proxyUrl + encodeURIComponent(url));
+    const data = await response.text();
+
+    if (data.includes('#EXTINF')) {
+      parseM3UString(data); // M3U Listesi ise ayrıştır
+    } else {
+      // Değilse doğrudan tekil film olarak Filmler kategorisine ekle
+      allChannels.push({
+        id: allChannels.length,
+        name: "Zerk (Film)",
+        logo: "https://via.placeholder.com/150?text=Film",
+        group: "Filmler",
+        url: url
+      });
+      categories.add("Filmler");
+    }
+    
+    // İşlem bitince listeleri kullanıcı hissetmeden güncelle
+    renderCategories();
+    renderChannels(document.getElementById('search-input').value.toLowerCase());
+  } catch (error) {
+    console.error("Dış kaynak çekilemedi:", error);
+  }
 }
 
 function renderCategories() {
@@ -505,10 +539,10 @@ function playStream(channelObj, indexInList) {
         document.getElementById('loading-spinner').style.display = 'none';
         document.getElementById('error-overlay').style.display = 'flex';
         let countdown = 3;
-        document.getElementById('error-countdown').innerText = `Sonraki kanala geçiliyor... (${countdown})`;
+        document.getElementById('error-countdown').innerText = `Sonraki içeriğe geçiliyor... (${countdown})`;
         skipTimeout = setInterval(() => {
           countdown--;
-          document.getElementById('error-countdown').innerText = `Sonraki kanala geçiliyor... (${countdown})`;
+          document.getElementById('error-countdown').innerText = `Sonraki içeriğe geçiliyor... (${countdown})`;
           if(countdown <= 0) { clearInterval(skipTimeout); playNextChannel(); }
         }, 1000);
       }
