@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IHS TV - PRO</title>
+  <title>IHS TV - TURBO</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -27,58 +27,36 @@
       overflow: hidden; 
     }
 
-    /* PC İÇİN ÖZEL SCROLLBAR (KAYDIRMA ÇUBUĞU) */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg-main); }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--ihs-red); }
 
-    /* ANA EKRAN DÜZENİ */
-    .app-wrapper {
-      display: flex;
-      height: 100vh;
-      flex-direction: column; /* Mobilde alt alta */
-    }
+    .app-wrapper { display: flex; height: 100vh; flex-direction: column; }
 
-    /* 1. OYNATICI ALANI (SOL/ÜST) */
+    /* OYNATICI ALANI */
     .player-section {
       background: var(--bg-main);
       z-index: 10;
       display: flex;
       flex-direction: column;
+      transform: translateZ(0); /* Donanım Hızlandırma */
     }
 
     .video-container { 
-      width: 100%; 
-      background: #000; 
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%; background: #000; display: flex; align-items: center; justify-content: center;
     }
-    
-    /* PC'de tam sığması, mobilde 16:9 olması için ayar */
     .video-container video { 
-      width: 100%; 
-      height: 100%;
-      object-fit: contain; /* Masaüstünde haber alt yazılarının kesilmesini engeller */
-      display: block;
+      width: 100%; height: 100%; object-fit: contain; display: block;
     }
 
-    /* Aktif Kanal Bilgisi (Canlı İbaresi) */
     .now-playing-bar {
-      display: none; 
-      padding: 15px 20px;
-      align-items: center;
-      gap: 15px;
-      background: #0a0a0a;
-      border-bottom: 1px solid var(--border-color);
+      display: none; padding: 15px 20px; align-items: center; gap: 15px;
+      background: #0a0a0a; border-bottom: 1px solid var(--border-color);
     }
     .now-playing-logo {
-      width: 45px; height: 45px;
-      border-radius: 8px;
-      background: #fff;
-      padding: 3px;
-      object-fit: contain;
+      width: 45px; height: 45px; border-radius: 8px; background: #fff;
+      padding: 3px; object-fit: contain;
     }
     .now-playing-info { flex: 1; }
     .now-playing-title { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
@@ -89,101 +67,78 @@
     .live-dot { width: 8px; height: 8px; background: var(--ihs-red); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-
-    /* 2. KANAL LİSTESİ VE MENÜ ALANI (SAĞ/ALT) */
+    /* MENÜ VE LİSTE ALANI */
     .sidebar-section {
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-main);
-      overflow: hidden;
+      display: flex; flex-direction: column; background: var(--bg-main); overflow: hidden;
     }
 
-    /* Arama Kutusu */
-    .search-container { padding: 15px; background: var(--bg-main); }
+    .search-container { padding: 12px 15px; background: var(--bg-main); }
     .search-box { 
-      display: flex; align-items: center; 
-      background: var(--bg-card); border: 1px solid var(--border-color); 
-      border-radius: 8px; padding: 10px 15px; 
+      display: flex; align-items: center; background: var(--bg-card); 
+      border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px; 
+      transition: border-color 0.2s;
     }
     .search-box input { background: transparent; border: none; color: white; width: 100%; margin-left: 10px; font-size: 14px; }
     .search-box:focus-within { border-color: var(--ihs-red); }
 
-    /* Kategoriler */
     .categories-bar {
-      display: flex; overflow-x: auto; padding: 0 15px 15px 15px; gap: 8px;
+      display: flex; overflow-x: auto; padding: 0 15px 12px 15px; gap: 8px;
       border-bottom: 1px solid var(--border-color);
+      -webkit-overflow-scrolling: touch; /* Mobilde kaydırmayı ivmelendirir */
+      will-change: transform;
     }
     .cat-btn {
       background: var(--bg-card); color: var(--text-muted);
       border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px;
-      font-weight: 600; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s;
+      font-weight: 600; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.15s;
     }
-    .cat-btn:hover { color: #fff; border-color: #555; }
     .cat-btn.active { background: var(--ihs-red); color: #fff; border-color: var(--ihs-red); }
 
-    /* Dikey Kanal Listesi */
     .channel-list {
       flex: 1; overflow-y: auto; padding: 10px 15px;
       display: flex; flex-direction: column; gap: 8px;
+      -webkit-overflow-scrolling: touch;
+      transform: translateZ(0); /* Donanım Hızlandırma */
+      will-change: transform;
     }
     .channel-row {
       display: flex; align-items: center; background: var(--bg-card);
       padding: 10px 15px; border-radius: 10px; border: 1px solid transparent;
-      cursor: pointer; transition: 0.2s;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
     }
-    .channel-row:hover { background: #1a1a1a; border-color: #333; }
-    .channel-row:active { background: rgba(229, 9, 20, 0.15); border-color: var(--ihs-red); transform: scale(0.98); }
+    .channel-row:active { background: rgba(229, 9, 20, 0.15); border-color: var(--ihs-red); transform: scale(0.97); }
     .channel-row img {
       width: 45px; height: 45px; object-fit: contain; background: #fff;
       border-radius: 6px; padding: 3px; margin-right: 15px;
     }
     .channel-row-name { flex: 1; font-weight: 600; font-size: 14px; color: var(--text-main); }
-    .channel-row i { color: var(--text-muted); font-size: 14px; transition: 0.2s; }
-    .channel-row:hover i { color: var(--ihs-red); }
+    .channel-row i { color: var(--text-muted); font-size: 14px; }
 
-
-    /* =========================================
-       RESPONSIVE (PC VE MOBİL AYRIMI) 
-       ========================================= */
-       
-    /* MOBİL GÖRÜNÜM (Genişlik 899px'den küçükse) */
+    /* RESPONSIVE (PC VE MOBİL) */
     @media (max-width: 899px) {
       .player-section { flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
       .video-container { aspect-ratio: 16/9; }
       .sidebar-section { flex: 1; }
     }
-
-    /* MASAÜSTÜ / PC GÖRÜNÜMÜ (Genişlik 900px ve üzeriyse) */
     @media (min-width: 900px) {
       .app-wrapper { flex-direction: row; }
-      
-      /* Sol Taraf: Video Alanı Genişler */
-      .player-section { 
-        flex: 1; /* Kalan tüm boşluğu doldur */
-        border-right: 1px solid var(--border-color); 
-        box-shadow: none;
-      }
+      .player-section { flex: 1; border-right: 1px solid var(--border-color); }
       .video-container { flex: 1; overflow: hidden; background: #000; }
-      
-      /* Sağ Taraf: Yan Menü (Sidebar) Sabit Genişlik Alır */
-      .sidebar-section { 
-        width: 400px; /* PC'de menü genişliği */
-        flex-shrink: 0; 
-      }
+      .sidebar-section { width: 400px; flex-shrink: 0; }
       .now-playing-bar { border-bottom: none; border-top: 1px solid var(--border-color); }
+      .channel-row:hover { background: #1a1a1a; border-color: #333; }
+      .channel-row:hover i { color: var(--ihs-red); }
+      .cat-btn:hover { color: #fff; border-color: #555; }
     }
   </style>
 </head>
 <body>
 
   <div class="app-wrapper">
-    
-    <!-- OYNATICI ALANI (Mobilde üstte, PC'de solda) -->
     <div class="player-section">
       <div class="video-container">
         <video id="video-player" controls autoplay playsinline></video>
       </div>
-      
       <div class="now-playing-bar" id="now-playing-bar">
         <img id="np-logo" class="now-playing-logo" src="" alt="logo">
         <div class="now-playing-info">
@@ -195,26 +150,19 @@
       </div>
     </div>
 
-    <!-- KANAL LİSTESİ VE MENÜ (Mobilde altta, PC'de sağda) -->
     <div class="sidebar-section">
-      
       <div class="search-container">
         <div class="search-box">
           <i class="fas fa-search" style="color: var(--text-muted);"></i>
-          <input type="text" id="search-input" placeholder="Kanal ara..." onkeyup="searchChannels()">
+          <input type="text" id="search-input" placeholder="Kanal ara..." oninput="searchChannels()">
         </div>
       </div>
-
       <div class="categories-bar" id="categories-bar"></div>
       <div class="channel-list" id="channel-list"></div>
-      
     </div>
-
   </div>
 
-
 <script>
-// M3U LİSTESİ
 const gomuluListe = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.imgur.com/PexhKwp.png" group-title="Turkey",4U TV
@@ -265,6 +213,15 @@ let currentCategory = 'Tüm Kanallar';
 let hls = null;
 const video = document.getElementById('video-player');
 
+// HLS.js Turbo Config Ayarları
+const hlsConfig = {
+  enableWorker: true,
+  lowLatencyMode: true,
+  backBufferLength: 90,
+  liveSyncDuration: 3,
+  liveMaxLatencyDuration: 10,
+};
+
 window.addEventListener('DOMContentLoaded', () => {
   parseContent(gomuluListe);
 });
@@ -306,6 +263,9 @@ function renderCategories() {
   const bar = document.getElementById('categories-bar');
   bar.innerHTML = '';
   
+  // Fragment (Parçacık) ile toplu DOM manipülasyonu (Hız Optimizasyonu)
+  const fragment = document.createDocumentFragment();
+  
   categories.forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'cat-btn';
@@ -317,10 +277,13 @@ function renderCategories() {
       renderCategories(); 
       renderChannels();
     };
-    bar.appendChild(btn);
+    fragment.appendChild(btn);
   });
+  
+  bar.appendChild(fragment);
 }
 
+// onkeyup yerine oninput kullanıldı, anlık ve sorunsuz yakalar
 function searchChannels() {
   const query = document.getElementById('search-input').value.toLowerCase();
   renderChannels(query);
@@ -333,20 +296,26 @@ function renderChannels(searchQuery = '') {
   let filtered = currentCategory === 'Tüm Kanallar' ? allChannels : allChannels.filter(c => c.group === currentCategory);
   
   if (searchQuery) {
-    filtered = allChannels.filter(c => c.name.toLowerCase().includes(searchQuery));
+    filtered = filtered.filter(c => c.name.toLowerCase().includes(searchQuery));
   }
+  
+  // Fragment (Parçacık) ile sıfır gecikmeli ekrana basma (Hız Optimizasyonu)
+  const fragment = document.createDocumentFragment();
   
   filtered.forEach(c => {
     const row = document.createElement('div');
     row.className = 'channel-row';
+    // loading="lazy" eklendi. Logolar sadece görünce indirilir. (Hız Optimizasyonu)
     row.innerHTML = `
-      <img src="${c.logo}" onerror="this.src='https://via.placeholder.com/150?text=TV'">
+      <img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'">
       <div class="channel-row-name">${c.name}</div>
       <i class="fas fa-play"></i>
     `;
     row.onclick = () => playStream(c, c.url);
-    list.appendChild(row);
+    fragment.appendChild(row);
   });
+  
+  list.appendChild(fragment);
 }
 
 function playStream(channelObj, url) {
@@ -354,9 +323,12 @@ function playStream(channelObj, url) {
   document.getElementById('np-logo').src = channelObj.logo;
   document.getElementById('np-title').innerText = channelObj.name;
 
-  if (hls) hls.destroy();
+  if (hls) {
+    hls.destroy();
+  }
+  
   if (Hls.isSupported() && url.includes('.m3u8')) {
-    hls = new Hls();
+    hls = new Hls(hlsConfig); // Turbo ayarlarıyla başlat
     hls.loadSource(url);
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play(); });
