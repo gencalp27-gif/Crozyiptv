@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IHS TV - PRO</title>
+  <title>IHS TV - PRO MEDIA PLAYER</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -25,20 +25,16 @@
       height: 100vh; overflow: hidden; 
     }
 
-    /* SPLASH SCREEN (AÇILIŞ ANİMASYONU) */
+    /* SPLASH SCREEN */
     .splash-screen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #000; z-index: 9999; display: flex; flex-direction: column;
       align-items: center; justify-content: center; transition: opacity 0.5s ease;
     }
     .splash-diamond {
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg, #ff4b4b, #8b0000);
-      transform: rotate(45deg);
-      box-shadow: 0 0 30px rgba(229, 9, 20, 0.6);
-      border: 2px solid #ff7a7a;
-      animation: breathe 2s infinite ease-in-out;
-      margin-bottom: 40px;
+      width: 80px; height: 80px; background: linear-gradient(135deg, #ff4b4b, #8b0000);
+      transform: rotate(45deg); box-shadow: 0 0 30px rgba(229, 9, 20, 0.6);
+      border: 2px solid #ff7a7a; animation: breathe 2s infinite ease-in-out; margin-bottom: 40px;
     }
     .splash-text { font-size: 28px; font-weight: 900; letter-spacing: 5px; color: var(--text-main); }
     .splash-text span { color: var(--ihs-red); }
@@ -51,25 +47,66 @@
 
     .app-wrapper { display: flex; height: 100vh; flex-direction: column; }
 
-    /* OYNATICI ALANI */
+    /* =========================================
+       GELİŞMİŞ ÖZEL VİDEO OYNATICI (CUSTOM PLAYER)
+       ========================================= */
     .player-section { background: var(--bg-main); z-index: 10; display: flex; flex-direction: column; transform: translateZ(0); }
-    .video-container { width: 100%; background: #000; display: flex; align-items: center; justify-content: center; position: relative;}
-    .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; }
     
-    /* Üst Bar İkonları (Cast, Ayarlar - Görsel placeholder) */
-    .top-icons { position: absolute; top: 15px; right: 15px; display: flex; gap: 15px; z-index: 20; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-    .top-icons i { font-size: 20px; color: rgba(255,255,255,0.8); cursor: pointer; transition: 0.2s; }
-    .top-icons i:hover { color: #fff; transform: scale(1.1); }
+    .video-container { 
+      width: 100%; background: #000; position: relative; display: flex; 
+      align-items: center; justify-content: center; overflow: hidden;
+    }
+    .video-container video { 
+      width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer;
+    }
 
-    .now-playing-bar { display: none; padding: 15px 20px; align-items: center; gap: 15px; background: #0a0a0a; border-bottom: 1px solid var(--border-color); }
-    .now-playing-logo { width: 45px; height: 45px; border-radius: 8px; background: #fff; padding: 3px; object-fit: contain; }
+    /* Oynatıcı Kontrol Çubuğu (Netflix Tarzı) */
+    .custom-controls {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 15px 10px 15px; z-index: 20;
+      opacity: 1; transition: opacity 0.4s ease;
+    }
+    .video-container.idle .custom-controls { opacity: 0; pointer-events: none; }
+    
+    .controls-left, .controls-right { display: flex; align-items: center; gap: 18px; }
+    
+    .control-btn {
+      background: none; border: none; color: #fff; font-size: 18px;
+      cursor: pointer; transition: 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .control-btn:hover { color: var(--ihs-red); transform: scale(1.1); }
+    .control-btn.play-btn { font-size: 22px; }
+
+    /* Yükleniyor (Buffering) Animasyonu */
+    .loading-spinner {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: var(--ihs-red); border-radius: 50%;
+      animation: spin 1s linear infinite; z-index: 15; display: none;
+    }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* Hata Ekranı */
+    .error-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); z-index: 16; display: none; 
+      flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    }
+    .error-overlay i { font-size: 40px; color: var(--ihs-red); margin-bottom: 10px; }
+    .error-overlay p { color: #fff; font-weight: bold; font-size: 14px; }
+
+    /* Aktif Kanal Bilgisi Barı */
+    .now-playing-bar { display: none; padding: 12px 15px; align-items: center; gap: 15px; background: #0a0a0a; border-bottom: 1px solid var(--border-color); }
+    .now-playing-logo { width: 40px; height: 40px; border-radius: 8px; background: #fff; padding: 3px; object-fit: contain; }
     .now-playing-info { flex: 1; }
-    .now-playing-title { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
-    .live-badge { font-size: 12px; font-weight: bold; color: var(--ihs-red); display: flex; align-items: center; gap: 5px; }
+    .now-playing-title { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+    .live-badge { font-size: 11px; font-weight: bold; color: var(--ihs-red); display: flex; align-items: center; gap: 5px; }
     .live-dot { width: 8px; height: 8px; background: var(--ihs-red); border-radius: 50%; animation: pulse 1.5s infinite; }
 
     /* MENÜ VE LİSTE ALANI */
-    .sidebar-section { display: flex; flex-direction: column; background: var(--bg-main); overflow: hidden; }
+    .sidebar-section { display: flex; flex-direction: column; background: var(--bg-main); overflow: hidden; flex:1;}
     .search-container { padding: 12px 15px; background: var(--bg-main); }
     .search-box { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px; }
     .search-box input { background: transparent; border: none; color: white; width: 100%; margin-left: 10px; font-size: 14px; }
@@ -95,7 +132,6 @@
     @media (max-width: 899px) {
       .player-section { flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
       .video-container { aspect-ratio: 16/9; }
-      .sidebar-section { flex: 1; }
     }
     @media (min-width: 900px) {
       .app-wrapper { flex-direction: row; }
@@ -116,13 +152,34 @@
   </div>
 
   <div class="app-wrapper">
+    
+    <!-- GELİŞMİŞ OYNATICI -->
     <div class="player-section">
-      <div class="video-container">
-        <div class="top-icons">
-          <i class="fab fa-chromecast" title="Yansıt (Yakında)"></i>
+      <div class="video-container" id="video-container">
+        
+        <!-- Yükleniyor ve Hata Katmanları -->
+        <div class="loading-spinner" id="loading-spinner"></div>
+        <div class="error-overlay" id="error-overlay">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>Yayın Bağlantısı Koptu</p>
         </div>
-        <video id="video-player" controls autoplay playsinline></video>
+
+        <!-- Video (controls parametresi silindi, custom yapıldı) -->
+        <video id="video-player" playsinline></video>
+        
+        <!-- Özel Kontrol Çubuğu -->
+        <div class="custom-controls" id="custom-controls">
+          <div class="controls-left">
+            <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
+            <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
+          </div>
+          <div class="controls-right">
+            <button class="control-btn" id="pip-btn" title="Resim İçinde Resim"><i class="fas fa-clone"></i></button>
+            <button class="control-btn" id="fullscreen-btn" title="Tam Ekran"><i class="fas fa-expand"></i></button>
+          </div>
+        </div>
       </div>
+
       <div class="now-playing-bar" id="now-playing-bar">
         <img id="np-logo" class="now-playing-logo" src="" alt="logo">
         <div class="now-playing-info">
@@ -134,6 +191,7 @@
       </div>
     </div>
 
+    <!-- YAN MENÜ -->
     <div class="sidebar-section">
       <div class="search-container">
         <div class="search-box">
@@ -147,7 +205,7 @@
   </div>
 
 <script>
-// AÇILIŞ ANİMASYONU YÖNETİMİ
+// AÇILIŞ ANİMASYONU
 setTimeout(() => {
   const splash = document.getElementById('splash');
   splash.style.opacity = '0';
@@ -202,36 +260,98 @@ let allChannels = [];
 let categories = new Set();
 let currentCategory = 'Tüm Kanallar';
 let hls = null;
-const video = document.getElementById('video-player');
-// LocalStorage'dan favorileri çek (Yoksa boş dizi)
 let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
+
+const video = document.getElementById('video-player');
+const videoContainer = document.getElementById('video-container');
+const playPauseBtn = document.getElementById('play-pause-btn');
+const muteBtn = document.getElementById('mute-btn');
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+const pipBtn = document.getElementById('pip-btn');
+const spinner = document.getElementById('loading-spinner');
+const errorOverlay = document.getElementById('error-overlay');
 
 const hlsConfig = { enableWorker: true, lowLatencyMode: true, backBufferLength: 90 };
 
-window.addEventListener('DOMContentLoaded', () => {
-  parseContent(gomuluListe);
-});
+// =========================================
+// ÖZEL OYNATICI (CUSTOM PLAYER) SCRIPTLERİ
+// =========================================
+
+// PiP Desteği Kontrolü
+if (!document.pictureInPictureEnabled) { pipBtn.style.display = 'none'; }
+
+// Play/Pause Fonksiyonu
+function togglePlay() {
+  if (video.paused) { video.play(); } else { video.pause(); }
+}
+playPauseBtn.onclick = togglePlay;
+video.onclick = togglePlay;
+
+// Ses Aç/Kapat
+muteBtn.onclick = () => {
+  video.muted = !video.muted;
+  muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+};
+
+// Tam Ekran
+fullscreenBtn.onclick = () => {
+  if (!document.fullscreenElement) {
+    if (videoContainer.requestFullscreen) videoContainer.requestFullscreen();
+    else if (videoContainer.webkitRequestFullscreen) videoContainer.webkitRequestFullscreen();
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+};
+video.ondblclick = fullscreenBtn.onclick;
+
+// PiP (Resim İçinde Resim)
+pipBtn.onclick = async () => {
+  try {
+    if (document.pictureInPictureElement) await document.exitPictureInPicture();
+    else await video.requestPictureInPicture();
+  } catch (err) { console.error("PiP Hatası:", err); }
+};
+
+// Video Eventleri (Durum Güncellemeleri)
+video.addEventListener('play', () => { playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; });
+video.addEventListener('pause', () => { playPauseBtn.innerHTML = '<i class="fas fa-play"></i>'; });
+video.addEventListener('waiting', () => { spinner.style.display = 'block'; });
+video.addEventListener('playing', () => { spinner.style.display = 'none'; errorOverlay.style.display = 'none'; });
+
+// Akıllı Kontrol Gizleme (3 Saniye Hareketsizlik)
+let timeout;
+function resetControlsTimeout() {
+  videoContainer.classList.remove('idle');
+  clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    if (!video.paused) videoContainer.classList.add('idle');
+  }, 3000);
+}
+videoContainer.addEventListener('mousemove', resetControlsTimeout);
+videoContainer.addEventListener('touchstart', resetControlsTimeout);
+videoContainer.addEventListener('mouseleave', () => { if (!video.paused) videoContainer.classList.add('idle'); });
+
+// =========================================
+// IPTV LİSTE VE KANAL YÖNETİMİ
+// =========================================
+window.addEventListener('DOMContentLoaded', () => { parseContent(gomuluListe); });
 
 function parseContent(content) {
   const lines = content.split('\n');
-  allChannels = []; 
-  categories.clear(); 
-
+  allChannels = []; categories.clear(); 
   let currentChannel = {};
 
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim();
     if (!line) continue;
-    
     if (line.startsWith('#EXTINF:')) {
       const logoMatch = line.match(/tvg-logo="([^"]+)"/);
       const groupMatch = line.match(/group-title="([^"]+)"/);
-      
       const logo = logoMatch ? logoMatch[1] : 'https://via.placeholder.com/150?text=TV';
       const group = groupMatch ? groupMatch[1] : 'Diğer';
       const name = line.split(',').pop().trim();
-      
-      currentChannel = { name: name, logo: logo, group: group };
+      currentChannel = { name, logo, group };
       categories.add(group);
     } else if (line.startsWith('http')) {
       currentChannel.url = line;
@@ -239,9 +359,7 @@ function parseContent(content) {
       currentChannel = {};
     }
   }
-  
-  renderCategories();
-  renderChannels();
+  renderCategories(); renderChannels();
 }
 
 function renderCategories() {
@@ -249,7 +367,6 @@ function renderCategories() {
   bar.innerHTML = '';
   const fragment = document.createDocumentFragment();
   
-  // 1. Favoriler Butonu
   const favBtn = document.createElement('button');
   favBtn.className = 'cat-btn cat-btn-fav';
   if(currentCategory === 'Favorilerim') favBtn.classList.add('active');
@@ -257,7 +374,6 @@ function renderCategories() {
   favBtn.onclick = () => { setCategory('Favorilerim'); };
   fragment.appendChild(favBtn);
 
-  // 2. Tüm Kanallar Butonu
   const allBtn = document.createElement('button');
   allBtn.className = 'cat-btn';
   if(currentCategory === 'Tüm Kanallar') allBtn.classList.add('active');
@@ -265,7 +381,6 @@ function renderCategories() {
   allBtn.onclick = () => { setCategory('Tüm Kanallar'); };
   fragment.appendChild(allBtn);
   
-  // 3. Diğer Kategoriler
   categories.forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'cat-btn';
@@ -274,59 +389,37 @@ function renderCategories() {
     btn.onclick = () => { setCategory(cat); };
     fragment.appendChild(btn);
   });
-  
   bar.appendChild(fragment);
 }
 
 function setCategory(cat) {
   currentCategory = cat;
   document.getElementById('search-input').value = ''; 
-  renderCategories(); 
-  renderChannels();
+  renderCategories(); renderChannels();
 }
 
-function searchChannels() {
-  const query = document.getElementById('search-input').value.toLowerCase();
-  renderChannels(query);
-}
+function searchChannels() { renderChannels(document.getElementById('search-input').value.toLowerCase()); }
 
-// FAVORİ EKLE/ÇIKAR FONKSİYONU
 function toggleFavorite(e, channelName) {
-  e.stopPropagation(); // Tıklamanın videoyu açmasını engeller
+  e.stopPropagation(); 
   const index = favorites.indexOf(channelName);
-  
-  if (index > -1) {
-    favorites.splice(index, 1); // Zaten varsa çıkar
-  } else {
-    favorites.push(channelName); // Yoksa ekle
-  }
-  
+  if (index > -1) favorites.splice(index, 1); else favorites.push(channelName);
   localStorage.setItem('ihs_favorites', JSON.stringify(favorites));
-  renderChannels(document.getElementById('search-input').value.toLowerCase()); // Kalp rengini güncelle
+  renderChannels(document.getElementById('search-input').value.toLowerCase()); 
 }
 
 function renderChannels(searchQuery = '') {
   const list = document.getElementById('channel-list');
   list.innerHTML = '';
   
-  let filtered = [];
-  
-  if (currentCategory === 'Favorilerim') {
-    filtered = allChannels.filter(c => favorites.includes(c.name));
-  } else if (currentCategory === 'Tüm Kanallar') {
-    filtered = allChannels;
-  } else {
-    filtered = allChannels.filter(c => c.group === currentCategory);
-  }
-  
-  if (searchQuery) {
-    filtered = filtered.filter(c => c.name.toLowerCase().includes(searchQuery));
-  }
+  let filtered = currentCategory === 'Favorilerim' ? allChannels.filter(c => favorites.includes(c.name)) 
+               : currentCategory === 'Tüm Kanallar' ? allChannels : allChannels.filter(c => c.group === currentCategory);
+  if (searchQuery) filtered = filtered.filter(c => c.name.toLowerCase().includes(searchQuery));
   
   const fragment = document.createDocumentFragment();
   
   if (filtered.length === 0 && currentCategory === 'Favorilerim') {
-     list.innerHTML = '<div style="text-align:center; padding:30px; color:#666;">Henüz favori kanalın yok. Kalp ikonuna tıklayarak ekleyebilirsin.</div>';
+     list.innerHTML = '<div style="text-align:center; padding:30px; color:#666;">Henüz favori kanalın yok.</div>';
      return;
   }
 
@@ -342,7 +435,6 @@ function renderChannels(searchQuery = '') {
     row.onclick = () => playStream(c, c.url);
     fragment.appendChild(row);
   });
-  
   list.appendChild(fragment);
 }
 
@@ -350,10 +442,30 @@ function playStream(channelObj, url) {
   document.getElementById('now-playing-bar').style.display = 'flex';
   document.getElementById('np-logo').src = channelObj.logo;
   document.getElementById('np-title').innerText = channelObj.name;
+  errorOverlay.style.display = 'none';
+  spinner.style.display = 'block';
 
   if (hls) hls.destroy();
+  
   if (Hls.isSupported() && url.includes('.m3u8')) {
     hls = new Hls(hlsConfig);
+    
+    // HATA YAKALAMA (STREAM KOPARSA)
+    hls.on(Hls.Events.ERROR, function (event, data) {
+      if (data.fatal) {
+        spinner.style.display = 'none';
+        errorOverlay.style.display = 'flex';
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            hls.startLoad(); // Ağı tekrar dene
+            break;
+          default:
+            hls.destroy();
+            break;
+        }
+      }
+    });
+
     hls.loadSource(url);
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play(); });
