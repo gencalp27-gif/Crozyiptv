@@ -191,12 +191,12 @@
 </head>
 <body>
 
+  <!-- BAN & GÜVENLİK EKRANI -->
   <div class="ban-screen" id="ban-screen">
     <i class="fas fa-ban"></i>
     <h1>ERİŞİM ENGELLENDİ</h1>
     <p>Güvenlik ihlali sebebiyle bu cihaz engellendi.</p>
   </div>
-  
   <div class="security-screen" id="security-screen">
     <div class="security-logo"></div>
     <div class="security-title">IHS PRIVATE</div>
@@ -205,10 +205,12 @@
     <div class="error-msg" id="error-msg"></div>
   </div>
 
+  <!-- ANA UYGULAMA -->
   <div class="app-wrapper" id="app-wrapper">
     <div class="player-section">
       <div class="video-container" id="video-container">
         
+        <!-- TEKNİK İSTATİSTİK PANELİ -->
         <div class="stats-panel" id="stats-panel">
           <div class="stats-header"><span>YAYIN BİLGİSİ</span> <i class="fas fa-satellite-dish" style="color:var(--ihs-red)"></i></div>
           <div class="stat-row"><span class="stat-label">Çözünürlük:</span><span class="stat-value" id="stat-res">Bekleniyor</span></div>
@@ -216,6 +218,7 @@
           <div class="stat-row"><span class="stat-label">Bit Hızı:</span><span class="stat-value" id="stat-bit">Bekleniyor</span></div>
         </div>
 
+        <!-- VİDEO İÇİ KANAL MENÜSÜ -->
         <div class="video-channel-menu" id="video-channel-menu">
           <div class="vcm-header">
             <h3><i class="fas fa-list-ul"></i> Kanallar</h3>
@@ -224,6 +227,7 @@
           <div class="vcm-list" id="vcm-list"></div>
         </div>
 
+        <!-- TV ZAPPING OSD -->
         <div class="tv-osd" id="tv-osd">
           <img id="osd-logo" class="osd-logo" src="" alt="logo">
           <div class="osd-info">
@@ -243,9 +247,8 @@
         
         <div class="custom-controls" id="custom-controls">
           <div class="controls-left">
-            <button class="control-btn" id="prev-channel-btn" title="Önceki Kanal"><i class="fas fa-step-backward"></i></button>
+            <!-- İleri-Geri butonları tamamen kaldırıldı. Yerini sadece Play, Ses ve Kanal Menüsü aldı -->
             <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
-            <button class="control-btn" id="next-channel-btn" title="Sonraki Kanal"><i class="fas fa-step-forward"></i></button>
             <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
             <button class="control-btn" id="channel-menu-btn" title="Kanal Listesi" style="margin-left: 10px;"><i class="fas fa-list-ul"></i></button>
           </div>
@@ -279,6 +282,9 @@
   </div>
 
 <script>
+// =========================================
+// 1. GÜVENLİK SİSTEMİ
+// =========================================
 const GECERLI_SIFRE = "ihspro"; 
 let hataliGirisSayisi = parseInt(localStorage.getItem('ihs_hata') || '0');
 const isBanned = localStorage.getItem('ihs_banned') === 'true';
@@ -312,6 +318,9 @@ function checkPassword() {
   }
 }
 
+// =========================================
+// 2. IPTV MOTORU & OSD & AUTO-SKIP
+// =========================================
 let allChannels = []; let categories = new Set(); let currentCategory = 'Tüm Kanallar';
 let activeChannelIndex = -1; let currentDisplayList = [];
 let hls = null; let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
@@ -591,8 +600,6 @@ function initPlayerControls() {
   const muteBtn = document.getElementById('mute-btn');
   const fsBtn = document.getElementById('fullscreen-btn');
   const pipBtn = document.getElementById('pip-btn');
-  const prevBtn = document.getElementById('prev-channel-btn');
-  const nextBtn = document.getElementById('next-channel-btn');
   const statsBtn = document.getElementById('stats-btn');
   const statsPanel = document.getElementById('stats-panel');
 
@@ -606,9 +613,6 @@ function initPlayerControls() {
   }
   playBtn.onclick = (e) => { e.stopPropagation(); togglePlay(); };
   video.onclick = togglePlay;
-
-  prevBtn.onclick = (e) => { e.stopPropagation(); playPrevChannel(); };
-  nextBtn.onclick = (e) => { e.stopPropagation(); playNextChannel(); };
 
   muteBtn.onclick = (e) => { e.stopPropagation(); video.muted = !video.muted; muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; };
 
