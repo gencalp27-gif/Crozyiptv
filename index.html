@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IHS TV - TURBO</title>
+  <title>IHS TV - PRO</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -20,12 +20,29 @@
     * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
     
     body {
-      background-color: var(--bg-main); 
-      color: var(--text-main);
+      background-color: var(--bg-main); color: var(--text-main);
       font-family: system-ui, -apple-system, sans-serif; 
-      height: 100vh; 
-      overflow: hidden; 
+      height: 100vh; overflow: hidden; 
     }
+
+    /* SPLASH SCREEN (AÇILIŞ ANİMASYONU) */
+    .splash-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #000; z-index: 9999; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; transition: opacity 0.5s ease;
+    }
+    .splash-diamond {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #ff4b4b, #8b0000);
+      transform: rotate(45deg);
+      box-shadow: 0 0 30px rgba(229, 9, 20, 0.6);
+      border: 2px solid #ff7a7a;
+      animation: breathe 2s infinite ease-in-out;
+      margin-bottom: 40px;
+    }
+    .splash-text { font-size: 28px; font-weight: 900; letter-spacing: 5px; color: var(--text-main); }
+    .splash-text span { color: var(--ihs-red); }
+    @keyframes breathe { 0% { transform: rotate(45deg) scale(1); box-shadow: 0 0 20px rgba(229,9,20,0.4); } 50% { transform: rotate(45deg) scale(1.1); box-shadow: 0 0 50px rgba(229,9,20,0.8); } 100% { transform: rotate(45deg) scale(1); box-shadow: 0 0 20px rgba(229,9,20,0.4); } }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg-main); }
@@ -35,86 +52,46 @@
     .app-wrapper { display: flex; height: 100vh; flex-direction: column; }
 
     /* OYNATICI ALANI */
-    .player-section {
-      background: var(--bg-main);
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      transform: translateZ(0); /* Donanım Hızlandırma */
-    }
+    .player-section { background: var(--bg-main); z-index: 10; display: flex; flex-direction: column; transform: translateZ(0); }
+    .video-container { width: 100%; background: #000; display: flex; align-items: center; justify-content: center; position: relative;}
+    .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; }
+    
+    /* Üst Bar İkonları (Cast, Ayarlar - Görsel placeholder) */
+    .top-icons { position: absolute; top: 15px; right: 15px; display: flex; gap: 15px; z-index: 20; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .top-icons i { font-size: 20px; color: rgba(255,255,255,0.8); cursor: pointer; transition: 0.2s; }
+    .top-icons i:hover { color: #fff; transform: scale(1.1); }
 
-    .video-container { 
-      width: 100%; background: #000; display: flex; align-items: center; justify-content: center;
-    }
-    .video-container video { 
-      width: 100%; height: 100%; object-fit: contain; display: block;
-    }
-
-    .now-playing-bar {
-      display: none; padding: 15px 20px; align-items: center; gap: 15px;
-      background: #0a0a0a; border-bottom: 1px solid var(--border-color);
-    }
-    .now-playing-logo {
-      width: 45px; height: 45px; border-radius: 8px; background: #fff;
-      padding: 3px; object-fit: contain;
-    }
+    .now-playing-bar { display: none; padding: 15px 20px; align-items: center; gap: 15px; background: #0a0a0a; border-bottom: 1px solid var(--border-color); }
+    .now-playing-logo { width: 45px; height: 45px; border-radius: 8px; background: #fff; padding: 3px; object-fit: contain; }
     .now-playing-info { flex: 1; }
     .now-playing-title { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
-    .live-badge { 
-      font-size: 12px; font-weight: bold; color: var(--ihs-red); 
-      display: flex; align-items: center; gap: 5px;
-    }
+    .live-badge { font-size: 12px; font-weight: bold; color: var(--ihs-red); display: flex; align-items: center; gap: 5px; }
     .live-dot { width: 8px; height: 8px; background: var(--ihs-red); border-radius: 50%; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
     /* MENÜ VE LİSTE ALANI */
-    .sidebar-section {
-      display: flex; flex-direction: column; background: var(--bg-main); overflow: hidden;
-    }
-
+    .sidebar-section { display: flex; flex-direction: column; background: var(--bg-main); overflow: hidden; }
     .search-container { padding: 12px 15px; background: var(--bg-main); }
-    .search-box { 
-      display: flex; align-items: center; background: var(--bg-card); 
-      border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px; 
-      transition: border-color 0.2s;
-    }
+    .search-box { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px; }
     .search-box input { background: transparent; border: none; color: white; width: 100%; margin-left: 10px; font-size: 14px; }
     .search-box:focus-within { border-color: var(--ihs-red); }
 
-    .categories-bar {
-      display: flex; overflow-x: auto; padding: 0 15px 12px 15px; gap: 8px;
-      border-bottom: 1px solid var(--border-color);
-      -webkit-overflow-scrolling: touch; /* Mobilde kaydırmayı ivmelendirir */
-      will-change: transform;
-    }
-    .cat-btn {
-      background: var(--bg-card); color: var(--text-muted);
-      border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px;
-      font-weight: 600; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.15s;
-    }
+    .categories-bar { display: flex; overflow-x: auto; padding: 0 15px 12px 15px; gap: 8px; border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; }
+    .cat-btn { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.15s; }
     .cat-btn.active { background: var(--ihs-red); color: #fff; border-color: var(--ihs-red); }
+    .cat-btn-fav { color: #ffeb3b; border-color: #333; }
+    .cat-btn-fav.active { background: #ffeb3b; color: #000; border-color: #ffeb3b; }
 
-    .channel-list {
-      flex: 1; overflow-y: auto; padding: 10px 15px;
-      display: flex; flex-direction: column; gap: 8px;
-      -webkit-overflow-scrolling: touch;
-      transform: translateZ(0); /* Donanım Hızlandırma */
-      will-change: transform;
-    }
-    .channel-row {
-      display: flex; align-items: center; background: var(--bg-card);
-      padding: 10px 15px; border-radius: 10px; border: 1px solid transparent;
-      cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
-    }
+    .channel-list { flex: 1; overflow-y: auto; padding: 10px 15px; display: flex; flex-direction: column; gap: 8px; -webkit-overflow-scrolling: touch; }
+    .channel-row { display: flex; align-items: center; background: var(--bg-card); padding: 10px 15px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: 0.15s; }
     .channel-row:active { background: rgba(229, 9, 20, 0.15); border-color: var(--ihs-red); transform: scale(0.97); }
-    .channel-row img {
-      width: 45px; height: 45px; object-fit: contain; background: #fff;
-      border-radius: 6px; padding: 3px; margin-right: 15px;
-    }
+    .channel-row img { width: 45px; height: 45px; object-fit: contain; background: #fff; border-radius: 6px; padding: 3px; margin-right: 15px; }
     .channel-row-name { flex: 1; font-weight: 600; font-size: 14px; color: var(--text-main); }
-    .channel-row i { color: var(--text-muted); font-size: 14px; }
+    
+    .fav-icon { font-size: 18px; color: #444; padding: 10px; transition: 0.2s; }
+    .fav-icon.active { color: var(--ihs-red); }
+    .fav-icon:hover { transform: scale(1.2); }
 
-    /* RESPONSIVE (PC VE MOBİL) */
+    /* RESPONSIVE */
     @media (max-width: 899px) {
       .player-section { flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
       .video-container { aspect-ratio: 16/9; }
@@ -127,16 +104,23 @@
       .sidebar-section { width: 400px; flex-shrink: 0; }
       .now-playing-bar { border-bottom: none; border-top: 1px solid var(--border-color); }
       .channel-row:hover { background: #1a1a1a; border-color: #333; }
-      .channel-row:hover i { color: var(--ihs-red); }
-      .cat-btn:hover { color: #fff; border-color: #555; }
     }
   </style>
 </head>
 <body>
 
+  <!-- SPLASH SCREEN -->
+  <div class="splash-screen" id="splash">
+    <div class="splash-diamond"></div>
+    <div class="splash-text"><span>IHS</span> PRO</div>
+  </div>
+
   <div class="app-wrapper">
     <div class="player-section">
       <div class="video-container">
+        <div class="top-icons">
+          <i class="fab fa-chromecast" title="Yansıt (Yakında)"></i>
+        </div>
         <video id="video-player" controls autoplay playsinline></video>
       </div>
       <div class="now-playing-bar" id="now-playing-bar">
@@ -163,6 +147,13 @@
   </div>
 
 <script>
+// AÇILIŞ ANİMASYONU YÖNETİMİ
+setTimeout(() => {
+  const splash = document.getElementById('splash');
+  splash.style.opacity = '0';
+  setTimeout(() => { splash.style.display = 'none'; }, 500);
+}, 2000);
+
 const gomuluListe = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.imgur.com/PexhKwp.png" group-title="Turkey",4U TV
@@ -212,15 +203,10 @@ let categories = new Set();
 let currentCategory = 'Tüm Kanallar';
 let hls = null;
 const video = document.getElementById('video-player');
+// LocalStorage'dan favorileri çek (Yoksa boş dizi)
+let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
 
-// HLS.js Turbo Config Ayarları
-const hlsConfig = {
-  enableWorker: true,
-  lowLatencyMode: true,
-  backBufferLength: 90,
-  liveSyncDuration: 3,
-  liveMaxLatencyDuration: 10,
-};
+const hlsConfig = { enableWorker: true, lowLatencyMode: true, backBufferLength: 90 };
 
 window.addEventListener('DOMContentLoaded', () => {
   parseContent(gomuluListe);
@@ -230,7 +216,6 @@ function parseContent(content) {
   const lines = content.split('\n');
   allChannels = []; 
   categories.clear(); 
-  categories.add('Tüm Kanallar');
 
   let currentChannel = {};
 
@@ -262,54 +247,97 @@ function parseContent(content) {
 function renderCategories() {
   const bar = document.getElementById('categories-bar');
   bar.innerHTML = '';
-  
-  // Fragment (Parçacık) ile toplu DOM manipülasyonu (Hız Optimizasyonu)
   const fragment = document.createDocumentFragment();
   
+  // 1. Favoriler Butonu
+  const favBtn = document.createElement('button');
+  favBtn.className = 'cat-btn cat-btn-fav';
+  if(currentCategory === 'Favorilerim') favBtn.classList.add('active');
+  favBtn.innerHTML = '<i class="fas fa-heart"></i> Favoriler';
+  favBtn.onclick = () => { setCategory('Favorilerim'); };
+  fragment.appendChild(favBtn);
+
+  // 2. Tüm Kanallar Butonu
+  const allBtn = document.createElement('button');
+  allBtn.className = 'cat-btn';
+  if(currentCategory === 'Tüm Kanallar') allBtn.classList.add('active');
+  allBtn.innerText = 'Tüm Kanallar';
+  allBtn.onclick = () => { setCategory('Tüm Kanallar'); };
+  fragment.appendChild(allBtn);
+  
+  // 3. Diğer Kategoriler
   categories.forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'cat-btn';
     if(cat === currentCategory) btn.classList.add('active');
     btn.innerText = cat;
-    btn.onclick = () => {
-      currentCategory = cat;
-      document.getElementById('search-input').value = ''; 
-      renderCategories(); 
-      renderChannels();
-    };
+    btn.onclick = () => { setCategory(cat); };
     fragment.appendChild(btn);
   });
   
   bar.appendChild(fragment);
 }
 
-// onkeyup yerine oninput kullanıldı, anlık ve sorunsuz yakalar
+function setCategory(cat) {
+  currentCategory = cat;
+  document.getElementById('search-input').value = ''; 
+  renderCategories(); 
+  renderChannels();
+}
+
 function searchChannels() {
   const query = document.getElementById('search-input').value.toLowerCase();
   renderChannels(query);
+}
+
+// FAVORİ EKLE/ÇIKAR FONKSİYONU
+function toggleFavorite(e, channelName) {
+  e.stopPropagation(); // Tıklamanın videoyu açmasını engeller
+  const index = favorites.indexOf(channelName);
+  
+  if (index > -1) {
+    favorites.splice(index, 1); // Zaten varsa çıkar
+  } else {
+    favorites.push(channelName); // Yoksa ekle
+  }
+  
+  localStorage.setItem('ihs_favorites', JSON.stringify(favorites));
+  renderChannels(document.getElementById('search-input').value.toLowerCase()); // Kalp rengini güncelle
 }
 
 function renderChannels(searchQuery = '') {
   const list = document.getElementById('channel-list');
   list.innerHTML = '';
   
-  let filtered = currentCategory === 'Tüm Kanallar' ? allChannels : allChannels.filter(c => c.group === currentCategory);
+  let filtered = [];
+  
+  if (currentCategory === 'Favorilerim') {
+    filtered = allChannels.filter(c => favorites.includes(c.name));
+  } else if (currentCategory === 'Tüm Kanallar') {
+    filtered = allChannels;
+  } else {
+    filtered = allChannels.filter(c => c.group === currentCategory);
+  }
   
   if (searchQuery) {
     filtered = filtered.filter(c => c.name.toLowerCase().includes(searchQuery));
   }
   
-  // Fragment (Parçacık) ile sıfır gecikmeli ekrana basma (Hız Optimizasyonu)
   const fragment = document.createDocumentFragment();
   
+  if (filtered.length === 0 && currentCategory === 'Favorilerim') {
+     list.innerHTML = '<div style="text-align:center; padding:30px; color:#666;">Henüz favori kanalın yok. Kalp ikonuna tıklayarak ekleyebilirsin.</div>';
+     return;
+  }
+
   filtered.forEach(c => {
+    const isFav = favorites.includes(c.name);
     const row = document.createElement('div');
     row.className = 'channel-row';
-    // loading="lazy" eklendi. Logolar sadece görünce indirilir. (Hız Optimizasyonu)
     row.innerHTML = `
       <img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'">
       <div class="channel-row-name">${c.name}</div>
-      <i class="fas fa-play"></i>
+      <i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${c.name.replace(/'/g, "\\'")}')"></i>
     `;
     row.onclick = () => playStream(c, c.url);
     fragment.appendChild(row);
@@ -323,12 +351,9 @@ function playStream(channelObj, url) {
   document.getElementById('np-logo').src = channelObj.logo;
   document.getElementById('np-title').innerText = channelObj.name;
 
-  if (hls) {
-    hls.destroy();
-  }
-  
+  if (hls) hls.destroy();
   if (Hls.isSupported() && url.includes('.m3u8')) {
-    hls = new Hls(hlsConfig); // Turbo ayarlarıyla başlat
+    hls = new Hls(hlsConfig);
     hls.loadSource(url);
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED, function() { video.play(); });
