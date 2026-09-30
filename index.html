@@ -118,22 +118,15 @@
     .fav-icon { font-size: 15px; color: #333; padding: 8px; }
     .fav-icon.active { color: var(--ihs-red); }
 
-    /* ========================================================
-       FİLM SİTESİ (NETFLIX) AFİŞ GRID'İ - YENİLENEN KUSURSUZ YAPI 
-       ======================================================== */
+    /* FİLM SİTESİ Afiş Grid'i */
     .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 15px; padding: 10px; }
     .movie-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; position: relative; }
     .movie-card:hover { transform: translateY(-5px); border-color: var(--ihs-red); box-shadow: 0 8px 20px rgba(229,9,20,0.5); z-index: 2; }
     .movie-card.active-movie { border-color: var(--ihs-red); box-shadow: 0 0 15px rgba(229,9,20,0.8); }
-    
-    /* Afiş Alanı: object-fit: contain ile hiçbir afiş/logo kırpılmaz! */
     .movie-poster-wrap { position: relative; width: 100%; aspect-ratio: 2 / 3; background: #050505; border-bottom: 2px solid var(--ihs-red); }
     .movie-poster { width: 100%; height: 100%; object-fit: contain; } 
-    
-    /* Film İsmi: 2 satıra kadar okunaklı şık görünüm */
     .movie-info { padding: 12px 8px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; background: linear-gradient(0deg, #0a0a0a, #1a1a1a); }
     .movie-title { font-size: 13px; font-weight: 700; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
-    
     .play-icon-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; backdrop-filter: blur(2px); }
     .movie-card:hover .play-icon-overlay { opacity: 1; }
     .play-icon-overlay i { font-size: 40px; color: white; text-shadow: 0 0 15px var(--ihs-red); }
@@ -202,13 +195,11 @@
         <video id="video-player" playsinline webkit-playsinline disablePictureInPicture></video>
         
         <div class="custom-controls" id="custom-controls">
-          <!-- VOD Seek Bar -->
           <div class="progress-container" id="progress-container">
             <span class="time-text" id="current-time">00:00</span>
             <input type="range" class="seek-bar" id="seek-bar" value="0" step="1">
             <span class="time-text" id="total-time">00:00</span>
           </div>
-
           <div class="control-buttons">
             <div class="controls-left">
               <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
@@ -227,19 +218,16 @@
 
     <!-- SAĞ: SİDEBAR -->
     <div class="sidebar-section">
-      <!-- Sekmeler (TV / Film) -->
       <div class="tab-container">
         <button class="tab-btn active" id="tab-tv" onclick="switchMode('TV')"><i class="fas fa-tv"></i> CANLI TV</button>
         <button class="tab-btn" id="tab-movie" onclick="switchMode('MOVIE')"><i class="fas fa-film"></i> FİLMLER</button>
       </div>
-
       <div class="search-container">
         <div class="search-box">
           <i class="fas fa-search" style="color: var(--text-muted);"></i>
           <input type="text" id="search-input" placeholder="Arama yap..." oninput="searchContent()">
         </div>
       </div>
-      
       <div class="categories-bar" id="categories-bar"></div>
       <div class="content-area" id="content-area"></div>
     </div>
@@ -281,6 +269,9 @@ let currentDisplayList = [];
 let activeItemUrl = "";
 let activeChannelIndex = -1;
 let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
+
+let currentRenderCount = 0; 
+const RENDER_CHUNK = 100; // Bellek optimizasyonu için 100'er 100'er yükler
 
 let hls = null;
 const video = document.getElementById('video-player');
@@ -588,7 +579,7 @@ function renderUI() {
     const btn = document.createElement('button');
     btn.className = 'cat-btn' + (isFav ? ' cat-btn-fav' : '') + (currentCategory===txt ? ' active' : '');
     btn.innerHTML = isFav ? `<i class="fas fa-heart"></i> ${txt}` : txt;
-    btn.onclick = () => { currentCategory = txt; document.getElementById('search-input').value = ''; renderUI(); };
+    btn.onclick = () => { currentCategory = txt; document.getElementById('search-input').value = ''; renderContentList(true); };
     catBar.appendChild(btn);
   };
   
@@ -596,53 +587,59 @@ function renderUI() {
   createBtn('Tümü');
   categoriesSet.forEach(cat => createBtn(cat));
 
-  renderContentList();
+  renderContentList(true);
 }
 
-function searchContent() { renderContentList(); }
+function searchContent() { renderContentList(true); }
 
 function toggleFavorite(e, channelName) {
   e.stopPropagation(); 
   const index = favorites.indexOf(channelName);
   if (index > -1) favorites.splice(index, 1); else favorites.push(channelName);
   localStorage.setItem('ihs_favorites', JSON.stringify(favorites));
-  renderContentList(); 
+  renderContentList(true); 
 }
 
-function renderContentList() {
+// =========================================
+// SONSUZ KAYDIRMA VE BELLEK OPTİMİZASYONU
+// =========================================
+function renderContentList(reset = false) {
   const contentArea = document.getElementById('content-area');
   const dataset = currentMode === 'TV' ? tvChannels : movies;
   const query = document.getElementById('search-input').value.toLowerCase();
   
-  if (currentCategory === 'Favorilerim') {
-      currentDisplayList = dataset.filter(c => favorites.includes(c.name));
-  } else {
-      currentDisplayList = currentCategory === 'Tümü' ? dataset : dataset.filter(c => c.group === currentCategory);
+  if (reset) {
+    currentRenderCount = 0;
+    contentArea.innerHTML = '';
+    
+    if (currentCategory === 'Favorilerim') {
+        currentDisplayList = dataset.filter(c => favorites.includes(c.name));
+    } else {
+        currentDisplayList = currentCategory === 'Tümü' ? dataset : dataset.filter(c => c.group === currentCategory);
+    }
+    if (query) currentDisplayList = currentDisplayList.filter(c => c.name.toLowerCase().includes(query));
+    
+    contentArea.className = currentMode === 'TV' ? 'content-area' : 'content-area movie-grid';
+    populateVideoChannelMenu(); 
   }
-  
-  if (query) currentDisplayList = currentDisplayList.filter(c => c.name.toLowerCase().includes(query));
 
-  contentArea.innerHTML = '';
-  
-  if(currentMode === 'TV') {
-    contentArea.className = 'content-area';
-    currentDisplayList.forEach((c, index) => {
+  const fragment = document.createDocumentFragment();
+  const endIndex = Math.min(currentRenderCount + RENDER_CHUNK, currentDisplayList.length);
+
+  for (let i = currentRenderCount; i < endIndex; i++) {
+    const c = currentDisplayList[i];
+    if(currentMode === 'TV') {
       const isFav = favorites.includes(c.name);
       const row = document.createElement('div');
       row.className = 'channel-row' + (activeItemUrl === c.url ? ' active-channel' : '');
       row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'">
                        <div class="channel-row-name">${c.name}</div>
                        <i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${c.name.replace(/'/g, "\\'")}')"></i>`;
-      row.onclick = () => playStream(c, index);
-      contentArea.appendChild(row);
-    });
-  } else {
-    contentArea.className = 'content-area movie-grid';
-    currentDisplayList.forEach((c, index) => {
+      row.onclick = () => playStream(c, i);
+      fragment.appendChild(row);
+    } else {
       const card = document.createElement('div');
       card.className = 'movie-card' + (activeItemUrl === c.url ? ' active-movie' : '');
-      
-      // YENİLENMİŞ KUSURSUZ FİLM KARTI MİMARİSİ
       card.innerHTML = `
         <div class="movie-poster-wrap">
             <img class="movie-poster" src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/111/fff?text=Afiş+Yok'">
@@ -650,12 +647,46 @@ function renderContentList() {
         </div>
         <div class="movie-info"><div class="movie-title">${c.name}</div></div>
       `;
-      
-      card.onclick = () => playStream(c, index);
-      contentArea.appendChild(card);
-    });
+      card.onclick = () => playStream(c, i);
+      fragment.appendChild(card);
+    }
   }
-  populateVideoChannelMenu();
+
+  contentArea.appendChild(fragment);
+  currentRenderCount = endIndex;
+
+  // Akıllı Tetikleyici (Görünmez elemana gelince yeni 100 içerik yükle)
+  if (currentRenderCount < currentDisplayList.length) {
+      const observerTarget = document.createElement('div');
+      observerTarget.style.width = "100%"; observerTarget.style.height = "20px";
+      contentArea.appendChild(observerTarget);
+
+      const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+              observer.disconnect();
+              observerTarget.remove();
+              renderContentList(false);
+          }
+      });
+      observer.observe(observerTarget);
+  }
+}
+
+function populateVideoChannelMenu() {
+  const vList = document.getElementById('vcm-list'); vList.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  
+  // Video donmasın diye menüye maksimum 100 kart ekliyoruz
+  const limit = Math.min(currentDisplayList.length, 100); 
+  for(let i = 0; i < limit; i++) {
+    const c = currentDisplayList[i];
+    const row = document.createElement('div');
+    row.className = 'channel-row' + ((activeItemUrl === c.url) ? ' active-channel' : '');
+    row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'"><div class="channel-row-name">${c.name}</div>`;
+    row.onclick = (e) => { e.stopPropagation(); playStream(c, i); document.getElementById('video-channel-menu').classList.remove('open'); document.getElementById('video-container').classList.remove('menu-open'); };
+    fragment.appendChild(row);
+  }
+  vList.appendChild(fragment);
 }
 
 // =========================================
@@ -664,7 +695,7 @@ function renderContentList() {
 function playStream(item, index) {
   activeItemUrl = item.url;
   activeChannelIndex = index;
-  renderContentList(); 
+  
   document.getElementById('error-overlay').style.display = 'none';
   document.getElementById('loading-spinner').style.display = 'block';
 
@@ -719,28 +750,12 @@ function initKeyboardControls() {
   });
 }
 
-const vcmMenu = document.getElementById('video-channel-menu');
-const vContainer = document.getElementById('video-container');
-
 document.getElementById('channel-menu-btn').onclick = (e) => {
-  e.stopPropagation(); populateVideoChannelMenu(); vcmMenu.classList.add('open'); vContainer.classList.add('menu-open'); 
+  e.stopPropagation(); document.getElementById('video-channel-menu').classList.add('open'); document.getElementById('video-container').classList.add('menu-open'); 
 };
 document.getElementById('vcm-close-btn').onclick = (e) => {
-  e.stopPropagation(); vcmMenu.classList.remove('open'); vContainer.classList.remove('menu-open');
+  e.stopPropagation(); document.getElementById('video-channel-menu').classList.remove('open'); document.getElementById('video-container').classList.remove('menu-open');
 };
-
-function populateVideoChannelMenu() {
-  const vList = document.getElementById('vcm-list'); vList.innerHTML = '';
-  const fragment = document.createDocumentFragment();
-  currentDisplayList.forEach((c, index) => {
-    const row = document.createElement('div');
-    row.className = 'channel-row' + ((activeItemUrl === c.url) ? ' active-channel' : '');
-    row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'"><div class="channel-row-name">${c.name}</div>`;
-    row.onclick = (e) => { e.stopPropagation(); playStream(c, index); vcmMenu.classList.remove('open'); vContainer.classList.remove('menu-open'); };
-    fragment.appendChild(row);
-  });
-  vList.appendChild(fragment);
-}
 
 function initPlayerControls() {
   const playBtn = document.getElementById('play-pause-btn');
@@ -749,6 +764,7 @@ function initPlayerControls() {
   const pipBtn = document.getElementById('pip-btn');
   const statsBtn = document.getElementById('stats-btn');
   const statsPanel = document.getElementById('stats-panel');
+  const vContainer = document.getElementById('video-container');
 
   if (!document.pictureInPictureEnabled) pipBtn.style.display = 'none';
 
@@ -811,7 +827,7 @@ function initPlayerControls() {
   let timeout;
   function resetControls() {
     vContainer.classList.remove('idle'); clearTimeout(timeout);
-    timeout = setTimeout(() => { if (!video.paused && !vcmMenu.classList.contains('open')) vContainer.classList.add('idle'); }, 3000);
+    timeout = setTimeout(() => { if (!video.paused) vContainer.classList.add('idle'); }, 3000);
   }
   vContainer.addEventListener('mousemove', resetControls); vContainer.addEventListener('touchstart', resetControls);
   vContainer.addEventListener('mouseleave', () => { if (!video.paused) vContainer.classList.add('idle'); });
