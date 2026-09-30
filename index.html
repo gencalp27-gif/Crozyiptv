@@ -363,7 +363,7 @@ https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&c
 function initApp() {
   parseM3UContent(tvData, tvChannels, tvCategories);
   
-  // GitHub'daki film.m3u listesini RAW linkten otomatik çekiyoruz
+  // GitHub ham film listesini çekiyoruz
   fetch('https://raw.githubusercontent.com/gencalp27-gif/Crozyiptv/main/film.m3u')
     .then(res => res.text())
     .then(data => {
@@ -509,7 +509,7 @@ function toggleFavorite(e, channelName) {
   renderContentList(true); 
 }
 
-// TMDB Lazy-Load ve Kuyruk Sistemi
+// TMDB Kuyruk ve Lazy-Load Sistemi
 function processTmdbQueue() {
   if (isFetchingTmdb || tmdbQueue.length === 0) return;
   isFetchingTmdb = true;
@@ -588,7 +588,6 @@ function createMovieCard(c, index) {
     card.setAttribute('data-url', c.url);
     card.setAttribute('data-movie-index', index);
     
-    // Fallback logo varsa doğrudan kullan, yoksa TMDB kuyruğuna atılacak
     const initialPoster = c.logo && c.logo.startsWith('http') ? c.logo : '';
     
     card.innerHTML = `
@@ -602,10 +601,8 @@ function createMovieCard(c, index) {
     `;
     card.onclick = () => playStream(c, index); 
     
-    // Eğer m3u içinde logo yoksa veya TMDB zenginleştirmesi isteniyorsa gözlemciye ekle
     movieObserver.observe(card);
     if(initialPoster) {
-      // Zaten m3u içinde logo varsa direkt göster
       setTimeout(() => {
         const img = card.querySelector('.movie-poster');
         if(img) img.style.opacity = '1';
@@ -740,7 +737,7 @@ function playStream(item, index) {
     let existingIframe = document.getElementById('embed-iframe');
     if (existingIframe) existingIframe.remove();
     
-    // OK.RU Video Desteği (Iframe embed)
+    // OK.RU veya benzeri Embed / Iframe destekleri
     if (item.url && item.url.includes('ok.ru/video/')) {
       const okId = item.url.split('/video/')[1].split('?')[0];
       video.style.display = 'none';
@@ -763,12 +760,12 @@ function playStream(item, index) {
       fadeOverlay.classList.remove('active');
     } else {
       video.style.display = 'block';
-      let finalUrl = item.url;
-      if (currentMode === 'MOVIE' || item.url.includes('lord.mariuannastluisborg')) { 
-          finalUrl = PROXY_BASE + encodeURIComponent(item.url); 
-      }
+      
+      // HEDEF LİNKİ AGRESİF ŞEKİLDE PROXY'DEN GEÇİRİYORUZ (CORS Hatasına Son!)
+      let targetUrl = item.url;
+      let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
 
-      if (Hls.isSupported() && item.url.includes('.m3u8')) {
+      if (Hls.isSupported() && (targetUrl.includes('.m3u8') || currentMode === 'TV')) {
         hls = new Hls({enableWorker: true}); 
         hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) handleStreamError(); });
         hls.loadSource(finalUrl); 
