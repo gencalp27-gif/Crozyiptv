@@ -22,7 +22,6 @@
     body {
       background-color: var(--bg-main); color: var(--text-main);
       font-family: system-ui, -apple-system, sans-serif; 
-      /* Dinamik Viewport (100dvh) adres çubuğu sorunlarını çözer */
       height: 100dvh; overflow: hidden; 
     }
 
@@ -253,7 +252,6 @@
           <span id="error-countdown">Sonraki içeriğe geçiliyor... (3)</span>
         </div>
 
-        <!-- webkit-playsinline ve disablePictureInPicture mobil native player'ı ezer -->
         <video id="video-player" playsinline webkit-playsinline disablePictureInPicture></video>
         
         <div class="custom-controls" id="custom-controls">
@@ -415,7 +413,7 @@ function initIptvApp() {
   renderChannels(); 
   initPlayerControls(); 
   initKeyboardControls();
-  fetchExternalSource('https://tinyurl.com/zerkfilm2');
+  fetchExternalSource('https://raw.githubusercontent.com/Zerk1903/zerkfilm/refs/heads/main/Filmler.m3u');
 }
 
 function parseM3UString(content) {
@@ -447,16 +445,17 @@ function parseM3UString(content) {
 
 async function fetchExternalSource(url) {
   try {
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
-    const response = await fetch(proxyUrl + encodeURIComponent(url));
+    // GitHub Raw proxy olmadan CORS destekler, doğrudan çekiyoruz
+    const response = await fetch(url);
     const data = await response.text();
-    if (data.includes('#EXTINF')) parseM3UString(data); 
-    else {
-      allChannels.push({ id: allChannels.length, name: "Zerk (Film)", logo: "https://via.placeholder.com/150?text=Film", group: "Filmler", url: url });
-      categories.add("Filmler");
+    if (data.includes('#EXTINF')) {
+        parseM3UString(data); 
     }
-    renderCategories(); renderChannels(document.getElementById('search-input').value.toLowerCase());
-  } catch (error) { console.error("Dış kaynak çekilemedi:", error); }
+    renderCategories(); 
+    renderChannels(document.getElementById('search-input').value.toLowerCase());
+  } catch (error) { 
+      console.error("Dış kaynak çekilemedi:", error); 
+  }
 }
 
 function renderCategories() {
@@ -633,14 +632,13 @@ function initPlayerControls() {
     e.stopPropagation();
     const isPseudoFS = vContainer.classList.contains('pseudo-fullscreen');
     
-    // Tam Ekran Mantığı (Pseudo-Fullscreen dahil edildi)
     if (!document.fullscreenElement && !isPseudoFS) {
       if (vContainer.requestFullscreen) {
           vContainer.requestFullscreen().catch(() => vContainer.classList.add('pseudo-fullscreen'));
       } else if (vContainer.webkitRequestFullscreen) {
           vContainer.webkitRequestFullscreen();
       } else {
-          vContainer.classList.add('pseudo-fullscreen'); // iOS Safari Yedeği
+          vContainer.classList.add('pseudo-fullscreen'); 
       }
       if (screen.orientation && screen.orientation.lock) { screen.orientation.lock('landscape').catch(()=>{}); }
     } else {
