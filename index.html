@@ -142,10 +142,10 @@
     
     .movie-poster-wrap { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: flex; align-items: center; justify-content: center; background: #111; }
     .movie-title-fallback { position: absolute; width: 100%; padding: 10px; text-align: center; font-size: 12px; font-weight: 700; color: #555; z-index: 0; }
-    .movie-poster { width: 100%; height: 100%; object-fit: cover; object-position: center top; z-index: 1; transition: opacity 0.3s; }
+    .movie-poster { width: 100%; height: 100%; object-fit: cover; object-position: center top; z-index: 1; transition: opacity 0.3s; opacity: 0; }
     
     .movie-title-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px 8px 10px 8px; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); color: #fff; font-size: 11px; font-weight: 700; z-index: 2; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; text-shadow: 1px 1px 3px #000; }
-    .movie-rating { position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: var(--gold); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; z-index: 3; display: flex; align-items: center; gap: 3px; }
+    .movie-rating { position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: var(--gold); font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; z-index: 3; display: none; align-items: center; gap: 3px; }
     
     .play-icon-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; backdrop-filter: blur(2px); z-index: 3; }
     .movie-card:hover .play-icon-overlay { opacity: 1; }
@@ -274,6 +274,7 @@
 
 <script>
 const PROXY_BASE = "https://billowing-block-3ef5proxy.ibrahim-srbl.workers.dev/?url=";
+const TMDB_KEY = "4d89b35eb4db17dc2a746c2318dd598b";
 
 const ENCRYPTED_PASS = "aWhzcHJv"; 
 let hataliGirisSayisi = parseInt(localStorage.getItem('ihs_hata') || '0');
@@ -307,7 +308,10 @@ let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
 
 let currentRenderCount = 0; 
 const RENDER_CHUNK = 100; 
-let currentObserver = null;
+
+const tmdbCache = {};
+const tmdbQueue = [];
+let isFetchingTmdb = false;
 
 let hls = null;
 const video = document.getElementById('video-player');
@@ -352,27 +356,21 @@ https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
 https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web&ce=3
 #EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/TRT_1_logo_%282021-%29.svg/960px-TRT_1_logo_%282021-%29.svg.png" group-title="Turkey",TRT 1 (1440p)
 https://tv-trt1.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-logo="https://upload.wikimedia.org/wikipedia/tr/thumb/6/68/Tv8_Yeni_Logo.png/960px-Tv8_Yeni_Logo.png" group-title="Turkey",TV 8 (1080p)
+https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3
 `;
-
-// SENİN MANUEL OLARAK EKLEDİĞİN FİLMLER VE OK.RU / VOD LİSTESİ (Buraya yeni film ekledikçe ekleyeceğiz!)
-const manualMoviesData = [
-  { 
-    name: "Mayday (2026)", 
-    logo: "https://image.tmdb.org/t/p/w500/q719jvvzQY1T0r9xWk6mNqY6k5C.jpg", // TMDB / Afiş görseli
-    group: "Aksiyon / Macera", 
-    rating: "6.8", 
-    url: "https://ok.ru/video/16217439799978" // Senin verdiğin OK.ru linki
-  }
-];
 
 function initApp() {
   parseM3UContent(tvData, tvChannels, tvCategories);
   
-  // Manuel film listemizi ve OK.ru filmlerimizi sisteme yüklüyoruz
-  manualMoviesData.forEach(m => {
-    movies.push(m);
-    movieCategories.add(m.group);
-  });
+  // GitHub'daki film.m3u listesini RAW linkten otomatik çekiyoruz
+  fetch('https://raw.githubusercontent.com/gencalp27-gif/Crozyiptv/main/film.m3u')
+    .then(res => res.text())
+    .then(data => {
+      parseM3UContent(data, movies, movieCategories);
+      if(currentMode === 'MOVIE') { renderCategoriesOnly(); renderContentList(true); }
+    })
+    .catch(e => console.log("Film listesi yüklenemedi", e));
 
   initPlayerControls(); 
   initKeyboardControls(); 
@@ -396,7 +394,7 @@ function parseM3UContent(content, targetArray, targetCategories) {
     if (line.startsWith('#EXTINF:')) {
       const logoMatch = line.match(/tvg-logo="([^"]+)"/);
       const groupMatch = line.match(/group-title="([^"]+)"/);
-      let finalGroup = groupMatch ? groupMatch[1] : 'Diğer';
+      let finalGroup = groupMatch ? groupMatch[1] : 'Genel';
       let name = line.split(',').pop().trim();
       currentObj = { name, logo: logoMatch ? logoMatch[1] : '', group: finalGroup }; 
       targetCategories.add(finalGroup);
@@ -511,14 +509,109 @@ function toggleFavorite(e, channelName) {
   renderContentList(true); 
 }
 
+// TMDB Lazy-Load ve Kuyruk Sistemi
+function processTmdbQueue() {
+  if (isFetchingTmdb || tmdbQueue.length === 0) return;
+  isFetchingTmdb = true;
+  const { movie, imgEl, ratingEl } = tmdbQueue.shift();
+  
+  let cleanName = movie.name.replace(/\(\d{4}\)/g, '').replace(/\[.*?\]/g, '').trim();
+  
+  if (tmdbCache[cleanName]) {
+    applyTmdbData(tmdbCache[cleanName], imgEl, ratingEl);
+    isFetchingTmdb = false;
+    setTimeout(processTmdbQueue, 100);
+    return;
+  }
+
+  fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(cleanName)}&language=tr-TR`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.results && data.results.length > 0) {
+        const item = data.results[0];
+        const info = {
+          poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : movie.logo,
+          rating: item.vote_average ? item.vote_average.toFixed(1) : ''
+        };
+        tmdbCache[cleanName] = info;
+        applyTmdbData(info, imgEl, ratingEl);
+      } else {
+        if (movie.logo) {
+          imgEl.src = movie.logo;
+          imgEl.style.opacity = '1';
+        }
+      }
+      isFetchingTmdb = false;
+      setTimeout(processTmdbQueue, 150);
+    })
+    .catch(() => {
+      isFetchingTmdb = false;
+      setTimeout(processTmdbQueue, 150);
+    });
+}
+
+function applyTmdbData(info, imgEl, ratingEl) {
+  if (info.poster && imgEl) {
+    imgEl.src = info.poster;
+    imgEl.style.opacity = '1';
+  }
+  if (info.rating && ratingEl) {
+    ratingEl.innerHTML = `<i class="fas fa-star" style="font-size:9px;"></i> ${info.rating}`;
+    ratingEl.style.display = 'flex';
+  }
+}
+
+const movieObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const card = entry.target;
+      const movieIdx = card.getAttribute('data-movie-index');
+      if (movieIdx !== null) {
+        const movie = movies[movieIdx];
+        const imgEl = card.querySelector('.movie-poster');
+        const ratingEl = card.querySelector('.movie-rating');
+        if (movie && (!movie.enriched || !imgEl.src)) {
+          movie.enriched = true;
+          tmdbQueue.push({ movie, imgEl, ratingEl });
+          processTmdbQueue();
+        }
+      }
+      observer.unobserve(card);
+    }
+  });
+}, { rootMargin: '150px' });
+
 function createMovieCard(c, index) {
     const safeName = c.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
-    const ratingHtml = c.rating ? `<div class="movie-rating"><i class="fas fa-star" style="font-size:9px;"></i> ${c.rating}</div>` : '';
     const card = document.createElement('div'); 
     card.className = 'movie-card' + (activeItemUrl === c.url ? ' active-movie' : ''); 
     card.setAttribute('data-url', c.url);
-    card.innerHTML = `<div class="movie-poster-wrap"><div class="movie-title-fallback">${safeName}</div>${ratingHtml}<img class="movie-poster" src="${c.logo}" loading="lazy" onerror="this.style.opacity=0"><div class="movie-title-overlay">${safeName}</div><div class="play-icon-overlay"><i class="fas fa-play-circle"></i></div></div>`;
+    card.setAttribute('data-movie-index', index);
+    
+    // Fallback logo varsa doğrudan kullan, yoksa TMDB kuyruğuna atılacak
+    const initialPoster = c.logo && c.logo.startsWith('http') ? c.logo : '';
+    
+    card.innerHTML = `
+      <div class="movie-poster-wrap">
+        <div class="movie-title-fallback">${safeName}</div>
+        <div class="movie-rating"><i class="fas fa-star" style="font-size:9px;"></i></div>
+        <img class="movie-poster" src="${initialPoster}" loading="lazy" onload="this.style.opacity='1'" onerror="this.style.opacity='0'">
+        <div class="movie-title-overlay">${safeName}</div>
+        <div class="play-icon-overlay"><i class="fas fa-play-circle"></i></div>
+      </div>
+    `;
     card.onclick = () => playStream(c, index); 
+    
+    // Eğer m3u içinde logo yoksa veya TMDB zenginleştirmesi isteniyorsa gözlemciye ekle
+    movieObserver.observe(card);
+    if(initialPoster) {
+      // Zaten m3u içinde logo varsa direkt göster
+      setTimeout(() => {
+        const img = card.querySelector('.movie-poster');
+        if(img) img.style.opacity = '1';
+      }, 50);
+    }
+    
     return card;
 }
 
@@ -552,7 +645,8 @@ function renderContentList(reset = false) {
           row.className = 'netflix-row'; 
           const limit = Math.min(catMovies.length, 30); 
           for(let i = 0; i < limit; i++) { 
-            row.appendChild(createMovieCard(catMovies[i], movies.indexOf(catMovies[i]))); 
+            const realIdx = movies.indexOf(catMovies[i]);
+            row.appendChild(createMovieCard(catMovies[i], realIdx)); 
           } 
           rowCont.appendChild(row); 
           contentArea.appendChild(rowCont);
@@ -566,6 +660,7 @@ function renderContentList(reset = false) {
   
   for (let i = currentRenderCount; i < endIndex; i++) {
     const c = currentDisplayList[i]; 
+    const realIdx = dataset.indexOf(c);
     const safeName = c.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
     
     if(currentMode === 'TV') {
@@ -574,10 +669,10 @@ function renderContentList(reset = false) {
       row.className = 'channel-row' + (activeItemUrl === c.url ? ' active-channel' : ''); 
       row.setAttribute('data-url', c.url);
       row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'"><div class="channel-row-name">${safeName}</div><i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${safeName.replace(/'/g, "\\'")}')"></i>`; 
-      row.onclick = () => playStream(c, i); 
+      row.onclick = () => playStream(c, realIdx); 
       fragment.appendChild(row);
     } else { 
-      fragment.appendChild(createMovieCard(c, i)); 
+      fragment.appendChild(createMovieCard(c, realIdx)); 
     }
   }
   contentArea.appendChild(fragment); 
@@ -626,7 +721,7 @@ function playStream(item, index) {
     
     const safeName = item.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
     const osd = document.getElementById('tv-osd'); 
-    document.getElementById('osd-logo').src = item.logo; 
+    document.getElementById('osd-logo').src = item.logo || 'https://via.placeholder.com/150'; 
     document.getElementById('osd-title').innerText = safeName;
     
     if(currentMode === 'TV') { 
@@ -641,13 +736,12 @@ function playStream(item, index) {
     
     if (hls) hls.destroy(); 
 
-    // Eski iframe varsa temizle
     const videoContainer = document.getElementById('video-container');
     let existingIframe = document.getElementById('embed-iframe');
     if (existingIframe) existingIframe.remove();
     
-    // OK.RU VEYA EMBED OYNATICI DESTEĞİ
-    if (item.url.includes('ok.ru/video/')) {
+    // OK.RU Video Desteği (Iframe embed)
+    if (item.url && item.url.includes('ok.ru/video/')) {
       const okId = item.url.split('/video/')[1].split('?')[0];
       video.style.display = 'none';
       
