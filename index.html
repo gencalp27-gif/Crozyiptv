@@ -118,16 +118,36 @@
     .fav-icon { font-size: 15px; color: #333; padding: 8px; }
     .fav-icon.active { color: var(--ihs-red); }
 
-    /* FİLM SİTESİ Afiş Grid'i */
-    .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 15px; padding: 10px; }
-    .movie-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; position: relative; }
+    /* ========================================================
+       FİLM SİTESİ (NETFLIX) AFİŞ GRID'İ - KIRILMAZ KUSURSUZ MİMARİ
+       ======================================================== */
+    .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 12px; padding: 10px; }
+    
+    .movie-card { 
+        background: #1a1a1a; border: 1px solid #333; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; 
+        display: flex; flex-direction: column; position: relative;
+        /* BU KOD KARTIN ÇÖKMESİNİ ENGELLER - DAİMA DİKEY DİKDÖRTGEN KALIR */
+        aspect-ratio: 1 / 1.6; 
+    }
     .movie-card:hover { transform: translateY(-5px); border-color: var(--ihs-red); box-shadow: 0 8px 20px rgba(229,9,20,0.5); z-index: 2; }
     .movie-card.active-movie { border-color: var(--ihs-red); box-shadow: 0 0 15px rgba(229,9,20,0.8); }
-    .movie-poster-wrap { position: relative; width: 100%; aspect-ratio: 2 / 3; background: #050505; border-bottom: 2px solid var(--ihs-red); }
-    .movie-poster { width: 100%; height: 100%; object-fit: contain; } 
-    .movie-info { padding: 12px 8px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; background: linear-gradient(0deg, #0a0a0a, #1a1a1a); }
-    .movie-title { font-size: 13px; font-weight: 700; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
-    .play-icon-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; backdrop-filter: blur(2px); }
+    
+    .movie-poster-wrap { 
+        flex: 1; width: 100%; position: relative; background: #050505; border-bottom: 2px solid var(--ihs-red); 
+        display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    /* GÖRSEL KIRIKSA VEYA ENGELLENMİŞSE ALTTAN BU YAZI ÇIKAR */
+    .movie-poster-wrap::before { content: 'AFİŞ YOK'; color: #333; font-size: 14px; font-weight: 900; position: absolute; letter-spacing: 1px; }
+    
+    .movie-poster { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1; } 
+    
+    .movie-info { 
+        height: 48px; padding: 4px 6px; text-align: center; 
+        display: flex; align-items: center; justify-content: center; background: linear-gradient(0deg, #050505, #151515); 
+    }
+    .movie-title { font-size: 11px; font-weight: 700; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+    
+    .play-icon-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; backdrop-filter: blur(2px); z-index: 2; }
     .movie-card:hover .play-icon-overlay { opacity: 1; }
     .play-icon-overlay i { font-size: 40px; color: white; text-shadow: 0 0 15px var(--ihs-red); }
 
@@ -271,7 +291,7 @@ let activeChannelIndex = -1;
 let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
 
 let currentRenderCount = 0; 
-const RENDER_CHUNK = 100; // Bellek optimizasyonu için 100'er 100'er yükler
+const RENDER_CHUNK = 100; 
 
 let hls = null;
 const video = document.getElementById('video-player');
@@ -533,14 +553,13 @@ function parseM3UContent(content, targetArray, targetCategories) {
     if (line.startsWith('#EXTINF:')) {
       const logoMatch = line.match(/tvg-logo="([^"]+)"/);
       const groupMatch = line.match(/group-title="([^"]+)"/);
-      const logo = logoMatch ? logoMatch[1] : 'https://via.placeholder.com/150?text=İçerik';
+      const logo = logoMatch ? logoMatch[1] : '';
       const group = groupMatch ? groupMatch[1] : 'Diğer';
       const name = line.split(',').pop().trim();
       currentObj = { name, logo, group };
       targetCategories.add(group);
     } else if (line.startsWith('http')) {
       if (currentObj) { currentObj.url = line; targetArray.push(currentObj); currentObj = null; } 
-      else { targetArray.push({ name: "Bilinmeyen İçerik", logo: "https://via.placeholder.com/150", group: "Diğer", url: line }); }
     }
   }
 }
@@ -628,24 +647,27 @@ function renderContentList(reset = false) {
 
   for (let i = currentRenderCount; i < endIndex; i++) {
     const c = currentDisplayList[i];
+    const safeName = c.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"); // XSS Koruması
+
     if(currentMode === 'TV') {
       const isFav = favorites.includes(c.name);
       const row = document.createElement('div');
       row.className = 'channel-row' + (activeItemUrl === c.url ? ' active-channel' : '');
       row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=TV'">
-                       <div class="channel-row-name">${c.name}</div>
-                       <i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${c.name.replace(/'/g, "\\'")}')"></i>`;
+                       <div class="channel-row-name">${safeName}</div>
+                       <i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${safeName.replace(/'/g, "\\'")}')"></i>`;
       row.onclick = () => playStream(c, i);
       fragment.appendChild(row);
     } else {
       const card = document.createElement('div');
       card.className = 'movie-card' + (activeItemUrl === c.url ? ' active-movie' : '');
+      
       card.innerHTML = `
         <div class="movie-poster-wrap">
-            <img class="movie-poster" src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/111/fff?text=Afiş+Yok'">
+            <img class="movie-poster" src="${c.logo}" loading="lazy" onerror="this.style.display='none'">
             <div class="play-icon-overlay"><i class="fas fa-play-circle"></i></div>
         </div>
-        <div class="movie-info"><div class="movie-title">${c.name}</div></div>
+        <div class="movie-info"><div class="movie-title">${safeName}</div></div>
       `;
       card.onclick = () => playStream(c, i);
       fragment.appendChild(card);
@@ -655,7 +677,6 @@ function renderContentList(reset = false) {
   contentArea.appendChild(fragment);
   currentRenderCount = endIndex;
 
-  // Akıllı Tetikleyici (Görünmez elemana gelince yeni 100 içerik yükle)
   if (currentRenderCount < currentDisplayList.length) {
       const observerTarget = document.createElement('div');
       observerTarget.style.width = "100%"; observerTarget.style.height = "20px";
@@ -676,13 +697,13 @@ function populateVideoChannelMenu() {
   const vList = document.getElementById('vcm-list'); vList.innerHTML = '';
   const fragment = document.createDocumentFragment();
   
-  // Video donmasın diye menüye maksimum 100 kart ekliyoruz
   const limit = Math.min(currentDisplayList.length, 100); 
   for(let i = 0; i < limit; i++) {
     const c = currentDisplayList[i];
+    const safeName = c.name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const row = document.createElement('div');
     row.className = 'channel-row' + ((activeItemUrl === c.url) ? ' active-channel' : '');
-    row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='https://via.placeholder.com/150'"><div class="channel-row-name">${c.name}</div>`;
+    row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.style.display='none'"><div class="channel-row-name">${safeName}</div>`;
     row.onclick = (e) => { e.stopPropagation(); playStream(c, i); document.getElementById('video-channel-menu').classList.remove('open'); document.getElementById('video-container').classList.remove('menu-open'); };
     fragment.appendChild(row);
   }
@@ -699,9 +720,10 @@ function playStream(item, index) {
   document.getElementById('error-overlay').style.display = 'none';
   document.getElementById('loading-spinner').style.display = 'block';
 
+  const safeName = item.name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const osd = document.getElementById('tv-osd');
   document.getElementById('osd-logo').src = item.logo;
-  document.getElementById('osd-title').innerText = item.name;
+  document.getElementById('osd-title').innerText = safeName;
   osd.classList.add('show'); clearTimeout(osdTimeout);
   osdTimeout = setTimeout(() => { osd.classList.remove('show'); }, 3000);
 
@@ -715,6 +737,8 @@ function playStream(item, index) {
     video.src = item.url; video.play(); 
     document.getElementById('loading-spinner').style.display = 'none';
   }
+  
+  renderContentList(true); // Oynatılanı aktif göstermek için listeyi tazele
 }
 
 function formatTime(seconds) {
@@ -751,7 +775,7 @@ function initKeyboardControls() {
 }
 
 document.getElementById('channel-menu-btn').onclick = (e) => {
-  e.stopPropagation(); document.getElementById('video-channel-menu').classList.add('open'); document.getElementById('video-container').classList.add('menu-open'); 
+  e.stopPropagation(); populateVideoChannelMenu(); document.getElementById('video-channel-menu').classList.add('open'); document.getElementById('video-container').classList.add('menu-open'); 
 };
 document.getElementById('vcm-close-btn').onclick = (e) => {
   e.stopPropagation(); document.getElementById('video-channel-menu').classList.remove('open'); document.getElementById('video-container').classList.remove('menu-open');
@@ -827,7 +851,7 @@ function initPlayerControls() {
   let timeout;
   function resetControls() {
     vContainer.classList.remove('idle'); clearTimeout(timeout);
-    timeout = setTimeout(() => { if (!video.paused) vContainer.classList.add('idle'); }, 3000);
+    timeout = setTimeout(() => { if (!video.paused && !document.getElementById('video-channel-menu').classList.contains('open')) vContainer.classList.add('idle'); }, 3000);
   }
   vContainer.addEventListener('mousemove', resetControls); vContainer.addEventListener('touchstart', resetControls);
   vContainer.addEventListener('mouseleave', () => { if (!video.paused) vContainer.classList.add('idle'); });
