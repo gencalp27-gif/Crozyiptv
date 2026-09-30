@@ -367,7 +367,7 @@ function initApp() {
   fetch('https://raw.githubusercontent.com/gencalp27-gif/Crozyiptv/main/film.m3u')
     .then(res => res.text())
     .then(data => {
-      parseM3UContent(data, movies, movieCategories);
+      parseFlexibleM3U(data, movies, movieCategories);
       if(currentMode === 'MOVIE') { renderCategoriesOnly(); renderContentList(true); }
     })
     .catch(e => console.log("Film listesi yüklenemedi", e));
@@ -385,6 +385,7 @@ function startClock() {
   }, 1000);
 }
 
+// Canlı TV için standart parser
 function parseM3UContent(content, targetArray, targetCategories) {
   const lines = content.split('\n'); 
   let currentObj = null;
@@ -400,6 +401,42 @@ function parseM3UContent(content, targetArray, targetCategories) {
       targetCategories.add(finalGroup);
     } else if (line.startsWith('http')) { 
       if (currentObj) { currentObj.url = line; targetArray.push(currentObj); currentObj = null; } 
+    }
+  }
+}
+
+// Esnek Parser (İster Link Önce, İster #EXTINF Önce Olsun Kusursuz Okur)
+function parseFlexibleM3U(content, targetArray, targetCategories) {
+  const lines = content.split('\n');
+  let pendingMeta = null;
+  let pendingUrl = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    if (!line || line.startsWith('#EXTM3U')) continue;
+
+    if (line.startsWith('#EXTINF:')) {
+      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
+      const groupMatch = line.match(/group-title="([^"]+)"/);
+      let group = groupMatch ? groupMatch[1] : 'Genel';
+      let name = line.split(',').pop().trim();
+      let logo = logoMatch ? logoMatch[1] : '';
+
+      targetCategories.add(group);
+      pendingMeta = { name, logo, group };
+    } else if (line.startsWith('http')) {
+      pendingUrl = line;
+    }
+
+    if (pendingMeta && pendingUrl) {
+      targetArray.push({
+        name: pendingMeta.name,
+        logo: pendingMeta.logo,
+        group: pendingMeta.group,
+        url: pendingUrl
+      });
+      pendingMeta = null;
+      pendingUrl = null;
     }
   }
 }
@@ -737,7 +774,7 @@ function playStream(item, index) {
     let existingIframe = document.getElementById('embed-iframe');
     if (existingIframe) existingIframe.remove();
     
-    // OK.RU veya benzeri Embed / Iframe destekleri
+    // OK.RU Video Desteği (Iframe embed)
     if (item.url && item.url.includes('ok.ru/video/')) {
       const okId = item.url.split('/video/')[1].split('?')[0];
       video.style.display = 'none';
@@ -760,8 +797,6 @@ function playStream(item, index) {
       fadeOverlay.classList.remove('active');
     } else {
       video.style.display = 'block';
-      
-      // HEDEF LİNKİ AGRESİF ŞEKİLDE PROXY'DEN GEÇİRİYORUZ (CORS Hatasına Son!)
       let targetUrl = item.url;
       let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
 
