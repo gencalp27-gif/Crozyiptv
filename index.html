@@ -25,7 +25,7 @@
 
     .app-wrapper { display: none; width: 100vw; height: 100dvh; overflow: hidden; }
 
-    /* OYNATICI VE DETAY BÖLÜMÜ */
+    /* OYNATICI BÖLÜMÜ */
     .player-section { background: #000; z-index: 10; display: flex; flex-direction: column; position: relative; }
     .video-container { width: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; aspect-ratio: 16/9; }
     .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer; }
@@ -55,14 +55,7 @@
     .epg-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; }
     .epg-progress { height: 100%; background: var(--ihs-red); border-radius: 4px; transition: width 1s linear; }
 
-    /* BİLGİ PANELİ */
-    .media-meta-panel { background: #0a0a0a; border-bottom: 1px solid var(--border-color); padding: 15px 20px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-    .meta-title-row { display: flex; justify-content: space-between; align-items: center; }
-    .meta-title { font-size: 16px; font-weight: 800; color: #fff; }
-    .meta-rating { background: rgba(245, 197, 24, 0.15); border: 1px solid rgba(245, 197, 24, 0.3); color: var(--gold); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
-    .meta-desc { font-size: 12px; color: #999; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-    /* İÇERİK MENÜSÜ */
+    /* VİDEO İÇİ KANAL LİSTESİ */
     .video-channel-menu { position: absolute; top: 0; right: -320px; width: 300px; height: 100%; background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(20px); z-index: 25; padding: 15px; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-left: 1px solid rgba(255,255,255,0.05); }
     .video-channel-menu.open { right: 0; }
     .vcm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
@@ -82,7 +75,7 @@
     .error-overlay i { font-size: 45px; color: var(--ihs-red); margin-bottom: 15px; }
     .fallback-msg { color: #aaa; font-size: 13px; margin-top: 10px; font-style: italic; }
 
-    /* KONTROLLER */
+    /* OYNATICI KONTROLLERİ */
     .custom-controls { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%); display: flex; flex-direction: column; padding: 40px 20px 20px 20px; z-index: 20; opacity: 1; transition: opacity 0.4s ease; }
     .video-container.idle .custom-controls { opacity: 0; pointer-events: none; }
     .video-container.menu-open .custom-controls { opacity: 1; pointer-events: auto; }
@@ -96,15 +89,23 @@
 
     .control-buttons { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .controls-left, .controls-right { display: flex; align-items: center; gap: 18px; }
-    .control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.8); position: relative; }
+    .control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
     .control-btn:hover { color: var(--ihs-red); transform: scale(1.1); }
     .control-btn.play-btn { font-size: 26px; margin: 0 5px; }
 
-    .audio-sub-dropdown { position: absolute; bottom: 45px; right: 0; background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 8px; padding: 10px; display: none; flex-direction: column; gap: 8px; min-width: 140px; z-index: 35; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
-    .audio-sub-dropdown.open { display: flex; }
-    .dropdown-title { font-size: 11px; font-weight: bold; color: #888; border-bottom: 1px solid #333; padding-bottom: 4px; }
-    .dropdown-item { background: transparent; border: none; color: #ccc; font-size: 12px; text-align: left; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
-    .dropdown-item:hover { background: var(--ihs-red); color: white; }
+    /* FİLM DETAY MODALI / EKRANI (İçeriklerin olduğu bölgede açılır) */
+    .movie-detail-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,15,15,0.98); z-index: 50; display: none; flex-direction: column; padding: 20px; overflow-y: auto; backdrop-filter: blur(10px); }
+    .movie-detail-modal.open { display: flex; }
+    .mdm-close { align-self: flex-end; background: #222; border: 1px solid #444; color: #fff; width: 35px; height: 35px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; margin-bottom: 10px; }
+    .mdm-close:hover { background: var(--ihs-red); border-color: var(--ihs-red); }
+    .mdm-content { display: flex; gap: 20px; align-items: flex-start; }
+    .mdm-poster { width: 120px; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; border: 1px solid #333; flex-shrink: 0; }
+    .mdm-info { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .mdm-title { font-size: 18px; font-weight: 800; color: #fff; }
+    .mdm-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--gold); font-weight: bold; }
+    .mdm-desc { font-size: 13px; color: #bbb; line-height: 1.4; margin-top: 5px; }
+    .mdm-play-btn { background: var(--ihs-red); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-top: 15px; width: fit-content; transition: 0.2s; }
+    .mdm-play-btn:hover { transform: scale(1.05); }
 
     /* LİSTE / SİDEBAR BÖLÜMÜ */
     .sidebar-section { display: flex; flex-direction: column; background: var(--bg-card); overflow: hidden; flex: 1; position: relative; min-width: 0; }
@@ -198,7 +199,7 @@
 
   <div class="app-wrapper" id="app-wrapper">
     
-    <!-- OYNATICI & BİLGİ PANELİ -->
+    <!-- OYNATICI BÖLÜMÜ -->
     <div class="player-section">
       <div class="video-container" id="video-container">
         <div class="fade-overlay" id="fade-overlay"></div>
@@ -254,17 +255,7 @@
               <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
               <button class="control-btn" id="channel-menu-btn" title="Kanal Listesi" style="margin-left: 10px;"><i class="fas fa-list-ul"></i></button>
             </div>
-            <div class="controls-right" style="position: relative;">
-              <button class="control-btn" id="audio-sub-btn" title="Ses Dili & Altyazı"><i class="fas fa-closed-captioning"></i></button>
-              <div class="audio-sub-dropdown" id="audio-sub-dropdown">
-                <div class="dropdown-title">Ses Dili</div>
-                <button class="dropdown-item" onclick="setAudioLang('tr')">Türkçe (Orijinal)</button>
-                <button class="dropdown-item" onclick="setAudioLang('en')">İngilizce</button>
-                <div class="dropdown-title" style="margin-top:5px;">Altyazı</div>
-                <button class="dropdown-item" onclick="setSubLang('tr')">Türkçe Altyazı</button>
-                <button class="dropdown-item" onclick="setSubLang('off')">Kapalı</button>
-              </div>
-
+            <div class="controls-right">
               <button class="control-btn" id="stats-btn" title="Yayın İstatistikleri"><i class="fas fa-info-circle"></i></button>
               <button class="control-btn" id="pip-btn" title="Pencere Modu"><i class="fas fa-clone"></i></button>
               <button class="control-btn" id="fullscreen-btn" title="Tam Ekran"><i class="fas fa-expand"></i></button>
@@ -272,19 +263,25 @@
           </div>
         </div>
       </div>
-
-      <!-- OYNATICI ALTI DETAY BİLGİ PANELİ -->
-      <div class="media-meta-panel" id="media-meta-panel">
-        <div class="meta-title-row">
-          <div class="meta-title" id="meta-title">IHS TV - Hoş Geldiniz</div>
-          <div class="meta-rating" id="meta-rating" style="display:none;"><i class="fas fa-star" style="font-size:10px;"></i> <span id="meta-rating-val">7.5</span></div>
-        </div>
-        <div class="meta-desc" id="meta-desc">İzlemek istediğiniz canlı TV kanalını veya VOD filmini seçerek hemen keyfini çıkarın.</div>
-      </div>
     </div>
 
-    <!-- LİSTE & KATEGORİ BÖLÜMÜ -->
-    <div class="sidebar-section">
+    <!-- LİSTE & KATEGORİ BÖLÜMÜ (DETAY EKRANI İÇERİK ALANINDA AÇILIR) -->
+    <div class="sidebar-section" style="position: relative;">
+      
+      <!-- FİLM DETAY POPUP EKRANI (Logoya/Filme tıklandığında içerik alanında açılır) -->
+      <div class="movie-detail-modal" id="movie-detail-modal">
+        <button class="mdm-close" onclick="closeMovieDetail()"><i class="fas fa-times"></i></button>
+        <div class="mdm-content">
+          <img class="mdm-poster" id="mdm-poster" src="" alt="Poster">
+          <div class="mdm-info">
+            <div class="mdm-title" id="mdm-title">Film Adı</div>
+            <div class="mdm-meta" id="mdm-meta"><i class="fas fa-star"></i> <span id="mdm-rating">7.5</span></div>
+            <div class="mdm-desc" id="mdm-desc">Film özeti yükleniyor...</div>
+            <button class="mdm-play-btn" id="mdm-play-btn"><i class="fas fa-play"></i> HEMEN İZLE</button>
+          </div>
+        </div>
+      </div>
+
       <div class="tab-container">
         <button class="tab-btn active" id="tab-tv" onclick="switchMode('TV')"><i class="fas fa-tv"></i> CANLI TV</button>
         <button class="tab-btn" id="tab-movie" onclick="switchMode('MOVIE')"><i class="fas fa-film"></i> FİLMLER</button>
@@ -674,7 +671,12 @@ function createMovieCard(c, index) {
         <div class="play-icon-overlay"><i class="fas fa-play-circle"></i></div>
       </div>
     `;
-    card.onclick = () => playStream(c, index); 
+    
+    // FİLME TIKLANDIĞINDA DOĞRUDAN OYNATMAK YERİNE DETAY EKRANINI AÇAR
+    card.onclick = (e) => {
+      e.stopPropagation();
+      openMovieDetail(c, index);
+    }; 
     
     movieObserver.observe(card);
     if(initialPoster) {
@@ -685,6 +687,30 @@ function createMovieCard(c, index) {
     }
     
     return card;
+}
+
+// FİLM DETAY EKRANINI AÇMA / KAPATMA FONKSİYONLARI
+function openMovieDetail(item, index) {
+  if (currentMode !== 'MOVIE') {
+    playStream(item, index);
+    return;
+  }
+  document.getElementById('mdm-poster').src = item.logo || 'https://via.placeholder.com/150';
+  document.getElementById('mdm-title').innerText = item.name;
+  document.getElementById('mdm-rating').innerText = item.rating || '7.0';
+  document.getElementById('mdm-desc').innerText = item.overview || 'Bu içerik için detaylı açıklama yükleniyor...';
+  
+  const playBtn = document.getElementById('mdm-play-btn');
+  playBtn.onclick = () => {
+    closeMovieDetail();
+    playStream(item, index);
+  };
+
+  document.getElementById('movie-detail-modal').classList.add('open');
+}
+
+function closeMovieDetail() {
+  document.getElementById('movie-detail-modal').classList.remove('open');
 }
 
 function renderContentList(reset = false) {
@@ -795,15 +821,6 @@ function playStream(item, index) {
     const osd = document.getElementById('tv-osd'); 
     document.getElementById('osd-logo').src = item.logo || 'https://via.placeholder.com/150'; 
     document.getElementById('osd-title').innerText = safeName;
-
-    document.getElementById('meta-title').innerText = safeName;
-    if(item.rating) {
-      document.getElementById('meta-rating').style.display = 'flex';
-      document.getElementById('meta-rating-val').innerText = item.rating;
-    } else {
-      document.getElementById('meta-rating').style.display = 'none';
-    }
-    document.getElementById('meta-desc').innerText = item.overview || 'Bu içerik için TMDB detay özeti yükleniyor veya bulunmuyor.';
     
     if(currentMode === 'TV') { 
       const randProg = Math.floor(Math.random() * 60) + 20; 
@@ -878,9 +895,6 @@ function formatTime(seconds) {
 function playNextChannel() { if(currentDisplayList.length === 0 || currentMode === 'MOVIE') return; let nextIdx = activeChannelIndex + 1; if (nextIdx >= currentDisplayList.length) nextIdx = 0; playStream(currentDisplayList[nextIdx], nextIdx); }
 function playPrevChannel() { if(currentDisplayList.length === 0 || currentMode === 'MOVIE') return; let prevIdx = activeChannelIndex - 1; if (prevIdx < 0) prevIdx = currentDisplayList.length - 1; playStream(currentDisplayList[prevIdx], prevIdx); }
 
-function setAudioLang(lang) { alert("Ses dili seçildi: " + lang.toUpperCase()); document.getElementById('audio-sub-dropdown').classList.remove('open'); }
-function setSubLang(lang) { alert("Altyazı ayarlandı: " + lang.toUpperCase()); document.getElementById('audio-sub-dropdown').classList.remove('open'); }
-
 function initKeyboardControls() { 
   document.addEventListener('keydown', (e) => { 
     if(document.activeElement.tagName === 'INPUT') return; 
@@ -895,13 +909,6 @@ function initKeyboardControls() {
 
 document.getElementById('channel-menu-btn').onclick = (e) => { e.stopPropagation(); populateVideoChannelMenu(); document.getElementById('video-channel-menu').classList.add('open'); document.getElementById('video-container').classList.add('menu-open'); };
 document.getElementById('vcm-close-btn').onclick = (e) => { e.stopPropagation(); document.getElementById('video-channel-menu').classList.remove('open'); document.getElementById('video-container').classList.remove('menu-open'); };
-
-document.getElementById('audio-sub-btn').onclick = (e) => { 
-  e.stopPropagation(); 
-  const dd = document.getElementById('audio-sub-dropdown'); 
-  dd.classList.toggle('open'); 
-};
-document.addEventListener('click', () => { document.getElementById('audio-sub-dropdown').classList.remove('open'); });
 
 function initPlayerControls() {
   const playBtn = document.getElementById('play-pause-btn'); const muteBtn = document.getElementById('mute-btn'); const fsBtn = document.getElementById('fullscreen-btn'); const pipBtn = document.getElementById('pip-btn'); const statsBtn = document.getElementById('stats-btn'); const statsPanel = document.getElementById('stats-panel'); const vContainer = document.getElementById('video-container');
