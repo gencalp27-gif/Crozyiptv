@@ -100,7 +100,7 @@
     .control-btn.play-btn { font-size: 26px; margin: 0 5px; }
 
     /* SİDEBAR VE TABLAR */
-    .sidebar-section { display: flex; flex-direction: column; background: var(--bg-card); overflow: hidden; flex:1; border-left: 1px solid var(--border-color);}
+    .sidebar-section { display: flex; flex-direction: column; background: var(--bg-card); overflow: hidden; flex:1; border-left: 1px solid var(--border-color); position: relative;}
     .tab-container { display: flex; background: var(--bg-main); border-bottom: 1px solid var(--border-color); }
     .tab-btn { flex: 1; padding: 18px 0; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; }
     .tab-btn.active { color: #fff; border-bottom-color: var(--ihs-red); background: rgba(255,255,255,0.02); }
@@ -114,12 +114,23 @@
     .cat-btn { background: #1a1a1a; color: #aaa; border: 1px solid #333; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 12px; white-space: nowrap; cursor: pointer; transition: 0.2s; }
     .cat-btn:hover { border-color: #555; color: #fff; }
     .cat-btn.active { background: var(--ihs-red); color: #fff; border-color: var(--ihs-red); }
-    .cat-btn.movie-cat { border-radius: 4px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+    .cat-btn.movie-cat { border-radius: 6px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; padding: 8px 14px;}
+
+    /* YENİ: FİLM KATEGORİ SEÇİM MENÜSÜ (Aşağıdan/Yandan Açılır) */
+    .category-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18, 18, 18, 0.98); z-index: 40; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .category-menu.open { transform: translateY(0); }
+    .cm-header { padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+    .cm-header h3 { font-size: 16px; margin: 0; color: #fff; display: flex; align-items: center; gap: 10px;}
+    .cm-close { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; transition: 0.2s;}
+    .cm-close:hover { color: var(--ihs-red); transform: scale(1.1); }
+    .cm-list { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; align-content: start; }
+    .cm-item { background: #222; border: 1px solid #333; padding: 15px 10px; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 700; color: #ddd; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 60px;}
+    .cm-item:hover, .cm-item.active { background: rgba(229,9,20,0.2); border-color: var(--ihs-red); color: #fff; box-shadow: 0 4px 10px rgba(229,9,20,0.3);}
 
     /* İÇERİK LİSTELERİ */
     .content-area { flex: 1; overflow-y: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
     
-    /* TV KANALLARI (LİSTE) */
+    /* TV Kanal Satırları */
     .channel-row { display: flex; align-items: center; background: transparent; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 6px; border: 1px solid transparent; }
     .channel-row.active-channel { background: rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.3); border-left: 4px solid var(--ihs-red); }
     .channel-row:hover { background: rgba(255,255,255,0.05); }
@@ -129,7 +140,7 @@
     .fav-icon:hover { transform: scale(1.2); }
     .fav-icon.active { color: var(--ihs-red); text-shadow: 0 0 10px rgba(229,9,20,0.5); }
 
-    /* FİLMLER NETFLIX MİMARİSİ (YATAY SCROLL) */
+    /* FİLM SİTESİ (NETFLIX) YATAY SCROLL */
     .netflix-row-container { margin-bottom: 25px; }
     .netflix-row-title { font-size: 15px; font-weight: 700; color: #fff; margin: 0 0 10px 10px; display: flex; justify-content: space-between; align-items: baseline; }
     .see-all { font-size: 11px; color: #aaa; cursor: pointer; font-weight: normal; margin-right: 15px; transition: color 0.2s;}
@@ -139,7 +150,7 @@
     .netflix-row::-webkit-scrollbar { display: none; }
     .netflix-row .movie-card { flex: 0 0 115px; scroll-snap-align: start; }
 
-    /* FİLM KARTLARI (Kusursuzlaştırıldı) */
+    /* FİLM KARTLARI (Kusursuz Afiş) */
     .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 15px; padding: 10px; }
     .movie-card { border-radius: 8px; overflow: hidden; position: relative; aspect-ratio: 2 / 3; background: #1a1a1a; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s, border 0.3s; border: 1px solid #333; }
     .movie-card:hover { transform: scale(1.05); z-index: 2; border-color: var(--ihs-red); box-shadow: 0 8px 20px rgba(229,9,20,0.6); }
@@ -265,7 +276,20 @@
           <input type="text" id="search-input" placeholder="Arama yap..." oninput="searchContent()">
         </div>
       </div>
+      
+      <!-- KATEGORİ BAR -->
       <div class="categories-bar" id="categories-bar"></div>
+      
+      <!-- KATEGORİ MENÜSÜ (Sadece Filmler İçin Butondan Açılır) -->
+      <div class="category-menu" id="category-menu">
+        <div class="cm-header">
+          <h3><i class="fas fa-list-ul"></i> Film Kategorileri</h3>
+          <button class="cm-close" onclick="closeCategoryMenu()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cm-list" id="cm-list"></div>
+      </div>
+
+      <!-- İÇERİK LİSTESİ -->
       <div class="content-area" id="content-area"></div>
     </div>
   </div>
@@ -316,7 +340,7 @@ const seekBar = document.getElementById('seek-bar');
 const fadeOverlay = document.getElementById('fade-overlay');
 let osdTimeout; let statsInterval; let clockInterval;
 
-// TÜM TV LİSTESİ (1 GRAM EKSİK YOK)
+// TÜM TV LİSTESİ (EKSİKSİZ)
 const tvData = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.imgur.com/PexhKwp.png" group-title="Turkey",4U TV (720p)
@@ -685,7 +709,7 @@ function startClock() {
   }, 1000);
 }
 
-// AKILLI METİN TEMİZLEYİCİ
+// AKILLI METİN TEMİZLEYİCİ (FİLMLERDEKİ BOZUK KATEGORİLERİ DÜZELTİR)
 function parseM3UContent(content, targetArray, targetCategories) {
   const lines = content.split('\n');
   let currentObj = null;
@@ -698,7 +722,6 @@ function parseM3UContent(content, targetArray, targetCategories) {
       const groupMatch = line.match(/group-title="([^"]+)"/);
       const logo = logoMatch ? logoMatch[1] : '';
       
-      // Boşlukları temizle ve İlk Harfi Büyük yap (Sorun Çözücü)
       let rawGroup = groupMatch ? groupMatch[1] : 'Diğer';
       let cleanGroup = rawGroup.trim().toUpperCase();
       let finalGroup = cleanGroup.charAt(0).toUpperCase() + cleanGroup.slice(1).toLowerCase();
@@ -712,6 +735,9 @@ function parseM3UContent(content, targetArray, targetCategories) {
   }
 }
 
+// =========================================
+// İKİLİ EKRAN (TAB) YÖNETİMİ
+// =========================================
 function switchMode(mode) {
   currentMode = mode;
   document.getElementById('tab-tv').className = mode === 'TV' ? 'tab-btn active' : 'tab-btn';
@@ -737,46 +763,81 @@ function switchMode(mode) {
   renderContentList(true);
 }
 
+// YENİ: KATEGORİ BAR SİSTEMİ (TV İÇİN LİSTE, FİLM İÇİN AÇILIR MENÜ)
 function renderCategoriesOnly() {
   const catBar = document.getElementById('categories-bar'); 
   catBar.innerHTML = '';
   const categoriesSet = currentMode === 'TV' ? tvCategories : movieCategories;
 
-  const createBtn = (txt, isFav=false) => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (currentMode === 'MOVIE' ? ' movie-cat' : '') + (isFav ? ' cat-btn-fav' : '') + (currentCategory===txt ? ' active' : '');
-    btn.innerHTML = isFav ? `<i class="fas fa-heart"></i> ${txt}` : txt;
-    
-    btn.onclick = () => { selectCategory(txt, btn); };
-    catBar.appendChild(btn);
-  };
-  
-  if(currentMode === 'TV') createBtn('Favorilerim', true);
-  createBtn('Tümü');
-  Array.from(categoriesSet).sort().forEach(cat => createBtn(cat));
+  if(currentMode === 'TV') {
+      const createBtn = (txt, isFav=false) => {
+        const btn = document.createElement('button');
+        btn.className = 'cat-btn' + (isFav ? ' cat-btn-fav' : '') + (currentCategory===txt ? ' active' : '');
+        btn.innerHTML = isFav ? `<i class="fas fa-heart"></i> ${txt}` : txt;
+        btn.onclick = () => { selectCategory(txt); };
+        catBar.appendChild(btn);
+      };
+      createBtn('Favorilerim', true);
+      createBtn('Tümü');
+      Array.from(categoriesSet).sort().forEach(cat => createBtn(cat));
+  } else {
+      // FİLM MODU: MİNİMALİST MENÜ (TÜMÜ + KATEGORİLER İKONU)
+      const btnAll = document.createElement('button');
+      btnAll.className = 'cat-btn movie-cat' + (currentCategory==='Tümü' ? ' active' : '');
+      btnAll.innerText = 'Tümü';
+      btnAll.onclick = () => selectCategory('Tümü');
+      catBar.appendChild(btnAll);
+
+      const btnMenu = document.createElement('button');
+      btnMenu.className = 'cat-btn movie-cat';
+      btnMenu.innerHTML = `<i class="fas fa-list-ul"></i> Kategoriler`;
+      btnMenu.onclick = openCategoryMenu;
+      catBar.appendChild(btnMenu);
+
+      if (currentCategory !== 'Tümü') {
+         const btnCurrent = document.createElement('button');
+         btnCurrent.className = 'cat-btn movie-cat active';
+         btnCurrent.innerText = currentCategory;
+         btnCurrent.onclick = () => openCategoryMenu(); 
+         catBar.appendChild(btnCurrent);
+      }
+  }
 }
 
-function selectCategory(catName, btnElement = null) {
+function selectCategory(catName) {
     currentCategory = catName;
     document.getElementById('search-input').value = '';
+    renderCategoriesOnly();
+    renderContentList(true);
     
-    // Kategori butonlarını güncelle ve odaklan
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    if(btnElement) {
-        btnElement.classList.add('active');
-        btnElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    } else {
-        // "Tümünü Gör" den tıklandıysa ilgili butonu bul
+    if(currentMode === 'TV') {
         const buttons = document.querySelectorAll('.cat-btn');
         for(let b of buttons) {
             if(b.innerText === catName || b.innerText.includes(catName)) {
-                b.classList.add('active');
                 b.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                 break;
             }
         }
     }
-    renderContentList(true);
+}
+
+// YENİ: FİLMLER İÇİN AÇILIR KATEGORİ MENÜSÜ
+function openCategoryMenu() {
+   const cmList = document.getElementById('cm-list');
+   cmList.innerHTML = '';
+   const sortedCats = Array.from(movieCategories).sort();
+   sortedCats.forEach(cat => {
+      const item = document.createElement('div');
+      item.className = 'cm-item' + (currentCategory === cat ? ' active' : '');
+      item.innerText = cat;
+      item.onclick = () => { selectCategory(cat); closeCategoryMenu(); };
+      cmList.appendChild(item);
+   });
+   document.getElementById('category-menu').classList.add('open');
+}
+
+function closeCategoryMenu() {
+   document.getElementById('category-menu').classList.remove('open');
 }
 
 function searchContent() { renderContentList(true); }
@@ -806,6 +867,9 @@ function createMovieCard(c, index) {
     return card;
 }
 
+// =========================================
+// SONSUZ KAYDIRMA VE LİSTE ÇİZİMİ
+// =========================================
 function renderContentList(reset = false) {
   const contentArea = document.getElementById('content-area');
   const dataset = currentMode === 'TV' ? tvChannels : movies;
@@ -815,19 +879,16 @@ function renderContentList(reset = false) {
     currentRenderCount = 0;
     contentArea.innerHTML = '';
     
-    if (currentCategory === 'Favorilerim') {
-        currentDisplayList = dataset.filter(c => favorites.includes(c.name));
-    } else {
-        currentDisplayList = currentCategory === 'Tümü' ? dataset : dataset.filter(c => c.group === currentCategory);
-    }
+    if (currentCategory === 'Favorilerim') { currentDisplayList = dataset.filter(c => favorites.includes(c.name)); } 
+    else { currentDisplayList = currentCategory === 'Tümü' ? dataset : dataset.filter(c => c.group === currentCategory); }
     if (query) currentDisplayList = currentDisplayList.filter(c => c.name.toLowerCase().includes(query));
     populateVideoChannelMenu(); 
   }
 
-  // EĞER FİLMLER SEKAMESİNDE VE TÜMÜ SEÇİLİYSE NETFLIX YATAY KAYDIRMA YAP
+  // FİLMLER - TÜMÜ EKRANINDA NETFLIX YATAY KAYDIRMA YAPISI
   if (currentMode === 'MOVIE' && currentCategory === 'Tümü' && query === '') {
       contentArea.className = 'content-area';
-      if(!reset) return; // Sonsuz kaydırmaya gerek yok, hepsi satır satır eklendi
+      if(!reset) return; 
       
       const sortedCats = Array.from(movieCategories).sort();
       sortedCats.forEach(cat => {
@@ -841,17 +902,14 @@ function renderContentList(reset = false) {
           const row = document.createElement('div');
           row.className = 'netflix-row';
           
-          const limit = Math.min(catMovies.length, 30);
-          for(let i = 0; i < limit; i++) {
-              row.appendChild(createMovieCard(catMovies[i], movies.indexOf(catMovies[i])));
-          }
-          rowCont.appendChild(row);
-          contentArea.appendChild(rowCont);
+          const limit = Math.min(catMovies.length, 30); // Ekranda kasmasın diye her satıra max 30 film
+          for(let i = 0; i < limit; i++) { row.appendChild(createMovieCard(catMovies[i], movies.indexOf(catMovies[i]))); }
+          rowCont.appendChild(row); contentArea.appendChild(rowCont);
       });
       return;
   }
 
-  // DİĞER DURUMLAR İÇİN (Canlı TV veya Seçili Film Kategorisi) GRID VE LİSTE YAPISI
+  // DİĞER DURUMLAR (Canlı TV Liste veya Belirli Bir Film Kategorisi Grid)
   contentArea.className = currentMode === 'TV' ? 'content-area' : 'content-area movie-grid';
   const fragment = document.createDocumentFragment();
   const endIndex = Math.min(currentRenderCount + RENDER_CHUNK, currentDisplayList.length);
@@ -890,11 +948,8 @@ function renderContentList(reset = false) {
 
 function updateActiveCardUI() {
     document.querySelectorAll('.channel-row, .movie-card').forEach(el => {
-        if(el.getAttribute('data-url') === activeItemUrl) {
-            el.classList.add(currentMode === 'TV' ? 'active-channel' : 'active-movie');
-        } else {
-            el.classList.remove('active-channel', 'active-movie');
-        }
+        if(el.getAttribute('data-url') === activeItemUrl) { el.classList.add(currentMode === 'TV' ? 'active-channel' : 'active-movie'); } 
+        else { el.classList.remove('active-channel', 'active-movie'); }
     });
 }
 
@@ -914,12 +969,14 @@ function populateVideoChannelMenu() {
   vList.appendChild(fragment);
 }
 
+// =========================================
+// OYNATICI 
+// =========================================
 function playStream(item, index) {
   fadeOverlay.classList.add('active');
   
   setTimeout(() => {
-    activeItemUrl = item.url;
-    activeChannelIndex = index;
+    activeItemUrl = item.url; activeChannelIndex = index;
     
     document.getElementById('error-overlay').style.display = 'none';
     document.getElementById('loading-spinner').style.display = 'block';
@@ -942,23 +999,19 @@ function playStream(item, index) {
     
     if (Hls.isSupported() && item.url.includes('.m3u8')) {
       hls = new Hls({enableWorker: true});
-      hls.on(Hls.Events.ERROR, (e, data) => { 
-          if (data.fatal) { handleStreamError(); } 
-      });
+      hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) { handleStreamError(); } });
       hls.loadSource(item.url); hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play(); });
     } else { 
       video.src = item.url; 
       video.play().catch(e => { console.error("Oynatma Hatası", e); handleStreamError(); });
     }
-    
     updateActiveCardUI(); 
   }, 400); 
 }
 
 function handleStreamError() {
-    document.getElementById('loading-spinner').style.display = 'none'; 
-    fadeOverlay.classList.remove('active');
+    document.getElementById('loading-spinner').style.display = 'none'; fadeOverlay.classList.remove('active');
     document.getElementById('error-overlay').style.display = 'flex';
     document.getElementById('fallback-msg').innerText = "CORS engeli veya sunucu yanıt vermiyor.";
 }
