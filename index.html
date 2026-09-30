@@ -16,6 +16,7 @@
     ::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--ihs-red); }
 
+    /* GÜVENLİK EKRANI */
     .security-screen, .ban-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     .ban-screen { display: none; background: #050505; }
     .security-logo { width: 70px; height: 70px; background: linear-gradient(135deg, #ff4b4b, #8b0000); transform: rotate(45deg); box-shadow: 0 0 20px rgba(229, 9, 20, 0.5); border: 2px solid #ff7a7a; margin-bottom: 40px; }
@@ -26,8 +27,10 @@
     .login-btn:active { transform: scale(0.95); }
     .error-msg { color: var(--ihs-red); font-size: 13px; font-weight: bold; margin-top: 15px; display: none; }
 
+    /* ANA UYGULAMA YAPISI */
     .app-wrapper { display: none; height: 100dvh; flex-direction: column; }
 
+    /* OYNATICI */
     .player-section { background: #000; z-index: 10; display: flex; flex-direction: column; position: relative;}
     .video-container { width: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer; }
@@ -43,6 +46,7 @@
     .stat-label { color: #aaa; }
     .stat-value { font-family: monospace; font-weight: bold; color: #4CAF50; letter-spacing: 0.5px;}
 
+    /* TV OSD (Bilgi Ekranı) */
     .tv-osd { position: absolute; top: 20px; left: 20px; background: rgba(10, 10, 10, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px 20px; display: flex; align-items: flex-start; gap: 15px; z-index: 30; opacity: 0; transform: translateX(-20px); transition: all 0.4s ease; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 280px; }
     .tv-osd.show { opacity: 1; transform: translateX(0); }
     .osd-logo { width: 55px; height: 55px; background: rgba(255,255,255,0.9); padding: 4px; border-radius: 10px; object-fit: contain; }
@@ -57,6 +61,7 @@
     .epg-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; }
     .epg-progress { height: 100%; background: var(--ihs-red); border-radius: 4px; transition: width 1s linear; }
 
+    /* VİDEO İÇİ LİSTE */
     .video-channel-menu { position: absolute; top: 0; right: -320px; width: 300px; height: 100%; background: rgba(10, 10, 10, 0.6); backdrop-filter: blur(20px); z-index: 25; padding: 15px; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-left: 1px solid rgba(255,255,255,0.05); }
     .video-channel-menu.open { right: 0; }
     .vcm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
@@ -76,6 +81,7 @@
     .error-overlay i { font-size: 45px; color: var(--ihs-red); margin-bottom: 15px; }
     .fallback-msg { color: #aaa; font-size: 13px; margin-top: 10px; font-style: italic; }
 
+    /* OYNATICI KONTROLLERİ */
     .custom-controls { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%); display: flex; flex-direction: column; padding: 40px 20px 20px 20px; z-index: 20; opacity: 1; transition: opacity 0.4s ease; }
     .video-container.idle .custom-controls { opacity: 0; pointer-events: none; }
     .video-container.menu-open .custom-controls { opacity: 1; pointer-events: auto; }
@@ -93,6 +99,7 @@
     .control-btn:hover { color: var(--ihs-red); transform: scale(1.1); }
     .control-btn.play-btn { font-size: 26px; margin: 0 5px; }
 
+    /* SİDEBAR VE TABLAR */
     .sidebar-section { display: flex; flex-direction: column; background: var(--bg-card); overflow: hidden; flex:1; border-left: 1px solid var(--border-color); position: relative;}
     .tab-container { display: flex; background: var(--bg-main); border-bottom: 1px solid var(--border-color); }
     .tab-btn { flex: 1; padding: 18px 0; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; }
@@ -109,6 +116,7 @@
     .cat-btn.active { background: var(--ihs-red); color: #fff; border-color: var(--ihs-red); }
     .cat-btn.movie-cat { border-radius: 6px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; padding: 8px 14px;}
 
+    /* YENİ: FİLM KATEGORİ SEÇİM MENÜSÜ */
     .category-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18, 18, 18, 0.98); z-index: 40; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     .category-menu.open { transform: translateY(0); }
     .cm-header { padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
@@ -119,8 +127,10 @@
     .cm-item { background: #222; border: 1px solid #333; padding: 15px 10px; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 700; color: #ddd; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 60px;}
     .cm-item:hover, .cm-item.active { background: rgba(229,9,20,0.2); border-color: var(--ihs-red); color: #fff; box-shadow: 0 4px 10px rgba(229,9,20,0.3);}
 
+    /* İÇERİK LİSTELERİ */
     .content-area { flex: 1; overflow-y: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
     
+    /* TV Kanal Satırları */
     .channel-row { display: flex; align-items: center; background: transparent; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 6px; border: 1px solid transparent; }
     .channel-row.active-channel { background: rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.3); border-left: 4px solid var(--ihs-red); }
     .channel-row:hover { background: rgba(255,255,255,0.05); }
@@ -130,6 +140,7 @@
     .fav-icon:hover { transform: scale(1.2); }
     .fav-icon.active { color: var(--ihs-red); text-shadow: 0 0 10px rgba(229,9,20,0.5); }
 
+    /* FİLM SİTESİ (NETFLIX) YATAY SCROLL */
     .netflix-row-container { margin-bottom: 25px; }
     .netflix-row-title { font-size: 15px; font-weight: 700; color: #fff; margin: 0 0 10px 10px; display: flex; justify-content: space-between; align-items: baseline; }
     .see-all { font-size: 11px; color: #aaa; cursor: pointer; font-weight: normal; margin-right: 15px; transition: color 0.2s;}
@@ -139,6 +150,7 @@
     .netflix-row::-webkit-scrollbar { display: none; }
     .netflix-row .movie-card { flex: 0 0 115px; scroll-snap-align: start; }
 
+    /* FİLM KARTLARI */
     .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 15px; padding: 10px; }
     .movie-card { border-radius: 8px; overflow: hidden; position: relative; aspect-ratio: 2 / 3; background: #1a1a1a; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s, border 0.3s; border: 1px solid #333; }
     .movie-card:hover { transform: scale(1.05); z-index: 2; border-color: var(--ihs-red); box-shadow: 0 8px 20px rgba(229,9,20,0.6); }
@@ -183,6 +195,7 @@
 
   <div class="app-wrapper" id="app-wrapper">
     
+    <!-- OYNATICI -->
     <div class="player-section">
       <div class="video-container" id="video-container">
         
@@ -277,6 +290,9 @@
   </div>
 
 <script>
+// =========================================
+// 1. ŞİFRELİ GÜVENLİK
+// =========================================
 const ENCRYPTED_PASS = "aWhzcHJv"; // ihspro
 let hataliGirisSayisi = parseInt(localStorage.getItem('ihs_hata') || '0');
 const isBanned = localStorage.getItem('ihs_banned') === 'true' || sessionStorage.getItem('ihs_banned') === 'true';
@@ -297,6 +313,9 @@ function checkPassword() {
   }
 }
 
+// =========================================
+// ÇEKİRDEK VERİ 
+// =========================================
 let tvChannels = []; let tvCategories = new Set();
 let movies = []; let movieCategories = new Set();
 
@@ -316,6 +335,7 @@ const seekBar = document.getElementById('seek-bar');
 const fadeOverlay = document.getElementById('fade-overlay');
 let osdTimeout; let statsInterval; let clockInterval;
 
+// TÜM TV LİSTESİ (SİNEMA KANALLARI EKLİ)
 const tvData = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.imgur.com/PexhKwp.png" group-title="Turkey",4U TV (720p)
