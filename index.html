@@ -32,9 +32,6 @@
     video::-webkit-media-controls, video::-webkit-media-controls-enclosure { display: none !important; }
     .video-container.pseudo-fullscreen { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100dvh !important; z-index: 999999 !important; background: #000 !important; }
 
-    .fade-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 14; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
-    .fade-overlay.active { opacity: 1; }
-
     .stats-panel { position: absolute; top: 15px; right: 15px; background: rgba(10, 10, 10, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px 15px; z-index: 22; display: none; flex-direction: column; gap: 8px; min-width: 180px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
     .stats-header { font-size: 11px; font-weight: bold; color: var(--text-muted); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 5px; display: flex; justify-content: space-between;}
     .stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
@@ -202,7 +199,6 @@
     <!-- OYNATICI BÖLÜMÜ -->
     <div class="player-section">
       <div class="video-container" id="video-container">
-        <div class="fade-overlay" id="fade-overlay"></div>
 
         <div class="stats-panel" id="stats-panel">
           <div class="stats-header"><span>YAYIN BİLGİSİ</span> <i class="fas fa-satellite-dish" style="color:var(--ihs-red)"></i></div>
@@ -351,7 +347,6 @@ let isFetchingTmdb = false;
 let hls = null;
 const video = document.getElementById('video-player');
 const seekBar = document.getElementById('seek-bar');
-const fadeOverlay = document.getElementById('fade-overlay');
 let osdTimeout; let statsInterval; let clockInterval;
 
 // TAM KADRO CANLI TV LİSTESİ
@@ -893,112 +888,108 @@ function populateVideoChannelMenu() {
   vList.appendChild(fragment);
 }
 
+// ANINDA TEPKİ VEREN OYNATICI FONKSİYONU (Yapay Gecikme Kaldırıldı)
 function playStream(item, index) {
-  fadeOverlay.classList.add('active');
-  setTimeout(() => {
-    activeItemUrl = item.url; 
-    activeChannelIndex = index; 
-    document.getElementById('error-overlay').style.display = 'none'; 
-    document.getElementById('loading-spinner').style.display = 'block';
-    
-    const safeName = item.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
-    const osd = document.getElementById('tv-osd'); 
-    document.getElementById('osd-logo').src = item.logo || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="%23222"><rect width="150" height="150"/><text x="50%" y="50%" fill="%23aaa" font-size="16" font-family="sans-serif" dominant-baseline="middle" text-anchor="middle">TV</text></svg>'; 
-    document.getElementById('osd-title').innerText = safeName;
-    
-    if(currentMode === 'TV') { 
-      const randProg = Math.floor(Math.random() * 60) + 20; 
-      document.getElementById('epg-title').innerText = "Şu An Oynayan: " + safeName + " Canlı Yayını"; 
-      document.getElementById('epg-progress').style.width = randProg + "%"; 
+  activeItemUrl = item.url; 
+  activeChannelIndex = index; 
+  document.getElementById('error-overlay').style.display = 'none'; 
+  document.getElementById('loading-spinner').style.display = 'block';
+  
+  const safeName = item.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
+  const osd = document.getElementById('tv-osd'); 
+  document.getElementById('osd-logo').src = item.logo || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" fill="%23222"><rect width="150" height="150"/><text x="50%" y="50%" fill="%23aaa" font-size="16" font-family="sans-serif" dominant-baseline="middle" text-anchor="middle">TV</text></svg>'; 
+  document.getElementById('osd-title').innerText = safeName;
+  
+  if(currentMode === 'TV') { 
+    const randProg = Math.floor(Math.random() * 60) + 20; 
+    document.getElementById('epg-title').innerText = "Şu An Oynayan: " + safeName + " Canlı Yayını"; 
+    document.getElementById('epg-progress').style.width = randProg + "%"; 
+  }
+  
+  osd.classList.add('show'); 
+  clearTimeout(osdTimeout); 
+  osdTimeout = setTimeout(() => { osd.classList.remove('show'); }, 4000);
+  
+  if (hls) hls.destroy(); 
+
+  const videoContainer = document.getElementById('video-container');
+  let existingIframe = document.getElementById('embed-iframe');
+  if (existingIframe) existingIframe.remove();
+  
+  // EVRENSEL AKILLI EMBED / IFRAME KONTROLÜ (Canlı TV ve Filmler için ortak)
+  let embedUrl = "";
+  let isEmbed = false;
+
+  if (item.url) {
+    if (item.url.includes('ok.ru/video/')) {
+      const okId = item.url.split('/video/')[1].split('?')[0];
+      embedUrl = `https://ok.ru/videoembed/${okId}`;
+      isEmbed = true;
+    } else if (item.url.includes('vixolity.com/vs/')) {
+      embedUrl = item.url;
+      isEmbed = true;
+    } else if (item.url.includes('youtube.com/watch?v=')) {
+      const ytId = item.url.split('v=')[1].split('&')[0];
+      embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+      isEmbed = true;
+    } else if (item.url.includes('youtu.be/')) {
+      const ytId = item.url.split('youtu.be/')[1].split('?')[0];
+      embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+      isEmbed = true;
+    } else if (item.url.includes('/embed/') || item.url.includes('player.php') || item.url.includes('youtube.com/embed/')) {
+      embedUrl = item.url;
+      isEmbed = true;
     }
-    
-    osd.classList.add('show'); 
-    clearTimeout(osdTimeout); 
-    osdTimeout = setTimeout(() => { osd.classList.remove('show'); }, 4000);
-    
-    if (hls) hls.destroy(); 
+  }
 
-    const videoContainer = document.getElementById('video-container');
-    let existingIframe = document.getElementById('embed-iframe');
-    if (existingIframe) existingIframe.remove();
+  if (isEmbed) {
+    video.style.display = 'none';
+    document.getElementById('custom-controls').style.display = 'none';
     
-    // EVRENSEL AKILLI EMBED / IFRAME KONTROLÜ (Canlı TV ve Filmler için ortak)
-    let embedUrl = "";
-    let isEmbed = false;
+    const iframe = document.createElement('iframe');
+    iframe.id = 'embed-iframe';
+    iframe.src = embedUrl;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.zIndex = '12';
+    iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+    iframe.setAttribute('allowfullscreen', 'true');
+    
+    videoContainer.appendChild(iframe);
+    document.getElementById('loading-spinner').style.display = 'none';
+  } else {
+    video.style.display = 'block';
+    document.getElementById('custom-controls').style.display = 'flex';
+    
+    let targetUrl = item.url;
+    let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
 
-    if (item.url) {
-      if (item.url.includes('ok.ru/video/')) {
-        const okId = item.url.split('/video/')[1].split('?')[0];
-        embedUrl = `https://ok.ru/videoembed/${okId}`;
-        isEmbed = true;
-      } else if (item.url.includes('vixolity.com/vs/')) {
-        embedUrl = item.url;
-        isEmbed = true;
-      } else if (item.url.includes('youtube.com/watch?v=')) {
-        const ytId = item.url.split('v=')[1].split('&')[0];
-        embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
-        isEmbed = true;
-      } else if (item.url.includes('youtu.be/')) {
-        const ytId = item.url.split('youtu.be/')[1].split('?')[0];
-        embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
-        isEmbed = true;
-      } else if (item.url.includes('/embed/') || item.url.includes('player.php') || item.url.includes('youtube.com/embed/')) {
-        embedUrl = item.url;
-        isEmbed = true;
-      }
+    if (Hls.isSupported() && (targetUrl.includes('.m3u8') || currentMode === 'TV')) {
+      hls = new Hls({
+        enableWorker: true,
+        xhrSetup: function (xhr, url) {
+          const proxiedUrl = url.startsWith(PROXY_BASE) ? url : PROXY_BASE + encodeURIComponent(url);
+          xhr.open('GET', proxiedUrl, true);
+        }
+      }); 
+      hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) handleStreamError(); });
+      hls.loadSource(finalUrl); 
+      hls.attachMedia(video); 
+      hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(e => console.log(e)); });
+    } else { 
+      video.src = finalUrl; 
+      video.play().catch(e => { console.error(e); handleStreamError(); }); 
     }
-
-    if (isEmbed) {
-      video.style.display = 'none';
-      document.getElementById('custom-controls').style.display = 'none';
-      
-      const iframe = document.createElement('iframe');
-      iframe.id = 'embed-iframe';
-      iframe.src = embedUrl;
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.border = 'none';
-      iframe.style.position = 'absolute';
-      iframe.style.top = '0';
-      iframe.style.left = '0';
-      iframe.style.zIndex = '12';
-      iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
-      iframe.setAttribute('allowfullscreen', 'true');
-      
-      videoContainer.appendChild(iframe);
-      document.getElementById('loading-spinner').style.display = 'none';
-      fadeOverlay.classList.remove('active');
-    } else {
-      video.style.display = 'block';
-      document.getElementById('custom-controls').style.display = 'flex';
-      
-      let targetUrl = item.url;
-      let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
-
-      if (Hls.isSupported() && (targetUrl.includes('.m3u8') || currentMode === 'TV')) {
-        hls = new Hls({
-          enableWorker: true,
-          xhrSetup: function (xhr, url) {
-            const proxiedUrl = url.startsWith(PROXY_BASE) ? url : PROXY_BASE + encodeURIComponent(url);
-            xhr.open('GET', proxiedUrl, true);
-          }
-        }); 
-        hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) handleStreamError(); });
-        hls.loadSource(finalUrl); 
-        hls.attachMedia(video); 
-        hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(e => console.log(e)); });
-      } else { 
-        video.src = finalUrl; 
-        video.play().catch(e => { console.error(e); handleStreamError(); }); 
-      }
-    }
-    updateActiveCardUI(); 
-  }, 400); 
+  }
+  updateActiveCardUI(); 
 }
 
 function handleStreamError() { 
   document.getElementById('loading-spinner').style.display = 'none'; 
-  fadeOverlay.classList.remove('active'); 
   document.getElementById('error-overlay').style.display = 'flex'; 
   document.getElementById('fallback-msg').innerText = "CORS engeli veya sunucu yanıt vermiyor."; 
 }
@@ -1036,7 +1027,7 @@ function initPlayerControls() {
   playBtn.onclick = (e) => { e.stopPropagation(); togglePlay(); }; video.onclick = togglePlay;
   
   video.addEventListener('waiting', () => { document.getElementById('loading-spinner').style.display = 'block'; }); 
-  video.addEventListener('playing', () => { document.getElementById('loading-spinner').style.display = 'none'; fadeOverlay.classList.remove('active'); }); 
+  video.addEventListener('playing', () => { document.getElementById('loading-spinner').style.display = 'none'; }); 
   video.addEventListener('error', () => { handleStreamError(); });
   video.addEventListener('play', () => { playBtn.innerHTML = '<i class="fas fa-pause"></i>'; }); 
   video.addEventListener('pause', () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; });
