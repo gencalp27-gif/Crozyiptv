@@ -36,10 +36,28 @@
     .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; z-index: 1; }
     
     /* AKILLI ÜST EYLEM BUTONLARI (Sinema, Yansıtma, PiP) */
-    .smart-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 20; opacity: 0; transition: opacity 0.3s; }
-    .video-container:hover .smart-actions { opacity: 1; }
+    .smart-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 20; opacity: 1; transition: opacity 0.4s ease; }
     .sa-btn { background: rgba(10,10,10,0.6); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     .sa-btn:hover { background: var(--ihs-red); border-color: var(--ihs-red); transform: scale(1.1); }
+
+    /* YENİ: ÖZEL KONTROL ÇUBUĞU (IHS Player) */
+    .custom-controls { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%); display: flex; flex-direction: column; padding: 40px 20px 15px 20px; z-index: 20; opacity: 1; transition: opacity 0.4s ease; }
+    
+    /* Akıllı Gizlenme Sınıfı */
+    .video-container.idle .custom-controls, .video-container.idle .smart-actions { opacity: 0 !important; pointer-events: none; }
+    
+    .progress-container { display: flex; align-items: center; gap: 15px; width: 100%; margin-bottom: 12px; }
+    .time-text { font-size: 12px; font-family: monospace; color: #ddd; min-width: 45px; text-align: center; }
+    .seek-bar { flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.2); height: 5px; border-radius: 5px; outline: none; cursor: pointer; transition: height 0.2s; }
+    .seek-bar:hover { height: 7px; }
+    .seek-bar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--ihs-red); cursor: pointer; transition: 0.2s; box-shadow: 0 0 10px rgba(229,9,20,0.5); }
+    .seek-bar::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+    .control-buttons { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .controls-left, .controls-right { display: flex; align-items: center; gap: 20px; }
+    .control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .control-btn:hover { color: var(--ihs-red); transform: scale(1.1); }
+    .control-btn.play-btn { font-size: 24px; }
 
     /* ÇİFT TIKLAMA BÖLGELERİ VE ANİMASYONLARI */
     .tap-zone { position: absolute; top: 0; width: 35%; height: 100%; z-index: 10; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -47,7 +65,6 @@
     .tap-indicator { background: rgba(0,0,0,0.6); color: #fff; font-size: 24px; font-weight: bold; padding: 15px 25px; border-radius: 30px; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0; transform: scale(0.8); transition: 0.2s ease-out; pointer-events: none; }
     .tap-indicator.show { opacity: 1; transform: scale(1); animation: fadeOutTap 0.6s forwards; }
     @keyframes fadeOutTap { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0; transform: scale(1); } }
-    .tap-indicator i { font-size: 30px; }
 
     /* OTOMATİK SIRADAKİ EKRANI */
     .auto-next-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 25; display: none; flex-direction: column; align-items: center; justify-content: center; color: #fff; backdrop-filter: blur(5px); }
@@ -65,7 +82,7 @@
     .error-overlay i { font-size: 45px; color: var(--ihs-red); margin-bottom: 15px; }
     .fallback-msg { color: #bbb; font-size: 14px; margin-top: 5px; font-weight: 600; }
 
-    /* LİSTE / SİDEBAR BÖLÜMÜ */
+    /* LİSTE BÖLÜMÜ */
     .sidebar-section { display: flex; flex-direction: column; background: var(--bg-card); overflow: hidden; flex: 1; position: relative; min-width: 0; transition: 0.5s; }
     .tab-container { display: flex; background: var(--bg-main); border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
     .tab-btn { flex: 1; padding: 15px 0; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; }
@@ -149,14 +166,14 @@
     <div class="player-section" id="player-section">
       <div class="video-container" id="video-container">
         
-        <!-- YÜZEN EKRAN, SİNEMA MODU VE CAST BUTONLARI -->
+        <!-- AKILLI YÜZEN BUTONLAR -->
         <div class="smart-actions" id="smart-actions">
            <button class="sa-btn" onclick="toggleCinema()" title="Sinema Modu"><i class="fas fa-lightbulb"></i></button>
            <button class="sa-btn" onclick="togglePip()" title="Yüzen Ekran (PiP)"><i class="fas fa-clone"></i></button>
            <button class="sa-btn" onclick="requestCast()" title="TV'ye Yansıt"><i class="fas fa-tv"></i></button>
         </div>
 
-        <!-- ÇİFT TIKLAMA HIZLI SARMA BÖLGELERİ -->
+        <!-- ÇİFT TIKLAMA HIZLI SARMA -->
         <div class="tap-zone tap-left" id="tap-left">
            <div class="tap-indicator" id="ind-left"><i class="fas fa-backward"></i><span>-10s</span></div>
         </div>
@@ -172,7 +189,7 @@
             <div class="fallback-msg" id="fallback-msg">Yayın geçersiz veya engellendi.</div>
         </div>
 
-        <!-- OTOMATİK SIRADAKİ GERİ SAYIM EKRANI -->
+        <!-- OTOMATİK SIRADAKİ EKRANI -->
         <div class="auto-next-overlay" id="auto-next-overlay">
             <div class="auto-next-spinner"><span class="auto-next-count" id="an-count">5</span></div>
             <div class="auto-next-title">Sıradaki İçerik Oynatılıyor...</div>
@@ -180,7 +197,27 @@
             <button class="cancel-next-btn" onclick="cancelAutoNext()">İptal Et</button>
         </div>
 
-        <video id="video-player" controls autoplay playsinline webkit-playsinline></video>
+        <!-- VİDEO (Native controls tamamen kaldırıldı, özel arayüz kullanılacak) -->
+        <video id="video-player" autoplay playsinline webkit-playsinline></video>
+        
+        <!-- YENİ IHS KONTROL ÇUBUĞU (Şeffaf ve Şık Tasarım) -->
+        <div class="custom-controls" id="custom-controls">
+          <div class="progress-container">
+            <span class="time-text" id="current-time">00:00</span>
+            <input type="range" class="seek-bar" id="seek-bar" value="0" step="0.1">
+            <span class="time-text" id="total-time">00:00</span>
+          </div>
+          <div class="control-buttons">
+            <div class="controls-left">
+              <button class="control-btn play-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
+              <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
+            </div>
+            <div class="controls-right">
+              <button class="control-btn" onclick="document.getElementById('video-player').requestFullscreen()"><i class="fas fa-expand"></i></button>
+            </div>
+          </div>
+        </div>
+        
       </div>
     </div>
 
@@ -234,7 +271,7 @@ let hls = null;
 const video = document.getElementById('video-player');
 let autoNextTimer = null; let isRestoringTime = false;
 
-// KANAL VE FİLM LİSTELERİ
+// KANAL LİSTESİ (TAM KADRO)
 const tvData = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.ibb.co/NCvRHC3/trt-haber.png" group-title="HABER",TRT HABER
@@ -369,6 +406,7 @@ function initApp() {
     .catch(e => console.log("Film yüklenemedi"));
 
   setupSmartFeatures();
+  setupCustomControls();
   switchMode('TV'); 
 }
 
@@ -380,7 +418,7 @@ function parseM3UContent(content, targetArray, targetCategories) {
       let group = (line.match(/group-title="([^"]+)"/) || [])[1] || 'Genel';
       let name = line.split(',').pop().trim();
       currentObj = { name, logo: (line.match(/tvg-logo="([^"]+)"/) || [])[1] || '', group }; 
-      targetCategories.add(group);
+      targetCategories.add(finalGroup);
     } else if (line.startsWith('http')) { 
       if (currentObj) { currentObj.url = line; targetArray.push(currentObj); currentObj = null; } 
     }
@@ -512,9 +550,56 @@ function updateActiveCardUI() {
   }); 
 }
 
-// YENİ AKILLI ÖZELLİKLER (Hafıza, Yansıtma, PiP, Çift Tık)
+// 🚀 ÖZEL IHS OYNATICI ÇUBUĞU (Custom Controls) & AKILLI GİZLENME
+function setupCustomControls() {
+    const playBtn = document.getElementById('play-pause-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const seekBar = document.getElementById('seek-bar');
+    const vContainer = document.getElementById('video-container');
+    
+    // Play / Pause
+    function togglePlay() { if(video.paused) video.play(); else video.pause(); }
+    playBtn.onclick = (e) => { e.stopPropagation(); togglePlay(); };
+    video.onclick = togglePlay;
+    
+    video.addEventListener('play', () => { playBtn.innerHTML = '<i class="fas fa-pause"></i>'; });
+    video.addEventListener('pause', () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; });
+    
+    // Ses
+    muteBtn.onclick = (e) => { e.stopPropagation(); video.muted = !video.muted; muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; };
+    
+    // Süre & Seekbar
+    video.addEventListener('loadedmetadata', () => { 
+        if(video.duration && video.duration !== Infinity) { 
+            seekBar.max = video.duration; document.getElementById('total-time').innerText = formatTime(video.duration); 
+        } 
+    });
+    video.addEventListener('timeupdate', () => { 
+        if(!seekBar.active) seekBar.value = video.currentTime; 
+        document.getElementById('current-time').innerText = formatTime(video.currentTime); 
+    });
+    
+    seekBar.addEventListener('mousedown', () => seekBar.active = true);
+    seekBar.addEventListener('touchstart', () => seekBar.active = true);
+    seekBar.addEventListener('change', () => { video.currentTime = seekBar.value; seekBar.active = false; });
+    seekBar.addEventListener('touchend', () => { video.currentTime = seekBar.value; seekBar.active = false; });
+
+    // Fare hareketsizliğinde kontrolleri gizle
+    let idleTimeout;
+    function resetIdle() {
+        vContainer.classList.remove('idle');
+        clearTimeout(idleTimeout);
+        idleTimeout = setTimeout(() => {
+            if(!video.paused) vContainer.classList.add('idle');
+        }, 2500);
+    }
+    vContainer.addEventListener('mousemove', resetIdle);
+    vContainer.addEventListener('touchstart', resetIdle);
+    vContainer.addEventListener('mouseleave', () => { if(!video.paused) vContainer.classList.add('idle'); });
+}
+
+// AKILLI ÖZELLİKLER (Hafıza, PiP, Çift Tık)
 function setupSmartFeatures() {
-    // 1. HAFIZA ÖNBELLEĞİ (Kaldığın Yerden Devam Et)
     video.addEventListener('timeupdate', () => {
         if (currentMode === 'MOVIE' && activeItemUrl && video.currentTime > 5 && video.duration > 0) {
             localStorage.setItem('ihs_resume_' + activeItemUrl, video.currentTime);
@@ -525,90 +610,60 @@ function setupSmartFeatures() {
         if (currentMode === 'MOVIE') {
             const savedTime = localStorage.getItem('ihs_resume_' + activeItemUrl);
             if (savedTime && parseFloat(savedTime) < video.duration - 10) {
-                isRestoringTime = true;
-                video.currentTime = parseFloat(savedTime);
+                isRestoringTime = true; video.currentTime = parseFloat(savedTime);
                 setTimeout(() => { isRestoringTime = false; }, 1000);
             }
         }
     });
 
-    // 2. OTOMATİK SIRADAKİ İÇERİK
     video.addEventListener('ended', () => {
         if(currentDisplayList.length > 0 && activeChannelIndex > -1) {
-            let nextIdx = activeChannelIndex + 1;
-            if (nextIdx >= currentDisplayList.length) nextIdx = 0;
+            let nextIdx = activeChannelIndex + 1; if (nextIdx >= currentDisplayList.length) nextIdx = 0;
             const nextItem = currentDisplayList[nextIdx];
-            
-            document.getElementById('an-name').innerText = nextItem.name;
-            document.getElementById('auto-next-overlay').style.display = 'flex';
-            
-            let count = 5;
-            document.getElementById('an-count').innerText = count;
+            document.getElementById('an-name').innerText = nextItem.name; document.getElementById('auto-next-overlay').style.display = 'flex';
+            let count = 5; document.getElementById('an-count').innerText = count;
             autoNextTimer = setInterval(() => {
                 count--; document.getElementById('an-count').innerText = count;
-                if(count <= 0) {
-                    clearInterval(autoNextTimer);
-                    document.getElementById('auto-next-overlay').style.display = 'none';
-                    playStream(nextItem, nextIdx);
-                }
+                if(count <= 0) { clearInterval(autoNextTimer); document.getElementById('auto-next-overlay').style.display = 'none'; playStream(nextItem, nextIdx); }
             }, 1000);
         }
     });
 
-    // 3. ÇİFT TIKLAMA İLE 10 SANİYE İLERİ/GERİ
     let lastTapLeft = 0; let lastTapRight = 0;
     document.getElementById('tap-left').addEventListener('click', (e) => {
-        const now = new Date().getTime();
-        if(now - lastTapLeft < 300) { seekVideo(-10); animateTap('ind-left'); }
-        lastTapLeft = now;
+        const now = new Date().getTime(); if(now - lastTapLeft < 300) { seekVideo(-10); animateTap('ind-left'); } lastTapLeft = now;
     });
     document.getElementById('tap-right').addEventListener('click', (e) => {
-        const now = new Date().getTime();
-        if(now - lastTapRight < 300) { seekVideo(10); animateTap('ind-right'); }
-        lastTapRight = now;
+        const now = new Date().getTime(); if(now - lastTapRight < 300) { seekVideo(10); animateTap('ind-right'); } lastTapRight = now;
     });
 }
 
 function seekVideo(amount) {
     if(video && video.duration) {
         let newTime = video.currentTime + amount;
-        if(newTime < 0) newTime = 0;
-        if(newTime > video.duration) newTime = video.duration;
+        if(newTime < 0) newTime = 0; if(newTime > video.duration) newTime = video.duration;
         video.currentTime = newTime;
     }
 }
 
 function animateTap(id) {
-    const el = document.getElementById(id);
-    el.classList.remove('show');
-    void el.offsetWidth; // Trigger reflow
-    el.classList.add('show');
+    const el = document.getElementById(id); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
 }
 
 function toggleCinema() { document.body.classList.toggle('cinema-mode'); }
 function cancelAutoNext() { clearInterval(autoNextTimer); document.getElementById('auto-next-overlay').style.display = 'none'; }
-
 function togglePip() {
-    if (document.pictureInPictureElement) {
-        document.exitPictureInPicture();
-    } else if (document.pictureInPictureEnabled) {
-        video.requestPictureInPicture().catch(err => console.log("PiP Engellendi", err));
-    } else {
-        alert("Tarayıcınız Yüzen Ekran (PiP) modunu desteklemiyor.");
-    }
+    if (document.pictureInPictureElement) { document.exitPictureInPicture(); } 
+    else if (document.pictureInPictureEnabled) { video.requestPictureInPicture().catch(()=>{}); } 
+    else { alert("Tarayıcınız Yüzen Ekran (PiP) modunu desteklemiyor."); }
 }
-
 function requestCast() {
-    if (video.remote && video.remote.state !== 'disconnected') {
-        video.remote.prompt().catch(err => console.log("Yansıtma İptal", err));
-    } else if (video.webkitShowPlaybackTargetPicker) {
-        video.webkitShowPlaybackTargetPicker(); // iOS AirPlay desteği
-    } else {
-        alert("TV'ye Yansıtma donanımınız (Cast/AirPlay) bulunamadı veya desteklenmiyor.");
-    }
+    if (video.remote && video.remote.state !== 'disconnected') { video.remote.prompt().catch(()=>{}); } 
+    else if (video.webkitShowPlaybackTargetPicker) { video.webkitShowPlaybackTargetPicker(); } 
+    else { alert("TV'ye Yansıtma donanımınız (Cast/AirPlay) bulunamadı."); }
 }
 
-// IŞIK HIZINDA DİREKT OYNATICI (Modal yok, Tek tıkla açılış)
+// IŞIK HIZINDA DİREKT OYNATICI
 function playStream(item, index) {
   activeItemUrl = item.url; activeChannelIndex = index; 
   cancelAutoNext();
@@ -634,18 +689,23 @@ function playStream(item, index) {
   }
 
   if (isEmbed) {
+    // İFRAME MODU (Orijinal site oynatıcısı ekranda kalır, bizim çubuk gizlenir)
     video.style.display = 'none';
+    document.getElementById('custom-controls').style.display = 'none';
     embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1'; 
     
     const iframe = document.createElement('iframe');
     iframe.id = 'ihs-iframe'; iframe.src = embedUrl;
-    iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border = 'none'; iframe.style.position = 'absolute'; iframe.style.top = '0'; iframe.style.left = '0'; iframe.style.zIndex = '5';
+    iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border = 'none'; iframe.style.position = 'absolute'; iframe.style.top = '0'; iframe.style.left = '0'; iframe.style.zIndex = '12';
     iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
     
     videoContainer.appendChild(iframe);
     document.getElementById('loading-spinner').style.display = 'none';
   } else {
+    // IHS ÖZEL KONTROL MODU (Tüm üst zeka eklentilerle birlikte çalışır)
     video.style.display = 'block';
+    document.getElementById('custom-controls').style.display = 'flex';
+    
     let targetUrl = item.url;
     let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
 
@@ -657,7 +717,7 @@ function playStream(item, index) {
            document.getElementById('error-overlay').style.display = 'flex'; 
         } 
       });
-      hls.loadSource(targetUrl); // Direkt hızlı bağlantı dener
+      hls.loadSource(targetUrl); // Direkt bağlantı
       hls.attachMedia(video); 
       hls.on(Hls.Events.MANIFEST_PARSED, () => { 
           video.play().catch(()=>{}); 
@@ -669,6 +729,13 @@ function playStream(item, index) {
     }
   }
   updateActiveCardUI(); 
+}
+
+function formatTime(seconds) { 
+  if(isNaN(seconds)) return "00:00"; 
+  const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); const h = Math.floor(m / 60); const mm = m % 60; 
+  if(h > 0) return `${h}:${mm < 10 ? '0'+mm : mm}:${s < 10 ? '0'+s : s}`; 
+  return `${m}:${s < 10 ? '0'+s : s}`; 
 }
 </script>
 </body>
