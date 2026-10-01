@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IHS TV & VOD - UNIFIED PLAYER</title>
+  <title>IHS TV & VOD - PREMIUM</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -13,24 +13,60 @@
     body { background-color: var(--bg-main); color: var(--text-main); font-family: system-ui, -apple-system, sans-serif; height: 100dvh; overflow: hidden; transition: background-color 0.4s; }
     ::-webkit-scrollbar { width: 5px; height: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; } ::-webkit-scrollbar-thumb:hover { background: var(--ihs-red); }
 
+    /* YENİ NESİL VIP GİRİŞ EKRANI */
+    .security-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: radial-gradient(circle at center, #1a0505 0%, #020000 100%); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s; }
+    .security-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    
+    .login-box { background: rgba(15, 15, 15, 0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(229, 9, 20, 0.25); padding: 50px 40px; border-radius: 24px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 1px 15px rgba(255,255,255,0.05); transform: translateY(30px); opacity: 0; animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; position: relative; overflow: hidden; }
+    .login-box::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(229,9,20,0.1) 0%, transparent 60%); pointer-events: none; animation: slowSpin 15s linear infinite; }
+    
+    @keyframes slideUpFade { to { transform: translateY(0); opacity: 1; } }
+    @keyframes slowSpin { to { transform: rotate(360deg); } }
+
+    /* KIRMIZI KRİSTAL LOGO ANİMASYONU */
+    .crystal-logo { width: 85px; height: 85px; background: linear-gradient(135deg, #ff1a1a 0%, #7a0000 100%); transform: rotate(45deg); box-shadow: 0 0 30px rgba(229, 9, 20, 0.5), inset 0 0 20px rgba(255,255,255,0.4); border: 2px solid #ff4a4a; border-radius: 14px; position: relative; margin-bottom: 35px; animation: crystalPulse 2.5s ease-in-out infinite alternate; z-index: 2; }
+    .crystal-logo::after { content: "IHS"; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 28px; letter-spacing: 3px; text-shadow: 0 3px 10px rgba(0,0,0,0.9); }
+    @keyframes crystalPulse {
+      0% { box-shadow: 0 0 20px rgba(229, 9, 20, 0.4), inset 0 0 10px rgba(255,255,255,0.2); transform: rotate(45deg) scale(1); }
+      100% { box-shadow: 0 0 50px rgba(229, 9, 20, 0.9), inset 0 0 25px rgba(255,255,255,0.6); transform: rotate(45deg) scale(1.05); }
+    }
+
+    .security-title { font-size: 20px; font-weight: 800; letter-spacing: 5px; margin-bottom: 30px; color: #fff; text-shadow: 0 2px 10px rgba(229,9,20,0.5); z-index: 2; }
+    
+    .input-group { position: relative; margin-bottom: 25px; width: 280px; z-index: 2; }
+    .input-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #777; transition: 0.3s; font-size: 14px; }
+    .password-input { background: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 12px; color: white; padding: 14px 15px 14px 45px; font-size: 15px; width: 100%; text-align: left; letter-spacing: 3px; transition: 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+    .password-input:focus { border-color: var(--ihs-red); outline: none; box-shadow: 0 0 15px rgba(229,9,20,0.2), inset 0 2px 5px rgba(0,0,0,0.5); }
+    .password-input:focus + i { color: var(--ihs-red); }
+
+    .login-btn { background: linear-gradient(90deg, #e50914, #b0060e); color: white; border: none; padding: 14px 0; border-radius: 12px; font-size: 14px; font-weight: 800; letter-spacing: 1px; cursor: pointer; width: 280px; transition: 0.3s; box-shadow: 0 5px 15px rgba(229,9,20,0.4); text-transform: uppercase; z-index: 2; }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(229,9,20,0.6); }
+    .login-btn:active { transform: translateY(1px); }
+    
+    .error-msg { color: #ff4a4a; font-size: 13px; font-weight: 700; margin-top: 15px; background: rgba(229,9,20,0.1); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(229,9,20,0.3); display: none; z-index: 2; animation: fadeIn 0.3s; }
+    
+    /* HATA TİTREMESİ */
+    .shake { animation: shakeAnim 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes shakeAnim {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+      40%, 60% { transform: translate3d(8px, 0, 0); }
+    }
+
+    .ban-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--ihs-red); }
+    .ban-screen i { font-size: 60px; margin-bottom: 20px; }
+
+    /* ANA SİSTEM DÜZENİ */
+    .app-wrapper { display: none; width: 100vw; height: 100dvh; overflow: hidden; opacity: 0; transition: opacity 0.8s ease; }
+    .app-wrapper.show { opacity: 1; }
+
     /* SİNEMA MODU */
     body.cinema-mode { background-color: #000; }
     body.cinema-mode .sidebar-section { opacity: 0.03; pointer-events: none; filter: blur(4px); transition: 0.4s; }
     body.cinema-mode .player-section { box-shadow: 0 0 120px rgba(0,0,0,1); z-index: 999; }
 
-    .security-screen, .ban-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .ban-screen { display: none; background: #050505; }
-    .security-logo { width: 70px; height: 70px; background: linear-gradient(135deg, #ff4b4b, #8b0000); transform: rotate(45deg); box-shadow: 0 0 20px rgba(229, 9, 20, 0.5); border: 2px solid #ff7a7a; margin-bottom: 40px; }
-    .security-title { font-size: 22px; font-weight: 900; letter-spacing: 3px; margin-bottom: 25px; }
-    .password-input { background: var(--bg-card); border: 1px solid #333; border-radius: 8px; color: white; padding: 12px 20px; font-size: 16px; width: 250px; text-align: center; margin-bottom: 15px; letter-spacing: 2px; }
-    .password-input:focus { border-color: var(--ihs-red); }
-    .login-btn { background: var(--ihs-red); color: white; border: none; padding: 12px 40px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .login-btn:active { transform: scale(0.95); }
-    .error-msg { color: var(--ihs-red); font-size: 13px; font-weight: bold; margin-top: 15px; display: none; }
-
-    .app-wrapper { display: none; width: 100vw; height: 100dvh; overflow: hidden; }
-
-    /* OYNATICI ALANI */
+    /* ORTAK OYNATICI ALANI */
     .player-section { background: #000; z-index: 10; display: flex; flex-direction: column; position: relative; }
     .video-container { width: 100%; height: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; z-index: 1; }
@@ -100,7 +136,7 @@
     .error-overlay i { font-size: 45px; color: var(--ihs-red); margin-bottom: 15px; }
     .fallback-msg { color: #bbb; font-size: 14px; margin-top: 5px; font-weight: 600; }
 
-    /* ORTAK LİSTE TASARIMI (Tüm Kanallar ve Filmler) */
+    /* ORTAK LİSTE TASARIMI */
     .sidebar-section { display: flex; flex-direction: column; background: var(--bg-card); overflow: hidden; flex: 1; position: relative; min-width: 0; transition: 0.4s; }
     .tab-container { display: flex; background: var(--bg-main); border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
     .tab-btn { flex: 1; padding: 15px 0; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; }
@@ -115,7 +151,6 @@
     .cat-btn { background: #1a1a1a; color: #aaa; border: 1px solid #333; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 12px; white-space: nowrap; cursor: pointer; transition: 0.2s; }
     .cat-btn:hover { border-color: #555; color: #fff; }
     .cat-btn.active { background: var(--ihs-red); color: #fff; border-color: var(--ihs-red); }
-    .cat-btn.movie-cat { border-radius: 6px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; padding: 8px 14px;}
 
     .content-area { flex: 1; overflow-y: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
     
@@ -123,7 +158,6 @@
     .channel-row.active-channel { background: rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.3); border-left: 4px solid var(--ihs-red); }
     .channel-row:hover { background: rgba(255,255,255,0.05); }
     
-    /* Resim (Logo / Afiş) Boyutlandırması */
     .channel-row img { width: 45px; height: 45px; object-fit: contain; background: #fff; border-radius: 6px; padding: 2px; margin-right: 15px; flex-shrink: 0; }
     .channel-row.movie-row img { width: 40px; height: 60px; object-fit: cover; background: #1a1a1a; padding: 0; border-radius: 4px; border: 1px solid #333; }
     
@@ -133,6 +167,10 @@
     .fav-icon { font-size: 16px; color: #444; padding: 8px; transition: 0.3s; z-index: 2; }
     .fav-icon:hover { transform: scale(1.2); }
     .fav-icon.active { color: var(--ihs-red); text-shadow: 0 0 10px rgba(229,9,20,0.5); }
+
+    /* İFRAME OYNATICI STİLLERİ */
+    .iframe-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 12; background: #000; }
+    .iframe-wrapper iframe { width: 100%; height: 100%; border: none; display: block; }
 
     /* RESPONSIVE DÜZEN */
     @media (max-width: 899px) {
@@ -152,12 +190,20 @@
 <body>
 
   <div class="ban-screen" id="ban-screen"><i class="fas fa-ban"></i><h1>ERİŞİM ENGELLENDİ</h1></div>
+  
+  <!-- YENİ NESİL VIP GİRİŞ EKRANI -->
   <div class="security-screen" id="security-screen">
-    <div class="security-logo"></div>
-    <div class="security-title">IHS PRIVATE</div>
-    <input type="password" id="pass-input" class="password-input" placeholder="Şifrenizi Girin">
-    <button class="login-btn" onclick="checkPassword()">GİRİŞ YAP</button>
-    <div class="error-msg" id="error-msg"></div>
+    <div class="login-box" id="login-box">
+        <div class="crystal-logo"></div>
+        <div class="security-title">PRIVATE AREA</div>
+        <div class="input-group">
+            <input type="password" id="pass-input" class="password-input" placeholder="Giriş Şifresi">
+            <i class="fas fa-lock"></i>
+            <i class="fas fa-eye-slash" id="toggle-pw" style="left: auto; right: 15px; cursor: pointer; pointer-events: auto;"></i>
+        </div>
+        <button class="login-btn" onclick="checkPassword()">SİSTEMİ BAŞLAT</button>
+        <div class="error-msg" id="error-msg"><i class="fas fa-exclamation-circle"></i> Şifre hatalı!</div>
+    </div>
   </div>
 
   <div class="app-wrapper" id="app-wrapper">
@@ -204,12 +250,13 @@
             <button class="cancel-next-btn" onclick="cancelAutoNext()">İptal Et</button>
         </div>
 
-        <!-- VİDEO -->
+        <!-- TEK VİDEO OYNATICI -->
         <video id="video-player" playsinline webkit-playsinline></video>
         
         <!-- BÜTÜNLEŞİK ALT KONTROL PANELİ -->
         <div class="custom-controls" id="custom-controls">
           
+          <!-- FİLM MODUNDA GÖRÜNEN İLERLEME ÇUBUĞU -->
           <div class="progress-container" id="progress-container">
             <span class="time-text" id="current-time">00:00</span>
             <input type="range" class="seek-bar" id="seek-bar" value="0" step="0.1">
@@ -218,10 +265,11 @@
 
           <div class="control-buttons">
             <div class="controls-left">
-              <button class="ctrl-btn" id="prev-btn" onclick="playPrevItem()" title="Önceki"><i class="fas fa-step-backward"></i></button>
+              <button class="ctrl-btn" id="prev-btn" onclick="playPrevItem()" title="Önceki İçerik"><i class="fas fa-step-backward"></i></button>
               <button class="ctrl-btn play-btn" id="play-pause-btn" title="Oynat / Durdur"><i class="fas fa-play"></i></button>
-              <button class="ctrl-btn" id="next-btn" onclick="playNextItem()" title="Sonraki"><i class="fas fa-step-forward"></i></button>
+              <button class="ctrl-btn" id="next-btn" onclick="playNextItem()" title="Sonraki İçerik"><i class="fas fa-step-forward"></i></button>
               
+              <!-- SES KONTROLÜ -->
               <div class="volume-box">
                 <button class="ctrl-btn" id="mute-btn" title="Sesi Aç/Kapat"><i class="fas fa-volume-up"></i></button>
                 <input type="range" class="vol-slider" id="vol-slider" min="0" max="1" step="0.05" value="1">
@@ -229,6 +277,7 @@
             </div>
 
             <div class="controls-right">
+              <!-- CANLI TV'DE GÖRÜNEN CANLI YAYIN ROZETİ -->
               <div class="live-indicator" id="live-indicator">
                  <div class="live-dot"></div> CANLI YAYIN
               </div>
@@ -253,14 +302,6 @@
       </div>
       <div class="categories-bar" id="categories-bar"></div>
       
-      <div class="category-menu" id="category-menu">
-        <div class="cm-header">
-          <h3><i class="fas fa-list-ul"></i> Kategoriler</h3>
-          <button class="cm-close" onclick="closeCategoryMenu()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="cm-list" id="cm-list"></div>
-      </div>
-
       <!-- TEK TİP DİKEY LİSTE ALANI -->
       <div class="content-area" id="content-area"></div>
     </div>
@@ -274,19 +315,48 @@ const ENCRYPTED_PASS = "aWhzcHJv";
 let hataliGirisSayisi = parseInt(localStorage.getItem('ihs_hata') || '0');
 const isBanned = localStorage.getItem('ihs_banned') === 'true' || sessionStorage.getItem('ihs_banned') === 'true';
 
+// Şifre Göster/Gizle
+document.getElementById('toggle-pw').addEventListener('click', function() {
+    const pwInput = document.getElementById('pass-input');
+    if (pwInput.type === 'password') { pwInput.type = 'text'; this.className = 'fas fa-eye'; } 
+    else { pwInput.type = 'password'; this.className = 'fas fa-eye-slash'; }
+});
+
 window.addEventListener('DOMContentLoaded', () => { if (isBanned) { document.getElementById('security-screen').style.display = 'none'; document.getElementById('ban-screen').style.display = 'flex'; } });
 document.getElementById("pass-input").addEventListener("keypress", (e) => { if (e.key === "Enter") checkPassword(); });
 
 function checkPassword() {
   if (isBanned) return;
   const girilenSifre = document.getElementById('pass-input').value;
+  const loginBox = document.getElementById('login-box');
+  const errorMsg = document.getElementById('error-msg');
+
   if (btoa(girilenSifre) === ENCRYPTED_PASS) {
-    localStorage.setItem('ihs_hata', '0'); document.getElementById('security-screen').style.display = 'none'; document.getElementById('app-wrapper').style.display = 'flex';
-    initApp(); 
+    localStorage.setItem('ihs_hata', '0'); 
+    errorMsg.style.display = 'none';
+    
+    // Perde açılış efekti
+    const secScreen = document.getElementById('security-screen');
+    secScreen.classList.add('hidden');
+    
+    setTimeout(() => {
+        secScreen.style.display = 'none';
+        const appWrapper = document.getElementById('app-wrapper');
+        appWrapper.style.display = 'flex';
+        setTimeout(() => appWrapper.classList.add('show'), 50);
+        initApp(); 
+    }, 800);
+
   } else {
     hataliGirisSayisi++; localStorage.setItem('ihs_hata', hataliGirisSayisi.toString());
     if (hataliGirisSayisi >= 3) { localStorage.setItem('ihs_banned', 'true'); sessionStorage.setItem('ihs_banned', 'true'); location.reload(); } 
-    else { document.getElementById('error-msg').innerText = "Hatalı şifre!"; document.getElementById('error-msg').style.display = 'block'; }
+    else { 
+        errorMsg.style.display = 'block'; 
+        // Hata Shake (Titreme) Animasyonu
+        loginBox.classList.remove('shake');
+        void loginBox.offsetWidth; // reflow
+        loginBox.classList.add('shake');
+    }
   }
 }
 
@@ -491,35 +561,16 @@ function switchMode(mode) {
 function renderCategoriesOnly() {
   const catBar = document.getElementById('categories-bar'); catBar.innerHTML = '';
   const categoriesSet = currentMode === 'TV' ? tvCategories : movieCategories;
-  if(currentMode === 'TV') {
-      const createBtn = (txt, isFav=false) => { 
-        const btn = document.createElement('button'); btn.className = 'cat-btn' + (isFav ? ' cat-btn-fav' : '') + (currentCategory===txt ? ' active' : ''); 
-        btn.innerHTML = isFav ? `<i class="fas fa-heart"></i> ${txt}` : txt; btn.onclick = () => { selectCategory(txt); }; catBar.appendChild(btn); 
-      };
-      createBtn('Favorilerim', true); createBtn('Tümü'); 
-      Array.from(categoriesSet).sort(new Intl.Collator('tr').compare).forEach(cat => createBtn(cat));
-  } else {
-      const btnAll = document.createElement('button'); btnAll.className = 'cat-btn movie-cat' + (currentCategory==='Tümü' ? ' active' : ''); 
-      btnAll.innerText = 'Tümü'; btnAll.onclick = () => selectCategory('Tümü'); catBar.appendChild(btnAll);
-      const btnMenu = document.createElement('button'); btnMenu.className = 'cat-btn movie-cat'; 
-      btnMenu.innerHTML = `<i class="fas fa-list-ul"></i> Kategoriler`; btnMenu.onclick = openCategoryMenu; catBar.appendChild(btnMenu);
-      if (currentCategory !== 'Tümü') { 
-         const btnCurrent = document.createElement('button'); btnCurrent.className = 'cat-btn movie-cat active'; 
-         btnCurrent.innerText = currentCategory; btnCurrent.onclick = () => openCategoryMenu(); catBar.appendChild(btnCurrent); 
-      }
-  }
+  
+  const createBtn = (txt, isFav=false) => { 
+    const btn = document.createElement('button'); btn.className = 'cat-btn' + (isFav ? ' cat-btn-fav' : '') + (currentCategory===txt ? ' active' : ''); 
+    btn.innerHTML = isFav ? `<i class="fas fa-heart"></i> ${txt}` : txt; btn.onclick = () => { selectCategory(txt); }; catBar.appendChild(btn); 
+  };
+  createBtn('Favorilerim', true); createBtn('Tümü'); 
+  Array.from(categoriesSet).sort(new Intl.Collator('tr').compare).forEach(cat => createBtn(cat));
 }
 
 function selectCategory(catName) { currentCategory = catName; document.getElementById('search-input').value = ''; renderCategoriesOnly(); renderContentList(true); }
-function openCategoryMenu() { 
-  const cmList = document.getElementById('cm-list'); cmList.innerHTML = ''; 
-  Array.from(movieCategories).sort(new Intl.Collator('tr').compare).forEach(cat => { 
-    const item = document.createElement('div'); item.className = 'cm-item' + (currentCategory === cat ? ' active' : ''); item.innerText = cat; 
-    item.onclick = () => { selectCategory(cat); closeCategoryMenu(); }; cmList.appendChild(item); 
-  }); 
-  document.getElementById('category-menu').classList.add('open'); 
-}
-function closeCategoryMenu() { document.getElementById('category-menu').classList.remove('open'); }
 function searchContent() { renderContentList(true); }
 function toggleFavorite(e, channelName) { 
   e.stopPropagation(); const index = favorites.indexOf(channelName); 
@@ -527,7 +578,7 @@ function toggleFavorite(e, channelName) {
   localStorage.setItem('ihs_favorites', JSON.stringify(favorites)); renderContentList(true); 
 }
 
-// TMDB BAĞLANTISI (Puan ve Afişleri Listeye Gömer)
+// TMDB BAĞLANTISI (Film Afişleri İçin)
 function processTmdbQueue() {
   if (isFetchingTmdb || tmdbQueue.length === 0) return;
   isFetchingTmdb = true;
@@ -567,7 +618,7 @@ const movieObserver = new IntersectionObserver((entries, observer) => {
   });
 }, { rootMargin: '150px' });
 
-// ORTAK LİSTE RENDERLAYICI (Filmler de Canlı TV de Dikey Liste)
+// ORTAK TEK TİP DİKEY LİSTE
 function renderContentList(reset = false) {
   const contentArea = document.getElementById('content-area'); 
   const dataset = currentMode === 'TV' ? tvChannels : movies; 
@@ -630,7 +681,6 @@ function setupUnifiedControls() {
     video.addEventListener('play', () => { playBtn.innerHTML = '<i class="fas fa-pause"></i>'; });
     video.addEventListener('pause', () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; });
 
-    // Ses Kontrolleri
     volSlider.oninput = (e) => { video.volume = e.target.value; video.muted = (video.volume === 0); updateVolIcon(); };
     muteBtn.onclick = (e) => { e.stopPropagation(); video.muted = !video.muted; volSlider.value = video.muted ? 0 : video.volume; updateVolIcon(); };
     function updateVolIcon() {
@@ -639,11 +689,9 @@ function setupUnifiedControls() {
         else muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
     }
 
-    // Zaman ve İlerleme Çubuğu (Filmler için)
     video.addEventListener('loadedmetadata', () => {
         if (currentMode === 'MOVIE' && video.duration && video.duration !== Infinity) {
-            seekBar.max = video.duration;
-            document.getElementById('total-time').innerText = formatTime(video.duration);
+            seekBar.max = video.duration; document.getElementById('total-time').innerText = formatTime(video.duration);
             const savedTime = localStorage.getItem('ihs_resume_' + activeItemUrl);
             if (savedTime && parseFloat(savedTime) < video.duration - 10) { video.currentTime = parseFloat(savedTime); }
         }
@@ -662,7 +710,6 @@ function setupUnifiedControls() {
     seekBar.addEventListener('change', () => { video.currentTime = seekBar.value; seekBar.active = false; });
     seekBar.addEventListener('touchend', () => { video.currentTime = seekBar.value; seekBar.active = false; });
 
-    // Otomatik Sıradaki
     video.addEventListener('ended', () => {
         if (currentDisplayList.length > 0 && activeChannelIndex > -1) {
             let nextIdx = activeChannelIndex + 1; if (nextIdx >= currentDisplayList.length) nextIdx = 0;
@@ -677,7 +724,6 @@ function setupUnifiedControls() {
         }
     });
 
-    // Çift Tıklama Bölgeleri
     let lastTapLeft = 0; let lastTapRight = 0;
     document.getElementById('tap-left').addEventListener('click', (e) => {
         const now = new Date().getTime();
@@ -690,7 +736,6 @@ function setupUnifiedControls() {
         lastTapRight = now;
     });
 
-    // Arayüz Otomatik Gizleme (2.5 sn)
     let idleTimeout;
     function resetIdle() {
         vContainer.classList.remove('idle'); clearTimeout(idleTimeout);
@@ -700,7 +745,6 @@ function setupUnifiedControls() {
     vContainer.addEventListener('touchstart', resetIdle);
     vContainer.addEventListener('mouseleave', () => { if (!video.paused) vContainer.classList.add('idle'); });
 
-    // Klavye Kısayolları
     document.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return;
         switch (e.code) {
@@ -737,7 +781,6 @@ function playStream(item, index) {
   let existingIframe = document.getElementById('ihs-iframe');
   if (existingIframe) existingIframe.remove();
 
-  // Dış Kaynak Oynatıcı Kontrolü
   let embedUrl = item.url; let isEmbed = false;
   if (item.url) {
     if (item.url.includes('ok.ru/video/')) { embedUrl = `https://ok.ru/videoembed/${item.url.split('/video/')[1].split('?')[0]}`; isEmbed = true; } 
@@ -747,7 +790,6 @@ function playStream(item, index) {
   }
 
   if (isEmbed) {
-    // İframe Modu (Alt Kontroller Gizlenir, Üst IHS Başlık Barı Kalır)
     video.style.display = 'none';
     document.getElementById('custom-controls').style.display = 'none';
     embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1';
@@ -760,7 +802,6 @@ function playStream(item, index) {
     videoContainer.appendChild(iframe);
     document.getElementById('loading-spinner').style.display = 'none';
   } else {
-    // Standart Hızlı Oynatıcı Modu (Tüm IHS kontrolleri aktif)
     video.style.display = 'block';
     document.getElementById('custom-controls').style.display = 'flex';
 
