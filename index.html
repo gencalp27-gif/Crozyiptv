@@ -35,15 +35,13 @@
     .video-container { width: 100%; height: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; z-index: 1; }
     
-    /* AKILLI ÜST EYLEM BUTONLARI (Sinema, Yansıtma, PiP) */
+    /* AKILLI ÜST EYLEM BUTONLARI */
     .smart-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 20; opacity: 1; transition: opacity 0.4s ease; }
     .sa-btn { background: rgba(10,10,10,0.6); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     .sa-btn:hover { background: var(--ihs-red); border-color: var(--ihs-red); transform: scale(1.1); }
 
-    /* YENİ: ÖZEL KONTROL ÇUBUĞU (IHS Player) */
+    /* ÖZEL KONTROL ÇUBUĞU (IHS Player) */
     .custom-controls { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%); display: flex; flex-direction: column; padding: 40px 20px 15px 20px; z-index: 20; opacity: 1; transition: opacity 0.4s ease; }
-    
-    /* Akıllı Gizlenme Sınıfı */
     .video-container.idle .custom-controls, .video-container.idle .smart-actions { opacity: 0 !important; pointer-events: none; }
     
     .progress-container { display: flex; align-items: center; gap: 15px; width: 100%; margin-bottom: 12px; }
@@ -197,10 +195,10 @@
             <button class="cancel-next-btn" onclick="cancelAutoNext()">İptal Et</button>
         </div>
 
-        <!-- VİDEO (Native controls tamamen kaldırıldı, özel arayüz kullanılacak) -->
-        <video id="video-player" autoplay playsinline webkit-playsinline></video>
+        <!-- VİDEO -->
+        <video id="video-player" playsinline webkit-playsinline></video>
         
-        <!-- YENİ IHS KONTROL ÇUBUĞU (Şeffaf ve Şık Tasarım) -->
+        <!-- YENİ IHS KONTROL ÇUBUĞU -->
         <div class="custom-controls" id="custom-controls">
           <div class="progress-container">
             <span class="time-text" id="current-time">00:00</span>
@@ -213,7 +211,7 @@
               <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
             </div>
             <div class="controls-right">
-              <button class="control-btn" onclick="document.getElementById('video-player').requestFullscreen()"><i class="fas fa-expand"></i></button>
+              <button class="control-btn" onclick="document.getElementById('video-container').requestFullscreen()"><i class="fas fa-expand"></i></button>
             </div>
           </div>
         </div>
@@ -418,7 +416,7 @@ function parseM3UContent(content, targetArray, targetCategories) {
       let group = (line.match(/group-title="([^"]+)"/) || [])[1] || 'Genel';
       let name = line.split(',').pop().trim();
       currentObj = { name, logo: (line.match(/tvg-logo="([^"]+)"/) || [])[1] || '', group }; 
-      targetCategories.add(finalGroup);
+      targetCategories.add(group);
     } else if (line.startsWith('http')) { 
       if (currentObj) { currentObj.url = line; targetArray.push(currentObj); currentObj = null; } 
     }
@@ -550,14 +548,13 @@ function updateActiveCardUI() {
   }); 
 }
 
-// 🚀 ÖZEL IHS OYNATICI ÇUBUĞU (Custom Controls) & AKILLI GİZLENME
+// 🚀 ÖZEL IHS OYNATICI ÇUBUĞU KONTROLLERİ
 function setupCustomControls() {
     const playBtn = document.getElementById('play-pause-btn');
     const muteBtn = document.getElementById('mute-btn');
     const seekBar = document.getElementById('seek-bar');
     const vContainer = document.getElementById('video-container');
     
-    // Play / Pause
     function togglePlay() { if(video.paused) video.play(); else video.pause(); }
     playBtn.onclick = (e) => { e.stopPropagation(); togglePlay(); };
     video.onclick = togglePlay;
@@ -565,10 +562,8 @@ function setupCustomControls() {
     video.addEventListener('play', () => { playBtn.innerHTML = '<i class="fas fa-pause"></i>'; });
     video.addEventListener('pause', () => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; });
     
-    // Ses
     muteBtn.onclick = (e) => { e.stopPropagation(); video.muted = !video.muted; muteBtn.innerHTML = video.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>'; };
     
-    // Süre & Seekbar
     video.addEventListener('loadedmetadata', () => { 
         if(video.duration && video.duration !== Infinity) { 
             seekBar.max = video.duration; document.getElementById('total-time').innerText = formatTime(video.duration); 
@@ -584,7 +579,6 @@ function setupCustomControls() {
     seekBar.addEventListener('change', () => { video.currentTime = seekBar.value; seekBar.active = false; });
     seekBar.addEventListener('touchend', () => { video.currentTime = seekBar.value; seekBar.active = false; });
 
-    // Fare hareketsizliğinde kontrolleri gizle
     let idleTimeout;
     function resetIdle() {
         vContainer.classList.remove('idle');
@@ -598,7 +592,7 @@ function setupCustomControls() {
     vContainer.addEventListener('mouseleave', () => { if(!video.paused) vContainer.classList.add('idle'); });
 }
 
-// AKILLI ÖZELLİKLER (Hafıza, PiP, Çift Tık)
+// AKILLI ÖZELLİKLER 
 function setupSmartFeatures() {
     video.addEventListener('timeupdate', () => {
         if (currentMode === 'MOVIE' && activeItemUrl && video.currentTime > 5 && video.duration > 0) {
@@ -663,7 +657,7 @@ function requestCast() {
     else { alert("TV'ye Yansıtma donanımınız (Cast/AirPlay) bulunamadı."); }
 }
 
-// IŞIK HIZINDA DİREKT OYNATICI
+// IŞIK HIZINDA OYNATICI 
 function playStream(item, index) {
   activeItemUrl = item.url; activeChannelIndex = index; 
   cancelAutoNext();
@@ -689,9 +683,9 @@ function playStream(item, index) {
   }
 
   if (isEmbed) {
-    // İFRAME MODU (Orijinal site oynatıcısı ekranda kalır, bizim çubuk gizlenir)
     video.style.display = 'none';
     document.getElementById('custom-controls').style.display = 'none';
+    document.getElementById('smart-actions').style.display = 'none';
     embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1'; 
     
     const iframe = document.createElement('iframe');
@@ -702,9 +696,9 @@ function playStream(item, index) {
     videoContainer.appendChild(iframe);
     document.getElementById('loading-spinner').style.display = 'none';
   } else {
-    // IHS ÖZEL KONTROL MODU (Tüm üst zeka eklentilerle birlikte çalışır)
     video.style.display = 'block';
     document.getElementById('custom-controls').style.display = 'flex';
+    document.getElementById('smart-actions').style.display = 'flex';
     
     let targetUrl = item.url;
     let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
@@ -717,7 +711,7 @@ function playStream(item, index) {
            document.getElementById('error-overlay').style.display = 'flex'; 
         } 
       });
-      hls.loadSource(targetUrl); // Direkt bağlantı
+      hls.loadSource(targetUrl); 
       hls.attachMedia(video); 
       hls.on(Hls.Events.MANIFEST_PARSED, () => { 
           video.play().catch(()=>{}); 
