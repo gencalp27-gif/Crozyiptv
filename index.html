@@ -32,6 +32,9 @@
     video::-webkit-media-controls, video::-webkit-media-controls-enclosure { display: none !important; }
     .video-container.pseudo-fullscreen { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100dvh !important; z-index: 999999 !important; background: #000 !important; }
 
+    .fade-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 14; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+    .fade-overlay.active { opacity: 1; }
+
     .stats-panel { position: absolute; top: 15px; right: 15px; background: rgba(10, 10, 10, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px 15px; z-index: 22; display: none; flex-direction: column; gap: 8px; min-width: 180px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
     .stats-header { font-size: 11px; font-weight: bold; color: var(--text-muted); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 5px; display: flex; justify-content: space-between;}
     .stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
@@ -349,7 +352,7 @@ const video = document.getElementById('video-player');
 const seekBar = document.getElementById('seek-bar');
 let osdTimeout; let statsInterval; let clockInterval;
 
-// TAM KADRO CANLI TV LİSTESİ
+// TAM KADRO CANLI TV LİSTESİ (Hiçbir kanal silinmedi)
 const tvData = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.ibb.co/NCvRHC3/trt-haber.png" group-title="HABER",TRT HABER
@@ -888,7 +891,7 @@ function populateVideoChannelMenu() {
   vList.appendChild(fragment);
 }
 
-// ANINDA TEPKİ VEREN OYNATICI FONKSİYONU (Yapay Gecikme Kaldırıldı)
+// 3 AŞAMALI ZIRHLI OYNATICI VE OTOMATİK IFRAME KALKANI (Canlı TV & Filmler için)
 function playStream(item, index) {
   activeItemUrl = item.url; 
   activeChannelIndex = index; 
@@ -913,11 +916,33 @@ function playStream(item, index) {
   if (hls) hls.destroy(); 
 
   const videoContainer = document.getElementById('video-container');
-  let existingIframe = document.getElementById('embed-iframe');
-  if (existingIframe) existingIframe.remove();
   
-  // EVRENSEL AKILLI EMBED / IFRAME KONTROLÜ (Canlı TV ve Filmler için ortak)
-  let embedUrl = "";
+  // IFRAME BAŞLATICI FONKSİYON (Son Çare veya Doğrudan Embed İçin)
+  function launchIframe(url) {
+      video.style.display = 'none';
+      document.getElementById('custom-controls').style.display = 'none';
+      let existingIframe = document.getElementById('embed-iframe');
+      if (existingIframe) existingIframe.remove();
+      
+      const iframe = document.createElement('iframe');
+      iframe.id = 'embed-iframe';
+      iframe.src = url;
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      iframe.style.position = 'absolute';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
+      iframe.style.zIndex = '12';
+      iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+      iframe.setAttribute('allowfullscreen', 'true');
+      
+      videoContainer.appendChild(iframe);
+      document.getElementById('loading-spinner').style.display = 'none';
+  }
+  
+  // EĞER LİNK BİLİNEN BİR WEB OYNATICIYSA (Youtube, OK.ru, Vixolity vs.) DİREKT IFRAME AÇ
+  let embedUrl = item.url;
   let isEmbed = false;
 
   if (item.url) {
@@ -925,8 +950,7 @@ function playStream(item, index) {
       const okId = item.url.split('/video/')[1].split('?')[0];
       embedUrl = `https://ok.ru/videoembed/${okId}`;
       isEmbed = true;
-    } else if (item.url.includes('vixolity.com/vs/')) {
-      embedUrl = item.url;
+    } else if (item.url.includes('vixolity.com/vs/') || item.url.includes('/embed/') || item.url.includes('player.php')) {
       isEmbed = true;
     } else if (item.url.includes('youtube.com/watch?v=')) {
       const ytId = item.url.split('v=')[1].split('&')[0];
@@ -936,39 +960,22 @@ function playStream(item, index) {
       const ytId = item.url.split('youtu.be/')[1].split('?')[0];
       embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
       isEmbed = true;
-    } else if (item.url.includes('/embed/') || item.url.includes('player.php') || item.url.includes('youtube.com/embed/')) {
-      embedUrl = item.url;
-      isEmbed = true;
     }
   }
 
   if (isEmbed) {
-    video.style.display = 'none';
-    document.getElementById('custom-controls').style.display = 'none';
-    
-    const iframe = document.createElement('iframe');
-    iframe.id = 'embed-iframe';
-    iframe.src = embedUrl;
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    iframe.style.position = 'absolute';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
-    iframe.style.zIndex = '12';
-    iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
-    iframe.setAttribute('allowfullscreen', 'true');
-    
-    videoContainer.appendChild(iframe);
-    document.getElementById('loading-spinner').style.display = 'none';
+    launchIframe(embedUrl);
   } else {
+    // STANDART YAYIN (Önce Proxy, Çökerse Direkt, O da Çökerse Iframe Kalkanı)
+    let existingIframe = document.getElementById('embed-iframe');
+    if (existingIframe) existingIframe.remove();
     video.style.display = 'block';
     document.getElementById('custom-controls').style.display = 'flex';
     
     let targetUrl = item.url;
     let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
 
-    if (Hls.isSupported() && (targetUrl.includes('.m3u8') || currentMode === 'TV')) {
+    if (Hls.isSupported() && (targetUrl.includes('.m3u8') || targetUrl.includes('.ts') || currentMode === 'TV')) {
       hls = new Hls({
         enableWorker: true,
         xhrSetup: function (xhr, url) {
@@ -976,13 +983,40 @@ function playStream(item, index) {
           xhr.open('GET', proxiedUrl, true);
         }
       }); 
-      hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) handleStreamError(); });
+
+      let proxyAttempt = 0;
+      hls.on(Hls.Events.ERROR, (e, data) => { 
+        if (data.fatal) { 
+           if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+               proxyAttempt++;
+               if (proxyAttempt === 1) {
+                   console.log("Proxy engellendi (CORS), direkt bağlantı deneniyor...");
+                   hls.loadSource(targetUrl); // Aradan proxy'yi çıkarıp saf bağlantı dener
+               } else if (proxyAttempt === 2) {
+                   console.log("Direkt bağlantı koptu, Iframe sistemine (Gömme) geçiliyor...");
+                   hls.destroy();
+                   launchIframe(targetUrl); // Video çöktü, son çare iframe olarak sayfaya gömer!
+               } else {
+                   handleStreamError();
+               }
+           } else {
+               // Format Hatası falan alırsak doğrudan İframe kalkanına yönlendir
+               hls.destroy();
+               launchIframe(targetUrl); 
+           }
+        } 
+      });
+
       hls.loadSource(finalUrl); 
       hls.attachMedia(video); 
       hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(e => console.log(e)); });
     } else { 
+      // Hls desteklenmeyen tarayıcılar (ör: iPhone)
       video.src = finalUrl; 
-      video.play().catch(e => { console.error(e); handleStreamError(); }); 
+      video.play().catch(e => { 
+         console.error(e); 
+         launchIframe(targetUrl); // Hata verirse direkt iframe açar
+      }); 
     }
   }
   updateActiveCardUI(); 
