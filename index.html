@@ -354,7 +354,6 @@ const seekBar = document.getElementById('seek-bar');
 const fadeOverlay = document.getElementById('fade-overlay');
 let osdTimeout; let statsInterval; let clockInterval;
 
-// TAM KADRO CANLI TV LİSTESİ
 const tvData = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.ibb.co/NCvRHC3/trt-haber.png" group-title="HABER",TRT HABER
@@ -850,7 +849,7 @@ function renderContentList(reset = false) {
       const row = document.createElement('div'); 
       row.className = 'channel-row' + (activeItemUrl === c.url ? ' active-channel' : ''); 
       row.setAttribute('data-url', c.url);
-      row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' fill=\'%23222\'><rect width=\'150\' height=\'150\'/><text x=\'50%\' y=\'50%\' fill=\'%23aaa\' font-size=\'16\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>TV</text></svg>'"><div class="channel-row-name">${safeName}</div><i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${safeName.replace(/'/g, "\\'")}')"></i>`; 
+      row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' fill=\'%23222\'><rect width=\'150\' height=\'150\'/><text x=\'50%\' y=\'50%-\' fill=\'%23aaa\' font-size=\'16\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>TV</text></svg>'"><div class="channel-row-name">${safeName}</div><i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${safeName.replace(/'/g, "\\'")}')"></i>`; 
       row.onclick = () => playStream(c, realIdx); 
       fragment.appendChild(row);
     } else { 
@@ -922,13 +921,19 @@ function playStream(item, index) {
     let existingIframe = document.getElementById('embed-iframe');
     if (existingIframe) existingIframe.remove();
     
-    if (item.url && item.url.includes('ok.ru/video/')) {
-      const okId = item.url.split('/video/')[1].split('?')[0];
+    // VIXOLITY VE OK.RU VİDEOLARI İÇİN OTOMATİK IFRAME (GÖMME) OYNATICI DESTEĞİ
+    if (item.url && (item.url.includes('ok.ru/video/') || item.url.includes('vixolity.com/vs/'))) {
       video.style.display = 'none';
       
+      let embedUrl = item.url;
+      if (item.url.includes('ok.ru/video/')) {
+        const okId = item.url.split('/video/')[1].split('?')[0];
+        embedUrl = `https://ok.ru/videoembed/${okId}`;
+      }
+
       const iframe = document.createElement('iframe');
       iframe.id = 'embed-iframe';
-      iframe.src = `https://ok.ru/videoembed/${okId}`;
+      iframe.src = embedUrl;
       iframe.style.width = '100%';
       iframe.style.height = '100%';
       iframe.style.border = 'none';
@@ -947,7 +952,6 @@ function playStream(item, index) {
       let targetUrl = item.url;
       let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
 
-      // HLS.js için xhrSetup entegrasyonu (Tüm alt parça isteklerini tüneller ve CORS'u ezer)
       if (Hls.isSupported() && (targetUrl.includes('.m3u8') || currentMode === 'TV')) {
         hls = new Hls({
           enableWorker: true,
