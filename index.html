@@ -849,7 +849,7 @@ function renderContentList(reset = false) {
       const row = document.createElement('div'); 
       row.className = 'channel-row' + (activeItemUrl === c.url ? ' active-channel' : ''); 
       row.setAttribute('data-url', c.url);
-      row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' fill=\'%23222\'><rect width=\'150\' height=\'150\'/><text x=\'50%\' y=\'50%-\' fill=\'%23aaa\' font-size=\'16\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>TV</text></svg>'"><div class="channel-row-name">${safeName}</div><i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${safeName.replace(/'/g, "\\'")}')"></i>`; 
+      row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' fill=\'%23222\'><rect width=\'150\' height=\'150\'/><text x=\'50%\' y=\'50%\' fill=\'%23aaa\' font-size=\'16\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>TV</text></svg>'"><div class="channel-row-name">${safeName}</div><i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${safeName.replace(/'/g, "\\'")}')"></i>`; 
       row.onclick = () => playStream(c, realIdx); 
       fragment.appendChild(row);
     } else { 
@@ -921,9 +921,10 @@ function playStream(item, index) {
     let existingIframe = document.getElementById('embed-iframe');
     if (existingIframe) existingIframe.remove();
     
-    // VIXOLITY VE OK.RU VİDEOLARI İÇİN OTOMATİK IFRAME (GÖMME) OYNATICI DESTEĞİ
+    // AKILLI OYNATICI SEÇİCİ (Vixolity ve OK.ru için temiz iframe modu, diğerleri için HTML5/HLS)
     if (item.url && (item.url.includes('ok.ru/video/') || item.url.includes('vixolity.com/vs/'))) {
       video.style.display = 'none';
+      document.getElementById('custom-controls').style.display = 'none'; // Özel kontrolleri gizle ki iframe player rahat çalışsın
       
       let embedUrl = item.url;
       if (item.url.includes('ok.ru/video/')) {
@@ -949,6 +950,8 @@ function playStream(item, index) {
       fadeOverlay.classList.remove('active');
     } else {
       video.style.display = 'block';
+      document.getElementById('custom-controls').style.display = 'flex'; // Normal akışlar için kontrolleri aç
+      
       let targetUrl = item.url;
       let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
 
