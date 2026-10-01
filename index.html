@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IHS TV & VOD - SMART PLAYER</title>
+  <title>IHS TV & VOD - UNIFIED PLAYER</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -243,7 +243,7 @@
         <!-- BÜTÜNLEŞİK ALT KONTROL PANELİ -->
         <div class="custom-controls" id="custom-controls">
           
-          <!-- FİLM MODUNDA GÖRÜNEN İLERLEME ÇUBUĞU (Hata Düzeltildi) -->
+          <!-- FİLM MODUNDA GÖRÜNEN İLERLEME ÇUBUĞU -->
           <div class="progress-container" id="progress-container">
             <span class="time-text" id="current-time">00:00</span>
             <input type="range" class="seek-bar" id="seek-bar" value="0" step="0.1">
@@ -288,7 +288,7 @@
         </div>
       </div>
       
-      <!-- FİLMLER İÇİN KATEGORİ AÇILIR MENÜSÜ EKLENDİ -->
+      <!-- FİLMLER İÇİN KATEGORİ AÇILIR MENÜSÜ -->
       <div class="categories-bar" id="categories-bar"></div>
       
       <div class="category-menu" id="category-menu">
@@ -526,7 +526,7 @@ function parseFlexibleM3U(content, targetArray, targetCategories) {
   }
 }
 
-// ARKA PLAN VE MOD GEÇİŞLERİ (FİLMLERDE "KATEGORİLER" MENÜSÜ AKTİF EDİLDİ)
+// ARKA PLAN VE MOD GEÇİŞLERİ (FİLMLERDE "KATEGORİLER" MENÜSÜ AKTİF)
 function switchMode(mode) {
   if (!video.paused) video.pause(); 
   currentMode = mode;
@@ -558,7 +558,6 @@ function renderCategoriesOnly() {
       createBtn('Favorilerim', true); createBtn('Tümü'); 
       Array.from(categoriesSet).sort(new Intl.Collator('tr').compare).forEach(cat => createBtn(cat));
   } else {
-      // FİLMLER İÇİN ÖZEL "KATEGORİLER" AÇILIR MENÜSÜ BUTONU
       const btnAll = document.createElement('button'); btnAll.className = 'cat-btn movie-cat' + (currentCategory==='Tümü' ? ' active' : ''); 
       btnAll.innerText = 'Tümü'; btnAll.onclick = () => selectCategory('Tümü'); catBar.appendChild(btnAll);
       
@@ -677,7 +676,7 @@ function updateActiveCardUI() {
   }); 
 }
 
-// BÜTÜNLEŞİK KONTROL MEKANİZMASI (Canlı ve Film Ortak)
+// BÜTÜNLEŞİK KONTROL MEKANİZMASI VE DİNAMİK SEEKBAR
 function setupUnifiedControls() {
     const playBtn = document.getElementById('play-pause-btn');
     const muteBtn = document.getElementById('mute-btn');
@@ -700,22 +699,24 @@ function setupUnifiedControls() {
         else muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
     }
 
-    // DİNAMİK SEEKBAR (SÜRE ÇUBUĞU) GÜNCELLEMESİ (HATA GİDERİLDİ)
+    // --- DİNAMİK SEEKBAR (SÜRE ÇUBUĞU) KUSURSUZLAŞTIRILDI ---
     video.addEventListener('loadedmetadata', () => {
-        if (currentMode === 'MOVIE' && video.duration && video.duration !== Infinity) {
-            seekBar.max = video.duration; document.getElementById('total-time').innerText = formatTime(video.duration);
+        if (currentMode === 'MOVIE' && video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
+            seekBar.max = video.duration; 
+            document.getElementById('total-time').innerText = formatTime(video.duration);
             const savedTime = localStorage.getItem('ihs_resume_' + activeItemUrl);
             if (savedTime && parseFloat(savedTime) < video.duration - 10) { video.currentTime = parseFloat(savedTime); }
         }
     });
 
     video.addEventListener('timeupdate', () => {
-        if (currentMode === 'MOVIE' && video.duration && video.duration !== Infinity) {
-            // Süre ilk saniyelerde yüklenmezse dinamik olarak çubuğu güncelle
-            if (seekBar.max != video.duration) {
+        if (currentMode === 'MOVIE' && video.duration && video.duration !== Infinity && !isNaN(video.duration)) {
+            // Eğer süre arkada yüklendiyse (veya değiştiyse) çubuğu dinamik uzat
+            if (Math.abs(seekBar.max - video.duration) > 1) {
                 seekBar.max = video.duration;
                 document.getElementById('total-time').innerText = formatTime(video.duration);
             }
+            // Sürükleme yapılmıyorsa zamanı ve çubuğu güncelle
             if (!seekBar.active) {
                 seekBar.value = video.currentTime;
                 document.getElementById('current-time').innerText = formatTime(video.currentTime);
@@ -724,17 +725,25 @@ function setupUnifiedControls() {
         }
     });
 
-    // Mobil ve Web'de kusursuz sürükleme için "input" eklendi
+    // Kusursuz Sürükleme Deneyimi (Mobil & PC Uyumlu)
+    seekBar.addEventListener('mousedown', () => { seekBar.active = true; });
+    seekBar.addEventListener('touchstart', () => { seekBar.active = true; }, {passive: true});
+    
+    // Parmak/Mouse kaydırılırken anlık saati gösterir
     seekBar.addEventListener('input', (e) => {
         seekBar.active = true;
         document.getElementById('current-time').innerText = formatTime(e.target.value);
     });
+    
+    // Parmağı/Mouse'u bıraktığın an videoyu atlatır
     seekBar.addEventListener('change', (e) => {
-        video.currentTime = e.target.value;
+        if (video.duration) { video.currentTime = e.target.value; }
         seekBar.active = false;
     });
-    seekBar.addEventListener('touchstart', () => { seekBar.active = true; });
-    seekBar.addEventListener('touchend', (e) => { video.currentTime = e.target.value; seekBar.active = false; });
+
+    seekBar.addEventListener('touchend', () => { seekBar.active = false; });
+    seekBar.addEventListener('mouseup', () => { seekBar.active = false; });
+    // -------------------------------------------------------
 
     video.addEventListener('ended', () => {
         if (currentDisplayList.length > 0 && activeChannelIndex > -1) {
