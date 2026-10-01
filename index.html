@@ -4,14 +4,19 @@
   <meta charset="UTF-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IHS TV & VOD - YILDIRIM HIZI</title>
+  <title>IHS TV & VOD - SMART PLAYER</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     :root { --bg-main: #050505; --bg-card: #121212; --ihs-red: #e50914; --text-main: #ffffff; --text-muted: #888888; --border-color: #262626; --gold: #f5c518; }
     * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-main); color: var(--text-main); font-family: system-ui, -apple-system, sans-serif; height: 100dvh; overflow: hidden; }
+    body { background-color: var(--bg-main); color: var(--text-main); font-family: system-ui, -apple-system, sans-serif; height: 100dvh; overflow: hidden; transition: background-color 0.5s; }
     ::-webkit-scrollbar { width: 5px; height: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; } ::-webkit-scrollbar-thumb:hover { background: var(--ihs-red); }
+
+    /* SİNEMA MODU AKTİFKEN */
+    body.cinema-mode { background-color: #000; }
+    body.cinema-mode .sidebar-section { opacity: 0.05; pointer-events: none; filter: blur(3px); transition: 0.5s; }
+    body.cinema-mode .player-section { box-shadow: 0 0 100px rgba(0,0,0,1); z-index: 999; }
 
     .security-screen, .ban-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     .ban-screen { display: none; background: #050505; }
@@ -26,10 +31,33 @@
     .app-wrapper { display: none; width: 100vw; height: 100dvh; overflow: hidden; }
 
     /* OYNATICI BÖLÜMÜ */
-    .player-section { background: #000; z-index: 10; display: flex; flex-direction: column; position: relative; }
-    .video-container { width: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; aspect-ratio: 16/9; }
-    .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .player-section { background: #000; z-index: 10; display: flex; flex-direction: column; position: relative; transition: 0.5s; }
+    .video-container { width: 100%; height: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .video-container video { width: 100%; height: 100%; object-fit: contain; display: block; z-index: 1; }
     
+    /* AKILLI ÜST EYLEM BUTONLARI (Sinema, Yansıtma, PiP) */
+    .smart-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; z-index: 20; opacity: 0; transition: opacity 0.3s; }
+    .video-container:hover .smart-actions { opacity: 1; }
+    .sa-btn { background: rgba(10,10,10,0.6); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 38px; height: 38px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    .sa-btn:hover { background: var(--ihs-red); border-color: var(--ihs-red); transform: scale(1.1); }
+
+    /* ÇİFT TIKLAMA BÖLGELERİ VE ANİMASYONLARI */
+    .tap-zone { position: absolute; top: 0; width: 35%; height: 100%; z-index: 10; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .tap-left { left: 0; } .tap-right { right: 0; }
+    .tap-indicator { background: rgba(0,0,0,0.6); color: #fff; font-size: 24px; font-weight: bold; padding: 15px 25px; border-radius: 30px; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0; transform: scale(0.8); transition: 0.2s ease-out; pointer-events: none; }
+    .tap-indicator.show { opacity: 1; transform: scale(1); animation: fadeOutTap 0.6s forwards; }
+    @keyframes fadeOutTap { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0; transform: scale(1); } }
+    .tap-indicator i { font-size: 30px; }
+
+    /* OTOMATİK SIRADAKİ EKRANI */
+    .auto-next-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 25; display: none; flex-direction: column; align-items: center; justify-content: center; color: #fff; backdrop-filter: blur(5px); }
+    .auto-next-spinner { width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--ihs-red); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; position: relative; display: flex; align-items: center; justify-content: center; }
+    .auto-next-count { position: absolute; font-size: 22px; font-weight: bold; }
+    .auto-next-title { font-size: 16px; color: #aaa; margin-bottom: 5px; }
+    .auto-next-name { font-size: 22px; font-weight: 800; max-width: 80%; text-align: center; }
+    .cancel-next-btn { margin-top: 20px; background: transparent; border: 1px solid #555; color: #ccc; padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: 0.2s; }
+    .cancel-next-btn:hover { background: #333; color: #fff; }
+
     .loading-spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--ihs-red); border-radius: 50%; animation: spin 1s linear infinite; z-index: 15; display: none; }
     @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
     
@@ -38,7 +66,7 @@
     .fallback-msg { color: #bbb; font-size: 14px; margin-top: 5px; font-weight: 600; }
 
     /* LİSTE / SİDEBAR BÖLÜMÜ */
-    .sidebar-section { display: flex; flex-direction: column; background: var(--bg-card); overflow: hidden; flex: 1; position: relative; min-width: 0; }
+    .sidebar-section { display: flex; flex-direction: column; background: var(--bg-card); overflow: hidden; flex: 1; position: relative; min-width: 0; transition: 0.5s; }
     .tab-container { display: flex; background: var(--bg-main); border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
     .tab-btn { flex: 1; padding: 15px 0; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; }
     .tab-btn.active { color: #fff; border-bottom-color: var(--ihs-red); background: rgba(255,255,255,0.02); }
@@ -54,16 +82,6 @@
     .cat-btn.active { background: var(--ihs-red); color: #fff; border-color: var(--ihs-red); }
     .cat-btn.movie-cat { border-radius: 6px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; padding: 8px 14px;}
 
-    .category-menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18, 18, 18, 0.98); z-index: 40; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-    .category-menu.open { transform: translateY(0); }
-    .cm-header { padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-    .cm-header h3 { font-size: 16px; margin: 0; color: #fff; display: flex; align-items: center; gap: 10px;}
-    .cm-close { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; transition: 0.2s;}
-    .cm-close:hover { color: var(--ihs-red); transform: scale(1.1); }
-    .cm-list { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; align-content: start; padding-bottom: 40px;}
-    .cm-item { background: #222; border: 1px solid #333; padding: 15px 10px; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 700; color: #ddd; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 60px;}
-    .cm-item:hover, .cm-item.active { background: rgba(229,9,20,0.2); border-color: var(--ihs-red); color: #fff; box-shadow: 0 4px 10px rgba(229,9,20,0.3);}
-
     .content-area { flex: 1; overflow-y: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
     
     .channel-row { display: flex; align-items: center; background: transparent; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 6px; border: 1px solid transparent; }
@@ -71,15 +89,13 @@
     .channel-row:hover { background: rgba(255,255,255,0.05); }
     .channel-row img { width: 40px; height: 40px; object-fit: contain; background: #fff; border-radius: 6px; padding: 3px; margin-right: 15px; flex-shrink: 0; }
     .channel-row-name { flex: 1; font-weight: 600; font-size: 13px; color: #eee; }
-    .fav-icon { font-size: 16px; color: #444; padding: 8px; transition: 0.3s; }
+    .fav-icon { font-size: 16px; color: #444; padding: 8px; transition: 0.3s; z-index: 2; }
     .fav-icon:hover { transform: scale(1.2); }
     .fav-icon.active { color: var(--ihs-red); text-shadow: 0 0 10px rgba(229,9,20,0.5); }
 
     /* NETFLIX DÜZENİ */
     .netflix-row-container { margin-bottom: 20px; }
     .netflix-row-title { font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 8px 8px; display: flex; justify-content: space-between; align-items: baseline; }
-    .see-all { font-size: 11px; color: #aaa; cursor: pointer; font-weight: normal; margin-right: 15px; transition: color 0.2s;}
-    .see-all:hover { color: var(--ihs-red); }
     
     .netflix-row { display: flex; gap: 10px; overflow-x: auto; padding: 5px 8px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; align-items: flex-start; }
     .netflix-row::-webkit-scrollbar { height: 4px; }
@@ -96,11 +112,10 @@
     .movie-poster { width: 100%; height: 100%; object-fit: cover; object-position: center top; z-index: 1; transition: opacity 0.3s; opacity: 0; }
     
     .movie-title-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 25px 6px 8px 6px; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); color: #fff; font-size: 10px; font-weight: 700; z-index: 2; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.2; text-shadow: 1px 1px 2px #000; pointer-events: none; }
-    .movie-rating { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: var(--gold); font-size: 9px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 3; display: none; align-items: center; gap: 3px; pointer-events: none; }
     
-    .play-icon-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; backdrop-filter: blur(1px); z-index: 3; pointer-events: none; }
-    .movie-card:hover .play-icon-overlay { opacity: 1; }
-    .play-icon-overlay i { font-size: 30px; color: white; text-shadow: 0 0 10px var(--ihs-red); }
+    /* İFRAME OYNATICI STİLLERİ */
+    .iframe-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 12; background: #000; }
+    .iframe-wrapper iframe { width: 100%; height: 100%; border: none; display: block; }
 
     /* RESPONSIVE YERLEŞİM */
     @media (max-width: 899px) {
@@ -112,7 +127,7 @@
     @media (min-width: 900px) {
       .app-wrapper { display: flex; flex-direction: row; height: 100dvh; overflow: hidden; }
       .player-section { width: 55%; height: 100dvh; flex-shrink: 0; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
-      .video-container { flex: 1; aspect-ratio: unset; height: 100%; }
+      .video-container { flex: 1; height: 100%; }
       .sidebar-section { width: 45%; height: 100dvh; display: flex; flex-direction: column; }
     }
   </style>
@@ -130,9 +145,25 @@
 
   <div class="app-wrapper" id="app-wrapper">
     
-    <!-- OYNATICI BÖLÜMÜ (Ekstra Tuşlar Silindi, Yerleşik Player Kaldı) -->
-    <div class="player-section">
+    <!-- OYNATICI BÖLÜMÜ -->
+    <div class="player-section" id="player-section">
       <div class="video-container" id="video-container">
+        
+        <!-- YÜZEN EKRAN, SİNEMA MODU VE CAST BUTONLARI -->
+        <div class="smart-actions" id="smart-actions">
+           <button class="sa-btn" onclick="toggleCinema()" title="Sinema Modu"><i class="fas fa-lightbulb"></i></button>
+           <button class="sa-btn" onclick="togglePip()" title="Yüzen Ekran (PiP)"><i class="fas fa-clone"></i></button>
+           <button class="sa-btn" onclick="requestCast()" title="TV'ye Yansıt"><i class="fas fa-tv"></i></button>
+        </div>
+
+        <!-- ÇİFT TIKLAMA HIZLI SARMA BÖLGELERİ -->
+        <div class="tap-zone tap-left" id="tap-left">
+           <div class="tap-indicator" id="ind-left"><i class="fas fa-backward"></i><span>-10s</span></div>
+        </div>
+        <div class="tap-zone tap-right" id="tap-right">
+           <div class="tap-indicator" id="ind-right"><i class="fas fa-forward"></i><span>+10s</span></div>
+        </div>
+
         <div class="loading-spinner" id="loading-spinner"></div>
         
         <div class="error-overlay" id="error-overlay">
@@ -141,14 +172,20 @@
             <div class="fallback-msg" id="fallback-msg">Yayın geçersiz veya engellendi.</div>
         </div>
 
-        <!-- Hızlı ve Native Video Oynatıcı -->
+        <!-- OTOMATİK SIRADAKİ GERİ SAYIM EKRANI -->
+        <div class="auto-next-overlay" id="auto-next-overlay">
+            <div class="auto-next-spinner"><span class="auto-next-count" id="an-count">5</span></div>
+            <div class="auto-next-title">Sıradaki İçerik Oynatılıyor...</div>
+            <div class="auto-next-name" id="an-name">Kanal Adı</div>
+            <button class="cancel-next-btn" onclick="cancelAutoNext()">İptal Et</button>
+        </div>
+
         <video id="video-player" controls autoplay playsinline webkit-playsinline></video>
       </div>
     </div>
 
-    <!-- LİSTE & KATEGORİ BÖLÜMÜ (Detay Modal Ekranı Çöpe Gitti) -->
-    <div class="sidebar-section" style="position: relative;">
-      
+    <!-- LİSTE BÖLÜMÜ -->
+    <div class="sidebar-section">
       <div class="tab-container">
         <button class="tab-btn active" id="tab-tv" onclick="switchMode('TV')"><i class="fas fa-tv"></i> CANLI TV</button>
         <button class="tab-btn" id="tab-movie" onclick="switchMode('MOVIE')"><i class="fas fa-film"></i> FİLMLER</button>
@@ -159,24 +196,13 @@
           <input type="text" id="search-input" placeholder="Arama yap..." oninput="searchContent()">
         </div>
       </div>
-      
       <div class="categories-bar" id="categories-bar"></div>
-      
-      <div class="category-menu" id="category-menu">
-        <div class="cm-header">
-          <h3><i class="fas fa-list-ul"></i> Kategoriler</h3>
-          <button class="cm-close" onclick="closeCategoryMenu()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="cm-list" id="cm-list"></div>
-      </div>
-
       <div class="content-area" id="content-area"></div>
     </div>
   </div>
 
 <script>
 const PROXY_BASE = "https://billowing-block-3ef5proxy.ibrahim-srbl.workers.dev/?url=";
-const TMDB_KEY = "4d89b35eb4db17dc2a746c2318dd598b";
 const ENCRYPTED_PASS = "aWhzcHJv"; 
 
 let hataliGirisSayisi = parseInt(localStorage.getItem('ihs_hata') || '0');
@@ -203,13 +229,12 @@ let movies = []; let movieCategories = new Set();
 let currentMode = 'TV'; let currentCategory = 'Tümü'; let currentDisplayList = [];
 let activeItemUrl = ""; let activeChannelIndex = -1;
 let favorites = JSON.parse(localStorage.getItem('ihs_favorites')) || [];
-
 let currentRenderCount = 0; const RENDER_CHUNK = 100; 
-const tmdbCache = {}; const tmdbQueue = []; let isFetchingTmdb = false;
 let hls = null;
 const video = document.getElementById('video-player');
+let autoNextTimer = null; let isRestoringTime = false;
 
-// TAM KADRO CANLI TV LİSTESİ (Hiçbir kanal silinmedi)
+// KANAL VE FİLM LİSTELERİ
 const tvData = `
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://i.ibb.co/NCvRHC3/trt-haber.png" group-title="HABER",TRT HABER
@@ -338,15 +363,12 @@ https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&c
 
 function initApp() {
   parseM3UContent(tvData, tvChannels, tvCategories);
-  
   fetch('https://raw.githubusercontent.com/gencalp27-gif/Crozyiptv/main/film.m3u')
     .then(res => res.text())
-    .then(data => {
-      parseFlexibleM3U(data, movies, movieCategories);
-      if(currentMode === 'MOVIE') { renderCategoriesOnly(); renderContentList(true); }
-    })
-    .catch(e => console.log("Film listesi yüklenemedi"));
+    .then(data => { parseFlexibleM3U(data, movies, movieCategories); if(currentMode === 'MOVIE') renderContentList(true); })
+    .catch(e => console.log("Film yüklenemedi"));
 
+  setupSmartFeatures();
   switchMode('TV'); 
 }
 
@@ -355,12 +377,10 @@ function parseM3UContent(content, targetArray, targetCategories) {
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim(); if (!line) continue;
     if (line.startsWith('#EXTINF:')) {
-      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-      const groupMatch = line.match(/group-title="([^"]+)"/);
-      let finalGroup = groupMatch ? groupMatch[1] : 'Genel';
+      let group = (line.match(/group-title="([^"]+)"/) || [])[1] || 'Genel';
       let name = line.split(',').pop().trim();
-      currentObj = { name, logo: logoMatch ? logoMatch[1] : '', group: finalGroup }; 
-      targetCategories.add(finalGroup);
+      currentObj = { name, logo: (line.match(/tvg-logo="([^"]+)"/) || [])[1] || '', group }; 
+      targetCategories.add(group);
     } else if (line.startsWith('http')) { 
       if (currentObj) { currentObj.url = line; targetArray.push(currentObj); currentObj = null; } 
     }
@@ -370,20 +390,13 @@ function parseM3UContent(content, targetArray, targetCategories) {
 function parseFlexibleM3U(content, targetArray, targetCategories) {
   const lines = content.split('\n'); let pendingMeta = null; let pendingUrl = null;
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim();
-    if (!line || line.startsWith('#EXTM3U')) continue;
+    let line = lines[i].trim(); if (!line || line.startsWith('#EXTM3U')) continue;
     if (line.startsWith('#EXTINF:')) {
-      const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-      const groupMatch = line.match(/group-title="([^"]+)"/);
-      let group = groupMatch ? groupMatch[1] : 'Genel';
-      let name = line.split(',').pop().trim();
+      let group = (line.match(/group-title="([^"]+)"/) || [])[1] || 'Genel';
       targetCategories.add(group);
-      pendingMeta = { name, logo: logoMatch ? logoMatch[1] : '', group };
+      pendingMeta = { name: line.split(',').pop().trim(), logo: (line.match(/tvg-logo="([^"]+)"/) || [])[1] || '', group };
     } else if (line.startsWith('http')) { pendingUrl = line; }
-    if (pendingMeta && pendingUrl) {
-      targetArray.push({ name: pendingMeta.name, logo: pendingMeta.logo, group: pendingMeta.group, url: pendingUrl });
-      pendingMeta = null; pendingUrl = null;
-    }
+    if (pendingMeta && pendingUrl) { targetArray.push({ ...pendingMeta, url: pendingUrl }); pendingMeta = null; pendingUrl = null; }
   }
 }
 
@@ -393,57 +406,33 @@ function switchMode(mode) {
   document.getElementById('tab-tv').className = mode === 'TV' ? 'tab-btn active' : 'tab-btn';
   document.getElementById('tab-movie').className = mode === 'MOVIE' ? 'tab-btn active' : 'tab-btn';
   document.getElementById('search-input').placeholder = mode === 'MOVIE' ? "Film ara..." : "Kanal ara...";
-  currentCategory = 'Tümü'; 
-  document.getElementById('search-input').value = ''; 
-  renderCategoriesOnly(); 
-  renderContentList(true);
+  currentCategory = 'Tümü'; document.getElementById('search-input').value = ''; 
+  renderCategoriesOnly(); renderContentList(true);
 }
 
 function renderCategoriesOnly() {
   const catBar = document.getElementById('categories-bar'); catBar.innerHTML = '';
   const categoriesSet = currentMode === 'TV' ? tvCategories : movieCategories;
-
   if(currentMode === 'TV') {
       const createBtn = (txt, isFav=false) => { 
-        const btn = document.createElement('button'); 
-        btn.className = 'cat-btn' + (isFav ? ' cat-btn-fav' : '') + (currentCategory===txt ? ' active' : ''); 
-        btn.innerHTML = isFav ? `<i class="fas fa-heart"></i> ${txt}` : txt; 
-        btn.onclick = () => { selectCategory(txt); }; 
-        catBar.appendChild(btn); 
+        const btn = document.createElement('button'); btn.className = 'cat-btn' + (isFav ? ' cat-btn-fav' : '') + (currentCategory===txt ? ' active' : ''); 
+        btn.innerHTML = isFav ? `<i class="fas fa-heart"></i> ${txt}` : txt; btn.onclick = () => { selectCategory(txt); }; catBar.appendChild(btn); 
       };
       createBtn('Favorilerim', true); createBtn('Tümü'); 
       Array.from(categoriesSet).sort(new Intl.Collator('tr').compare).forEach(cat => createBtn(cat));
   } else {
-      const btnAll = document.createElement('button'); 
-      btnAll.className = 'cat-btn movie-cat' + (currentCategory==='Tümü' ? ' active' : ''); 
-      btnAll.innerText = 'Tümü'; btnAll.onclick = () => selectCategory('Tümü'); 
-      catBar.appendChild(btnAll);
-      
-      const btnMenu = document.createElement('button'); 
-      btnMenu.className = 'cat-btn movie-cat'; 
-      btnMenu.innerHTML = `<i class="fas fa-list-ul"></i> Kategoriler`; btnMenu.onclick = openCategoryMenu; 
-      catBar.appendChild(btnMenu);
-      
+      const btnAll = document.createElement('button'); btnAll.className = 'cat-btn movie-cat' + (currentCategory==='Tümü' ? ' active' : ''); 
+      btnAll.innerText = 'Tümü'; btnAll.onclick = () => selectCategory('Tümü'); catBar.appendChild(btnAll);
+      const btnMenu = document.createElement('button'); btnMenu.className = 'cat-btn movie-cat'; 
+      btnMenu.innerHTML = `<i class="fas fa-list-ul"></i> Kategoriler`; btnMenu.onclick = openCategoryMenu; catBar.appendChild(btnMenu);
       if (currentCategory !== 'Tümü') { 
-         const btnCurrent = document.createElement('button'); 
-         btnCurrent.className = 'cat-btn movie-cat active'; 
-         btnCurrent.innerText = currentCategory; btnCurrent.onclick = () => openCategoryMenu(); 
-         catBar.appendChild(btnCurrent); 
+         const btnCurrent = document.createElement('button'); btnCurrent.className = 'cat-btn movie-cat active'; 
+         btnCurrent.innerText = currentCategory; btnCurrent.onclick = () => openCategoryMenu(); catBar.appendChild(btnCurrent); 
       }
   }
 }
 
-function selectCategory(catName) { 
-  currentCategory = catName; document.getElementById('search-input').value = ''; 
-  renderCategoriesOnly(); renderContentList(true); 
-  if(currentMode === 'TV') { 
-    const buttons = document.querySelectorAll('.cat-btn'); 
-    for(let b of buttons) { 
-      if(b.innerText === catName || b.innerText.includes(catName)) { b.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); break; } 
-    } 
-  } 
-}
-
+function selectCategory(catName) { currentCategory = catName; document.getElementById('search-input').value = ''; renderCategoriesOnly(); renderContentList(true); }
 function openCategoryMenu() { 
   const cmList = document.getElementById('cm-list'); cmList.innerHTML = ''; 
   Array.from(movieCategories).sort(new Intl.Collator('tr').compare).forEach(cat => { 
@@ -452,81 +441,34 @@ function openCategoryMenu() {
   }); 
   document.getElementById('category-menu').classList.add('open'); 
 }
-
 function closeCategoryMenu() { document.getElementById('category-menu').classList.remove('open'); }
 function searchContent() { renderContentList(true); }
-
 function toggleFavorite(e, channelName) { 
   e.stopPropagation(); const index = favorites.indexOf(channelName); 
   if (index > -1) favorites.splice(index, 1); else favorites.push(channelName); 
   localStorage.setItem('ihs_favorites', JSON.stringify(favorites)); renderContentList(true); 
 }
 
-function processTmdbQueue() {
-  if (isFetchingTmdb || tmdbQueue.length === 0) return;
-  isFetchingTmdb = true; const { movie, imgEl, ratingEl } = tmdbQueue.shift();
-  let cleanName = movie.name.replace(/\(\d{4}\)/g, '').replace(/\[.*?\]/g, '').trim();
-  
-  if (tmdbCache[cleanName]) { applyTmdbData(tmdbCache[cleanName], movie, imgEl, ratingEl); isFetchingTmdb = false; setTimeout(processTmdbQueue, 100); return; }
-
-  fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(cleanName)}&language=tr-TR`)
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.results && data.results.length > 0) {
-        const item = data.results[0];
-        const info = { poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : movie.logo, rating: item.vote_average ? item.vote_average.toFixed(1) : '' };
-        tmdbCache[cleanName] = info; applyTmdbData(info, movie, imgEl, ratingEl);
-      } else {
-        if (movie.logo) { imgEl.src = movie.logo; imgEl.style.opacity = '1'; }
-      }
-      isFetchingTmdb = false; setTimeout(processTmdbQueue, 150);
-    }).catch(() => { isFetchingTmdb = false; setTimeout(processTmdbQueue, 150); });
-}
-
-function applyTmdbData(info, movie, imgEl, ratingEl) {
-  if (info.poster && imgEl) { imgEl.src = info.poster; imgEl.style.opacity = '1'; }
-  if (info.rating && ratingEl) { ratingEl.innerHTML = `<i class="fas fa-star" style="font-size:9px;"></i> ${info.rating}`; ratingEl.style.display = 'flex'; }
-}
-
-const movieObserver = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const card = entry.target; const movieIdx = card.getAttribute('data-movie-index');
-      if (movieIdx !== null) {
-        const movie = movies[movieIdx]; const imgEl = card.querySelector('.movie-poster'); const ratingEl = card.querySelector('.movie-rating');
-        if (movie && (!movie.enriched || !imgEl.src)) { movie.enriched = true; tmdbQueue.push({ movie, imgEl, ratingEl }); processTmdbQueue(); }
-      }
-      observer.unobserve(card);
-    }
-  });
-}, { rootMargin: '150px' });
-
 function createMovieCard(c, index) {
     const safeName = c.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
     const card = document.createElement('div'); 
-    card.className = 'movie-card' + (activeItemUrl === c.url ? ' active-movie' : ''); 
-    card.setAttribute('data-url', c.url); card.setAttribute('data-movie-index', index);
+    card.className = 'movie-card' + (activeItemUrl === c.url ? ' active-movie' : ''); card.setAttribute('data-url', c.url);
     const initialPoster = c.logo && c.logo.startsWith('http') ? c.logo : '';
-    
     card.innerHTML = `
       <div class="movie-poster-wrap">
         <div class="movie-title-fallback">${safeName}</div>
-        <div class="movie-rating"><i class="fas fa-star" style="font-size:9px;"></i></div>
         <img class="movie-poster" src="${initialPoster}" loading="lazy" onload="this.style.opacity='1'" onerror="this.style.opacity='0'">
         <div class="movie-title-overlay">${safeName}</div>
         <div class="play-icon-overlay"><i class="fas fa-play-circle"></i></div>
       </div>
     `;
-    
     card.onclick = (e) => { e.stopPropagation(); playStream(c, index); }; 
-    movieObserver.observe(card);
     if(initialPoster) { setTimeout(() => { const img = card.querySelector('.movie-poster'); if(img) img.style.opacity = '1'; }, 50); }
     return card;
 }
 
 function renderContentList(reset = false) {
-  const contentArea = document.getElementById('content-area'); 
-  const dataset = currentMode === 'TV' ? tvChannels : movies; 
+  const contentArea = document.getElementById('content-area'); const dataset = currentMode === 'TV' ? tvChannels : movies; 
   const query = document.getElementById('search-input').value.toLocaleLowerCase('tr-TR');
   
   if (reset) { 
@@ -546,20 +488,16 @@ function renderContentList(reset = false) {
           const limit = Math.min(catMovies.length, 30); 
           for(let i = 0; i < limit; i++) { row.appendChild(createMovieCard(catMovies[i], movies.indexOf(catMovies[i]))); } 
           rowCont.appendChild(row); contentArea.appendChild(rowCont);
-      }); 
-      return;
+      }); return;
   }
 
   contentArea.className = currentMode === 'TV' ? 'content-area' : 'content-area movie-grid'; 
   const fragment = document.createDocumentFragment(); const endIndex = Math.min(currentRenderCount + RENDER_CHUNK, currentDisplayList.length);
-  
   for (let i = currentRenderCount; i < endIndex; i++) {
     const c = currentDisplayList[i]; const realIdx = dataset.indexOf(c); const safeName = c.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
-    
     if(currentMode === 'TV') {
       const isFav = favorites.includes(c.name); 
-      const row = document.createElement('div'); 
-      row.className = 'channel-row' + (activeItemUrl === c.url ? ' active-channel' : ''); row.setAttribute('data-url', c.url);
+      const row = document.createElement('div'); row.className = 'channel-row' + (activeItemUrl === c.url ? ' active-channel' : ''); row.setAttribute('data-url', c.url);
       row.innerHTML = `<img src="${c.logo}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' fill=\'%23222\'><rect width=\'150\' height=\'150\'/><text x=\'50%\' y=\'50%\' fill=\'%23aaa\' font-size=\'16\' font-family=\'sans-serif\' dominant-baseline=\'middle\' text-anchor=\'middle\'>TV</text></svg>'"><div class="channel-row-name">${safeName}</div><i class="${isFav ? 'fas' : 'far'} fa-heart fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, '${safeName.replace(/'/g, "\\'")}')"></i>`; 
       row.onclick = () => playStream(c, realIdx); fragment.appendChild(row);
     } else { fragment.appendChild(createMovieCard(c, realIdx)); }
@@ -569,14 +507,111 @@ function renderContentList(reset = false) {
 
 function updateActiveCardUI() { 
   document.querySelectorAll('.channel-row, .movie-card').forEach(el => { 
-    if(el.getAttribute('data-url') === activeItemUrl) { el.classList.add(currentMode === 'TV' ? 'active-channel' : 'active-movie'); } 
-    else { el.classList.remove('active-channel', 'active-movie'); }
+    if(el.getAttribute('data-url') === activeItemUrl) el.classList.add(currentMode === 'TV' ? 'active-channel' : 'active-movie'); 
+    else el.classList.remove('active-channel', 'active-movie'); 
   }); 
 }
 
-// 🚀 IŞIK HIZINDA DİREKT OYNATICI (Sıfır Gecikme, Modal Yok, Native Player)
+// YENİ AKILLI ÖZELLİKLER (Hafıza, Yansıtma, PiP, Çift Tık)
+function setupSmartFeatures() {
+    // 1. HAFIZA ÖNBELLEĞİ (Kaldığın Yerden Devam Et)
+    video.addEventListener('timeupdate', () => {
+        if (currentMode === 'MOVIE' && activeItemUrl && video.currentTime > 5 && video.duration > 0) {
+            localStorage.setItem('ihs_resume_' + activeItemUrl, video.currentTime);
+        }
+    });
+
+    video.addEventListener('loadedmetadata', () => {
+        if (currentMode === 'MOVIE') {
+            const savedTime = localStorage.getItem('ihs_resume_' + activeItemUrl);
+            if (savedTime && parseFloat(savedTime) < video.duration - 10) {
+                isRestoringTime = true;
+                video.currentTime = parseFloat(savedTime);
+                setTimeout(() => { isRestoringTime = false; }, 1000);
+            }
+        }
+    });
+
+    // 2. OTOMATİK SIRADAKİ İÇERİK
+    video.addEventListener('ended', () => {
+        if(currentDisplayList.length > 0 && activeChannelIndex > -1) {
+            let nextIdx = activeChannelIndex + 1;
+            if (nextIdx >= currentDisplayList.length) nextIdx = 0;
+            const nextItem = currentDisplayList[nextIdx];
+            
+            document.getElementById('an-name').innerText = nextItem.name;
+            document.getElementById('auto-next-overlay').style.display = 'flex';
+            
+            let count = 5;
+            document.getElementById('an-count').innerText = count;
+            autoNextTimer = setInterval(() => {
+                count--; document.getElementById('an-count').innerText = count;
+                if(count <= 0) {
+                    clearInterval(autoNextTimer);
+                    document.getElementById('auto-next-overlay').style.display = 'none';
+                    playStream(nextItem, nextIdx);
+                }
+            }, 1000);
+        }
+    });
+
+    // 3. ÇİFT TIKLAMA İLE 10 SANİYE İLERİ/GERİ
+    let lastTapLeft = 0; let lastTapRight = 0;
+    document.getElementById('tap-left').addEventListener('click', (e) => {
+        const now = new Date().getTime();
+        if(now - lastTapLeft < 300) { seekVideo(-10); animateTap('ind-left'); }
+        lastTapLeft = now;
+    });
+    document.getElementById('tap-right').addEventListener('click', (e) => {
+        const now = new Date().getTime();
+        if(now - lastTapRight < 300) { seekVideo(10); animateTap('ind-right'); }
+        lastTapRight = now;
+    });
+}
+
+function seekVideo(amount) {
+    if(video && video.duration) {
+        let newTime = video.currentTime + amount;
+        if(newTime < 0) newTime = 0;
+        if(newTime > video.duration) newTime = video.duration;
+        video.currentTime = newTime;
+    }
+}
+
+function animateTap(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('show');
+    void el.offsetWidth; // Trigger reflow
+    el.classList.add('show');
+}
+
+function toggleCinema() { document.body.classList.toggle('cinema-mode'); }
+function cancelAutoNext() { clearInterval(autoNextTimer); document.getElementById('auto-next-overlay').style.display = 'none'; }
+
+function togglePip() {
+    if (document.pictureInPictureElement) {
+        document.exitPictureInPicture();
+    } else if (document.pictureInPictureEnabled) {
+        video.requestPictureInPicture().catch(err => console.log("PiP Engellendi", err));
+    } else {
+        alert("Tarayıcınız Yüzen Ekran (PiP) modunu desteklemiyor.");
+    }
+}
+
+function requestCast() {
+    if (video.remote && video.remote.state !== 'disconnected') {
+        video.remote.prompt().catch(err => console.log("Yansıtma İptal", err));
+    } else if (video.webkitShowPlaybackTargetPicker) {
+        video.webkitShowPlaybackTargetPicker(); // iOS AirPlay desteği
+    } else {
+        alert("TV'ye Yansıtma donanımınız (Cast/AirPlay) bulunamadı veya desteklenmiyor.");
+    }
+}
+
+// IŞIK HIZINDA DİREKT OYNATICI (Modal yok, Tek tıkla açılış)
 function playStream(item, index) {
   activeItemUrl = item.url; activeChannelIndex = index; 
+  cancelAutoNext();
   document.getElementById('error-overlay').style.display = 'none'; 
   document.getElementById('loading-spinner').style.display = 'block';
   
@@ -585,7 +620,6 @@ function playStream(item, index) {
   let existingIframe = document.getElementById('ihs-iframe');
   if (existingIframe) existingIframe.remove();
 
-  // Web Sayfası / İframe Kontrolü (OK.ru, Youtube, Vixolity vs.)
   let embedUrl = item.url; let isEmbed = false;
   if (item.url) {
     if (item.url.includes('ok.ru/video/')) {
@@ -600,20 +634,17 @@ function playStream(item, index) {
   }
 
   if (isEmbed) {
-    // İFRAME MODU (Ekstra üst bar vs. YOK, direkt tam ekran iframe)
     video.style.display = 'none';
-    embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1'; // Otomatik oynatmaya zorla
+    embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1'; 
     
     const iframe = document.createElement('iframe');
-    iframe.id = 'ihs-iframe';
-    iframe.src = embedUrl;
-    iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border = 'none'; iframe.style.position = 'absolute'; iframe.style.top = '0'; iframe.style.left = '0'; iframe.style.zIndex = '12';
+    iframe.id = 'ihs-iframe'; iframe.src = embedUrl;
+    iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border = 'none'; iframe.style.position = 'absolute'; iframe.style.top = '0'; iframe.style.left = '0'; iframe.style.zIndex = '5';
     iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
     
     videoContainer.appendChild(iframe);
     document.getElementById('loading-spinner').style.display = 'none';
   } else {
-    // NATIVE VİDEO MODU (Kendi kontrolleriyle en hızlı akış)
     video.style.display = 'block';
     let targetUrl = item.url;
     let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
@@ -626,7 +657,7 @@ function playStream(item, index) {
            document.getElementById('error-overlay').style.display = 'flex'; 
         } 
       });
-      hls.loadSource(targetUrl); // Direkt hızlı bağlantı dener!
+      hls.loadSource(targetUrl); // Direkt hızlı bağlantı dener
       hls.attachMedia(video); 
       hls.on(Hls.Events.MANIFEST_PARSED, () => { 
           video.play().catch(()=>{}); 
@@ -639,7 +670,6 @@ function playStream(item, index) {
   }
   updateActiveCardUI(); 
 }
-
 </script>
 </body>
 </html>
