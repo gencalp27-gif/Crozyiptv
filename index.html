@@ -71,9 +71,25 @@
 
     .loading-spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--ihs-red); border-radius: 50%; animation: spin 1s linear infinite; z-index: 15; display: none; }
     @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-    .error-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 16; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    
+    /* YENİ HATA VE KURTARMA EKRANI */
+    .error-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 16; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
     .error-overlay i { font-size: 45px; color: var(--ihs-red); margin-bottom: 15px; }
-    .fallback-msg { color: #aaa; font-size: 13px; margin-top: 10px; font-style: italic; }
+    .fallback-msg { color: #bbb; font-size: 14px; margin-top: 5px; font-weight: 600; }
+    .error-actions { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+    .err-btn { background: #222; color: #fff; border: 1px solid #444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+    .err-btn:hover { background: var(--ihs-red); border-color: var(--ihs-red); transform: scale(1.05); }
+
+    /* YENİ İFRAME OYNATICI TASARIMI */
+    .iframe-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 12; display: flex; flex-direction: column; background: #000; box-shadow: inset 0 0 30px rgba(229,9,20,0.1); }
+    .iframe-header { position: absolute; top: 0; left: 0; width: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.95), rgba(0,0,0,0)); padding: 15px 20px 30px 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 13; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+    .iframe-wrapper:hover .iframe-header { opacity: 1; }
+    .ih-title { color: #fff; font-size: 14px; font-weight: 700; text-shadow: 0 2px 4px #000; display: flex; align-items: center; gap: 8px; pointer-events: auto; }
+    .ih-badges { background: var(--ihs-red); font-size: 10px; padding: 3px 6px; border-radius: 4px; }
+    .ih-actions { display: flex; gap: 10px; pointer-events: auto; }
+    .ih-btn { background: rgba(20,20,20,0.8); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .ih-btn:hover { background: var(--ihs-red); border-color: var(--ihs-red); transform: scale(1.1); }
+    .iframe-wrapper iframe { flex: 1; width: 100%; height: 100%; border: none; }
 
     /* OYNATICI KONTROLLERİ */
     .custom-controls { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%); display: flex; flex-direction: column; padding: 40px 20px 20px 20px; z-index: 20; opacity: 1; transition: opacity 0.4s ease; }
@@ -234,10 +250,16 @@
         </div>
 
         <div class="loading-spinner" id="loading-spinner"></div>
+        
+        <!-- YENİ HATA KURTARMA EKRANI -->
         <div class="error-overlay" id="error-overlay">
             <i class="fas fa-exclamation-triangle"></i>
             <p>Bu İçeriğe Ulaşılamıyor</p>
-            <div class="fallback-msg" id="fallback-msg">Sunucu yanıt vermiyor.</div>
+            <div class="fallback-msg" id="fallback-msg">Sunucu engeli veya yayın kapalı.</div>
+            <div class="error-actions">
+               <button class="err-btn" id="err-vlc-btn"><i class="fas fa-play"></i> VLC ile Aç</button>
+               <button class="err-btn" id="err-web-btn"><i class="fas fa-external-link-alt"></i> Tarayıcıda Denetle</button>
+            </div>
         </div>
 
         <video id="video-player" playsinline webkit-playsinline disablePictureInPicture></video>
@@ -891,7 +913,7 @@ function populateVideoChannelMenu() {
   vList.appendChild(fragment);
 }
 
-// 3 AŞAMALI ZIRHLI OYNATICI VE OTOMATİK IFRAME KALKANI (Canlı TV & Filmler için)
+// 🚀 TURBO OYNATICI (Gecikmesiz ve Ölümsüz Kurtarma Modlu)
 function playStream(item, index) {
   activeItemUrl = item.url; 
   activeChannelIndex = index; 
@@ -917,31 +939,38 @@ function playStream(item, index) {
 
   const videoContainer = document.getElementById('video-container');
   
-  // IFRAME BAŞLATICI FONKSİYON (Son Çare veya Doğrudan Embed İçin)
+  // ÖLÜMSÜZLÜK MODU (Açılmayan yayınlar için butonları URL ile güncelle)
+  document.getElementById('err-vlc-btn').onclick = () => { window.location.href = 'vlc://' + item.url; };
+  document.getElementById('err-web-btn').onclick = () => { window.open(item.url, '_blank'); };
+
+  // 🎨 TASARIMLI IFRAME OLUŞTURUCU (Yavan beyaz sayfa yerine IHS stili)
   function launchIframe(url) {
       video.style.display = 'none';
       document.getElementById('custom-controls').style.display = 'none';
-      let existingIframe = document.getElementById('embed-iframe');
+      
+      let existingIframe = document.getElementById('ihs-iframe-wrapper');
       if (existingIframe) existingIframe.remove();
       
-      const iframe = document.createElement('iframe');
-      iframe.id = 'embed-iframe';
-      iframe.src = url;
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.border = 'none';
-      iframe.style.position = 'absolute';
-      iframe.style.top = '0';
-      iframe.style.left = '0';
-      iframe.style.zIndex = '12';
-      iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
-      iframe.setAttribute('allowfullscreen', 'true');
+      const wrapper = document.createElement('div');
+      wrapper.id = 'ihs-iframe-wrapper';
+      wrapper.className = 'iframe-wrapper';
       
-      videoContainer.appendChild(iframe);
+      wrapper.innerHTML = `
+        <div class="iframe-header">
+           <div class="ih-title"><span class="ih-badges">IHS YAYIN</span> ${safeName}</div>
+           <div class="ih-actions">
+              <button class="ih-btn" onclick="window.open('${url}', '_blank')" title="Tarayıcıda Aç"><i class="fas fa-external-link-alt"></i></button>
+              <button class="ih-btn" onclick="window.location.href='vlc://${url}'" title="VLC'de Aç"><i class="fas fa-play"></i></button>
+              <button class="ih-btn" onclick="document.getElementById('ihs-iframe-wrapper').remove(); document.getElementById('video-player').style.display='block'; document.getElementById('custom-controls').style.display='flex';" title="Kapat"><i class="fas fa-times"></i></button>
+           </div>
+        </div>
+        <iframe src="${url}" allowfullscreen></iframe>
+      `;
+      
+      videoContainer.appendChild(wrapper);
       document.getElementById('loading-spinner').style.display = 'none';
   }
   
-  // EĞER LİNK BİLİNEN BİR WEB OYNATICIYSA (Youtube, OK.ru, Vixolity vs.) DİREKT IFRAME AÇ
   let embedUrl = item.url;
   let isEmbed = false;
 
@@ -966,8 +995,7 @@ function playStream(item, index) {
   if (isEmbed) {
     launchIframe(embedUrl);
   } else {
-    // STANDART YAYIN (Önce Proxy, Çökerse Direkt, O da Çökerse Iframe Kalkanı)
-    let existingIframe = document.getElementById('embed-iframe');
+    let existingIframe = document.getElementById('ihs-iframe-wrapper');
     if (existingIframe) existingIframe.remove();
     video.style.display = 'block';
     document.getElementById('custom-controls').style.display = 'flex';
@@ -976,8 +1004,12 @@ function playStream(item, index) {
     let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
 
     if (Hls.isSupported() && (targetUrl.includes('.m3u8') || targetUrl.includes('.ts') || currentMode === 'TV')) {
+      // 🚀 HIZLI YÜKLEME AYARLARI (Gecikme süresi 4 saniyeye düşürüldü)
       hls = new Hls({
         enableWorker: true,
+        lowLatencyMode: true,
+        manifestLoadingTimeOut: 4000, // 4 saniyede tepki vermezse pas geç
+        manifestLoadingMaxRetry: 0,   // Boşuna bekleme
         xhrSetup: function (xhr, url) {
           const proxiedUrl = url.startsWith(PROXY_BASE) ? url : PROXY_BASE + encodeURIComponent(url);
           xhr.open('GET', proxiedUrl, true);
@@ -990,17 +1022,14 @@ function playStream(item, index) {
            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
                proxyAttempt++;
                if (proxyAttempt === 1) {
-                   console.log("Proxy engellendi (CORS), direkt bağlantı deneniyor...");
-                   hls.loadSource(targetUrl); // Aradan proxy'yi çıkarıp saf bağlantı dener
+                   hls.loadSource(targetUrl); // Saliseler içinde aradan proxy'yi çıkarıp saf bağlantı dener
                } else if (proxyAttempt === 2) {
-                   console.log("Direkt bağlantı koptu, Iframe sistemine (Gömme) geçiliyor...");
                    hls.destroy();
-                   launchIframe(targetUrl); // Video çöktü, son çare iframe olarak sayfaya gömer!
+                   launchIframe(targetUrl); // O da engellenirse anında şık İframe tasarıma atlar
                } else {
                    handleStreamError();
                }
            } else {
-               // Format Hatası falan alırsak doğrudan İframe kalkanına yönlendir
                hls.destroy();
                launchIframe(targetUrl); 
            }
@@ -1011,11 +1040,10 @@ function playStream(item, index) {
       hls.attachMedia(video); 
       hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(e => console.log(e)); });
     } else { 
-      // Hls desteklenmeyen tarayıcılar (ör: iPhone)
       video.src = finalUrl; 
       video.play().catch(e => { 
          console.error(e); 
-         launchIframe(targetUrl); // Hata verirse direkt iframe açar
+         launchIframe(targetUrl); 
       }); 
     }
   }
@@ -1025,7 +1053,6 @@ function playStream(item, index) {
 function handleStreamError() { 
   document.getElementById('loading-spinner').style.display = 'none'; 
   document.getElementById('error-overlay').style.display = 'flex'; 
-  document.getElementById('fallback-msg').innerText = "CORS engeli veya sunucu yanıt vermiyor."; 
 }
 
 function formatTime(seconds) { 
