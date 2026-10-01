@@ -921,17 +921,36 @@ function playStream(item, index) {
     let existingIframe = document.getElementById('embed-iframe');
     if (existingIframe) existingIframe.remove();
     
-    // AKILLI OYNATICI SEÇİCİ (Vixolity ve OK.ru için temiz iframe modu, diğerleri için HTML5/HLS)
-    if (item.url && (item.url.includes('ok.ru/video/') || item.url.includes('vixolity.com/vs/'))) {
-      video.style.display = 'none';
-      document.getElementById('custom-controls').style.display = 'none'; // Özel kontrolleri gizle ki iframe player rahat çalışsın
-      
-      let embedUrl = item.url;
+    // EVRENSEL AKILLI EMBED / IFRAME KONTROLÜ (Canlı TV ve Filmler için ortak)
+    let embedUrl = "";
+    let isEmbed = false;
+
+    if (item.url) {
       if (item.url.includes('ok.ru/video/')) {
         const okId = item.url.split('/video/')[1].split('?')[0];
         embedUrl = `https://ok.ru/videoembed/${okId}`;
+        isEmbed = true;
+      } else if (item.url.includes('vixolity.com/vs/')) {
+        embedUrl = item.url;
+        isEmbed = true;
+      } else if (item.url.includes('youtube.com/watch?v=')) {
+        const ytId = item.url.split('v=')[1].split('&')[0];
+        embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+        isEmbed = true;
+      } else if (item.url.includes('youtu.be/')) {
+        const ytId = item.url.split('youtu.be/')[1].split('?')[0];
+        embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+        isEmbed = true;
+      } else if (item.url.includes('/embed/') || item.url.includes('player.php') || item.url.includes('youtube.com/embed/')) {
+        embedUrl = item.url;
+        isEmbed = true;
       }
+    }
 
+    if (isEmbed) {
+      video.style.display = 'none';
+      document.getElementById('custom-controls').style.display = 'none';
+      
       const iframe = document.createElement('iframe');
       iframe.id = 'embed-iframe';
       iframe.src = embedUrl;
@@ -950,7 +969,7 @@ function playStream(item, index) {
       fadeOverlay.classList.remove('active');
     } else {
       video.style.display = 'block';
-      document.getElementById('custom-controls').style.display = 'flex'; // Normal akışlar için kontrolleri aç
+      document.getElementById('custom-controls').style.display = 'flex';
       
       let targetUrl = item.url;
       let finalUrl = PROXY_BASE + encodeURIComponent(targetUrl);
