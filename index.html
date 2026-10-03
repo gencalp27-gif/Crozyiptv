@@ -480,7 +480,7 @@ const vContainer = $('video-container');
 const spinner = $('loading-spinner');
 let pendingStart = 0, stallN = 0, moviesState = 'loading', seekTimer = null, toastT = null;
 
-/* --- Güncellenmiş ve Temizlenmiş Canlı TV listesi --- */
+/* --- Canlı TV listesi --- */
 const tvData = `
 #EXTM3U
 #EXTINF:-1 tvg-id="trt1" tvg-name="TRT 1" group-title="Ulusal",TRT 1
@@ -972,11 +972,16 @@ function setupControls() {
   vol.oninput = e => { video.volume = +e.target.value; video.muted = video.volume === 0; volIcon(); };
   muteBtn.onclick = e => { e.stopPropagation(); video.muted = !video.muted; vol.value = video.muted ? 0 : video.volume; volIcon(); };
 
-  video.addEventListener('loadedmetadata', () => {
+  // --- ZORLA DEVAM ET (RESUME) MANTIĞI ---
+  video.addEventListener('canplay', () => {
     if (currentMode !== 'MOVIE' || !activeItem) return;
     if (pendingStart > 30) {
-      video.currentTime = pendingStart;
-      pendingStart = 0; 
+      const targetTime = pendingStart;
+      pendingStart = 0; // Bir daha atlamasın diye sıfırla
+      setTimeout(() => {
+        video.currentTime = targetTime;
+        toast('Kaldığın yerden devam ediliyor...');
+      }, 400); // Sistemin oturması için yarım saniyeye yakın bekle
     }
   });
   
@@ -987,7 +992,11 @@ function setupControls() {
     if (!seeking) seek.value = video.currentTime;
     $('current-time').textContent = formatTime(video.currentTime);
     const now = Date.now();
-    if (video.currentTime > 5 && now - lastSave > 5000) { lastSave = now; store.set('ihs_resume_' + activeItem.url, video.currentTime); }
+    // Kayıt hassasiyetini 5 saniyeden 3 saniyeye düşürdük
+    if (video.currentTime > 5 && now - lastSave > 3000) { 
+        lastSave = now; 
+        store.set('ihs_resume_' + activeItem.url, video.currentTime); 
+    }
   });
   seek.addEventListener('input', () => { seeking = true; $('current-time').textContent = formatTime(+seek.value); });
   seek.addEventListener('change', () => { seeking = false; seekTo(+seek.value); });
@@ -1170,7 +1179,6 @@ function playStream(item, forceProxy, startAt, proxyIndex = 0) {
   const isStrict = needsStrictProxy(src);
   const isMixedContent = location.protocol === 'https:' && src.startsWith('http:');
 
-  // URL bilindik yasaklı bir sunucuysa anında Proxy ile aç
   if (isMixedContent || isStrict) { 
     src = proxies[proxyIndex] || src; 
     usedProxy = !!proxies[proxyIndex]; 
@@ -1184,8 +1192,8 @@ function playStream(item, forceProxy, startAt, proxyIndex = 0) {
   if (isHls && window.Hls && Hls.isSupported()) {
     let netRetries = 0, mediaRetries = 0;
     
+    // startPosition'ı kaldırdık (Zorla atlama ile çözdük)
     hls = new Hls({
-      startPosition: pendingStart > 0 ? pendingStart : -1,
       enableWorker: true, 
       lowLatencyMode: false,
       
