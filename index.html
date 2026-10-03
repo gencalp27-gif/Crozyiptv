@@ -18,11 +18,11 @@ body.cinema-mode{background:#000}
 body.cinema-mode .sidebar{opacity:.03;pointer-events:none;filter:blur(4px)}
 .sidebar{transition:.4s}
 
-/* Giriş */
+/* Giriş ve Logo */
 .security-screen{position:fixed;inset:0;background:radial-gradient(circle at center,#1a0505,#000);z-index:99999;display:flex;align-items:center;justify-content:center}
 .login-box{background:rgba(15,15,15,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(229,9,20,.3);padding:40px;border-radius:20px;display:flex;flex-direction:column;align-items:center;box-shadow:0 20px 50px rgba(0,0,0,.9);width:90%;max-width:380px;text-align:center}
-.crystal-logo{width:70px;height:70px;background:linear-gradient(135deg,#ff1a1a,#8b0000);transform:rotate(45deg);border:2px solid #ff4a4a;border-radius:12px;margin-bottom:34px;position:relative;animation:pulseLogo 2s infinite alternate}
-.crystal-logo::after{content:"IHS";position:absolute;inset:0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;letter-spacing:2px}
+.crystal-logo{width:70px;height:70px;background:linear-gradient(135deg,#ff1a1a,#8b0000);transform:rotate(45deg);border:2px solid #ff4a4a;border-radius:12px;margin-bottom:34px;position:relative;animation:pulseLogo 2s infinite alternate;box-shadow:0 0 15px rgba(229,9,20,.4)}
+.crystal-logo::after{content:"IHS";position:absolute;inset:0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;letter-spacing:2px;color:#fff}
 @keyframes pulseLogo{from{box-shadow:0 0 15px rgba(229,9,20,.4)}to{box-shadow:0 0 35px rgba(229,9,20,.8)}}
 .security-title{font-size:20px;font-weight:900;letter-spacing:4px;margin-bottom:25px}
 .input-group{position:relative;width:100%;margin-bottom:20px}
@@ -149,59 +149,101 @@ body.cinema-mode .sidebar{opacity:.03;pointer-events:none;filter:blur(4px)}
 .cm-item:hover,.cm-item.active{background:rgba(229,9,20,.2);border-color:var(--red);color:#fff}
 .row-year{color:var(--muted);font-weight:500;margin-left:6px}
 
-/* --- YENİ MODERN FİLM DETAY EKRANI (MODAL) --- */
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: scale(0.95) translateY(20px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+/* --- YENİ MODERN MERKEZİ FİLM DETAY EKRANI (MODAL) --- */
+.modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    z-index: 60000; display: none; align-items: center; justify-content: center; padding: 15px;
 }
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 60000; display: none; align-items: center; justify-content: center; padding: 20px; }
 .modal.open { display: flex; }
-.modal.open .modal-card { animation: modalFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-.modal-card { position: relative; width: min(850px, 100%); max-height: 90dvh; overflow-y: auto; background: linear-gradient(to bottom, #181818, #0a0a0a); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
-.modal-card::-webkit-scrollbar { width: 6px; }
-.modal-card::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-.modal-card::-webkit-scrollbar-thumb:hover { background: var(--red); }
-.modal-close { position: absolute; top: 20px; right: 20px; z-index: 5; width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); color: #fff; font-size: 18px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-.modal-close:hover { background: var(--red); transform: rotate(90deg); }
-.md-hero { position: relative; aspect-ratio: 16/9; background-color: #111; background-position: top center; background-size: cover; background-repeat: no-repeat; }
-.md-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, #181818 0%, rgba(24,24,24,0.8) 15%, transparent 60%); pointer-events: none; }
-.md-trailer { position: absolute; inset: 0; z-index: 3; background: #000; }
-.md-trailer iframe { width: 100%; height: 100%; border: 0; }
-.md-body { padding: 0 40px 40px; position: relative; top: -50px; z-index: 4; }
-.md-body h2 { font-size: 36px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.8); margin-bottom: 12px; letter-spacing: -0.5px; }
-.md-meta { color: #ccc; font-size: 15px; font-weight: 600; margin-bottom: 24px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
-.md-actions { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
-.md-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 28px; border-radius: 30px; font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.3s; border: none; letter-spacing: 0.5px; }
-.md-btn.primary { background: var(--red); color: #fff; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
-.md-btn.primary:hover { background: #ff0f1a; transform: scale(1.05); box-shadow: 0 6px 20px rgba(229,9,20,0.6); }
-.md-btn:not(.primary) { background: rgba(255,255,255,0.15); color: #fff; backdrop-filter: blur(4px); }
-.md-btn:not(.primary):hover:not(:disabled) { background: rgba(255,255,255,0.25); transform: scale(1.05); }
-.md-btn:disabled { opacity: 0.4; cursor: default; }
-#md-fav { padding: 12px 18px; }
-#md-fav.on { color: var(--red); }
-#md-fav.on i { text-shadow: 0 0 10px rgba(229,9,20,0.6); }
-.md-overview { font-size: 16px; line-height: 1.7; color: #ddd; margin-bottom: 35px; max-width: 90%; text-shadow: 0 1px 2px rgba(0,0,0,0.5); font-weight: 400; }
-.md-body h4 { font-size: 18px; font-weight: 700; margin: 0 0 15px 0; color: #fff; }
-.md-cast { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
-.md-cast::-webkit-scrollbar { display: none; }
-.md-person { flex: 0 0 90px; text-align: center; }
-.md-person img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; background: #222; box-shadow: 0 4px 10px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.05); margin: 0 auto 8px; transition: 0.3s; }
-.md-person:hover img { border-color: var(--red); transform: scale(1.05); }
-.md-person b { display: block; color: #eee; font-weight: 600; font-size: 13px; margin-bottom: 3px; }
-.md-person small { color: var(--muted); font-size: 11px; }
-.md-similar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
-.md-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #999; padding: 10px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; transition: 0.3s; }
-.md-chip.in { color: #fff; border-color: rgba(229,9,20,0.4); cursor: pointer; }
-.md-chip.in:hover { background: var(--red); border-color: var(--red); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(229,9,20,0.4); }
-.tmdb-credit{display:none !important} 
-
-@media(max-width: 650px) {
-  .md-body { padding: 0 20px 20px; top: -30px; }
-  .md-body h2 { font-size: 28px; }
-  .md-overview { max-width: 100%; font-size: 15px; }
-  .md-actions { flex-direction: column; gap: 10px; }
-  .md-btn { width: 100%; padding: 14px 20px; }
+.modal-card {
+    width: 100%; max-width: 900px; max-height: 90dvh; background: #111;
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 25px rgba(229,9,20,0.15);
+    display: flex; flex-direction: column; overflow: hidden;
+    animation: modalScaleIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+@keyframes modalScaleIn {
+    from { opacity: 0; transform: scale(0.95) translateY(15px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-close {
+    position: absolute; top: 15px; right: 15px; z-index: 50; width: 38px; height: 38px;
+    border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.15);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;
+    transition: 0.3s; backdrop-filter: blur(5px);
+}
+.modal-close:hover { background: var(--red); border-color: var(--red); transform: rotate(90deg); }
+
+.md-layout { display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+.md-layout::-webkit-scrollbar { width: 6px; }
+.md-layout::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+.md-layout::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+/* Görsel Alan */
+.md-visual { position: relative; flex-shrink: 0; background: #050505; }
+.md-visual img { display: block; width: 100%; object-fit: cover; }
+.img-desktop { display: none; }
+.img-mobile { display: block; aspect-ratio: 16/9; }
+
+/* Fragman Katmanı */
+.md-trailer { position: absolute; inset: 0; background: #000; z-index: 10; display: none; }
+.md-trailer.show { display: block; }
+.md-trailer iframe { width: 100%; height: 100%; border: none; }
+
+/* İçerik Alanı */
+.md-content-area { padding: 25px; display: flex; flex-direction: column; flex: 1; background: linear-gradient(to bottom, #151515, #0a0a0a); }
+.md-header-top { display: flex; align-items: center; margin-bottom: 15px; gap: 8px; }
+.crystal-logo.mini { width: 22px; height: 22px; margin: 0; border-width: 1px; box-shadow: 0 0 10px rgba(229,9,20,0.5); animation: none; }
+.crystal-logo.mini::after { font-size: 8px; letter-spacing: 1px; }
+.ihs-brand-text { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--red); text-transform: uppercase; }
+
+.md-content-area h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.md-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #aaa; margin-bottom: 22px; font-weight: 600; align-items: center; }
+.md-meta span { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
+
+/* Aksiyon Butonları */
+.md-actions { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+.md-btn { padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.25s; color: #fff; background: rgba(255,255,255,0.1); letter-spacing: 0.5px; }
+.md-btn.primary { background: var(--red); box-shadow: 0 4px 15px rgba(229,9,20,0.3); }
+.md-btn:not(.primary):hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.md-btn.primary:hover { transform: translateY(-2px); background: #ff0f1a; box-shadow: 0 6px 20px rgba(229,9,20,0.5); }
+#md-fav { padding: 12px 18px; }
+#md-fav.on { color: var(--red); background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.3); }
+
+/* Özet ve Alt Kısımlar */
+.md-overview { font-size: 14px; line-height: 1.6; color: #ddd; margin-bottom: 30px; font-weight: 400; }
+.md-content-area h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #222; padding-bottom: 8px; }
+
+.md-cast { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+.md-cast::-webkit-scrollbar { display: none; }
+.md-person { text-align: center; flex: 0 0 75px; }
+.md-person img { width: 70px; height: 70px; border-radius: 14px; object-fit: cover; background: #222; margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; }
+.md-person:hover img { border-color: var(--red); transform: scale(1.05); }
+.md-person b { display: block; font-size: 11px; color: #eee; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.md-person small { font-size: 10px; color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.md-similar { display: flex; flex-wrap: wrap; gap: 8px; }
+.md-chip { background: #1a1a1a; border: 1px solid #333; color: #999; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.md-chip.in { color: #fff; border-color: rgba(229,9,20,0.4); }
+.md-chip.in:hover { background: var(--red); border-color: var(--red); box-shadow: 0 4px 10px rgba(229,9,20,0.3); transform: translateY(-2px); }
+
+/* --- BİLGİSAYAR DİZİLİMİ (Sol Poster, Sağ Bilgiler) --- */
+@media (min-width: 768px) {
+    .md-layout { flex-direction: row; overflow: hidden; }
+    .md-visual { width: 340px; border-right: 1px solid #222; }
+    .img-mobile { display: none; }
+    .img-desktop { display: block; height: 100%; }
+    .md-trailer { width: 100%; height: 100%; }
+    .md-content-area { overflow-y: auto; padding: 40px; }
+    .md-content-area h2 { font-size: 34px; margin-bottom: 12px; }
+    .md-meta { font-size: 14px; margin-bottom: 25px; }
+    .md-overview { font-size: 15px; }
+}
+@media (max-width: 480px) {
+    .md-actions { flex-direction: column; }
+    .md-btn { width: 100%; }
+}
+.tmdb-credit{display:none !important} 
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -303,22 +345,49 @@ body.cinema-mode .sidebar{opacity:.03;pointer-events:none;filter:blur(4px)}
 <div class="modal" id="modal" aria-hidden="true">
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="md-title">
     <button class="modal-close" id="md-close" aria-label="Kapat"><i class="fas fa-times"></i></button>
-    <div class="md-hero" id="md-hero"><div class="md-trailer" id="md-trailer"></div></div>
-    <div class="md-body">
-      <h2 id="md-title"></h2>
-      <div class="md-meta" id="md-meta"></div>
-      <div class="md-actions">
-        <button class="md-btn primary" id="md-play"><i class="fas fa-play"></i> Oynat</button>
-        <button class="md-btn" id="md-trailer-btn"><i class="fab fa-youtube"></i> Fragman</button>
-        <button class="md-btn" id="md-fav" aria-label="Favori"><i class="far fa-heart"></i></button>
+    
+    <div class="md-layout">
+      <!-- Görsel Alan: PC'de dikey, Mobilde yatay -->
+      <div class="md-visual">
+         <img id="md-img-desktop" class="img-desktop" src="" alt="">
+         <img id="md-img-mobile" class="img-mobile" src="" alt="">
+         <!-- Fragman için Overlay -->
+         <div class="md-trailer" id="md-trailer"></div>
       </div>
-      <p class="md-overview" id="md-overview"></p>
-      <section id="md-cast-sec" hidden><h4>Oyuncular</h4><div class="md-cast" id="md-cast"></div></section>
-      <section id="md-sim-sec" hidden><h4>Benzer filmler</h4><div class="md-similar" id="md-similar"></div></section>
-      <div class="tmdb-credit">This product uses the TMDB API but is not endorsed or certified by TMDB.</div>
+
+      <!-- İçerik Alanı -->
+      <div class="md-content-area">
+         <div class="md-header-top">
+             <div class="crystal-logo mini"></div>
+             <span class="ihs-brand-text">IHS VOD</span>
+         </div>
+         
+         <h2 id="md-title"></h2>
+         <div class="md-meta" id="md-meta"></div>
+         
+         <div class="md-actions">
+            <button class="md-btn primary" id="md-play"><i class="fas fa-play"></i> <span>Oynat</span></button>
+            <button class="md-btn" id="md-trailer-btn"><i class="fab fa-youtube"></i> <span>Fragman</span></button>
+            <button class="md-btn" id="md-fav" aria-label="Favori"><i class="far fa-heart"></i></button>
+         </div>
+         
+         <p class="md-overview" id="md-overview"></p>
+         
+         <section id="md-cast-sec" hidden>
+            <h4>Oyuncular</h4>
+            <div class="md-cast" id="md-cast"></div>
+         </section>
+         
+         <section id="md-sim-sec" hidden>
+            <h4>Benzer İçerikler</h4>
+            <div class="md-similar" id="md-similar"></div>
+         </section>
+      </div>
     </div>
+    
   </div>
 </div>
+
 <script>
 /* IHS Player — dayanıklılık ayarları */
 const CONFIG = Object.freeze({
@@ -620,7 +689,7 @@ async function tmdbFind(movie) {
   let d = await q(year);
   if (year && !(d.results && d.results.length)) d = await q('');
   const r = d.results && d.results[0];
-  const info = r ? { id: r.id, poster: r.poster_path || '', rating: r.vote_average ? +r.vote_average.toFixed(1) : 0, year: (r.release_date || '').slice(0, 4) } : { id: 0 };
+  const info = r ? { id: r.id, poster: r.poster_path || '', rating: r.vote_average ? +r.vote_average.toFixed(1) : 0, year: (r.release_date || '').slice(0, 4), backdrop: r.backdrop_path || '' } : { id: 0 };
   tmdbCache[movie.name] = info; saveTmdbCache();
   return info;
 }
@@ -655,6 +724,8 @@ function libraryIndex() {
 }
 function mk(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
 const fbPerson = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='92' height='92'><rect width='92' height='92' fill='%23222'/></svg>";
+const fbMovie = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='150'><rect width='100' height='150' fill='%23111'/><text x='50%' y='50%' fill='%23333' font-size='12' font-family='sans-serif' dominant-baseline='middle' text-anchor='middle'>IHS VOD</text></svg>";
+
 function setDetailFav() {
   const on = !!detailMovie && favorites.includes(detailMovie.url);
   $('md-fav').innerHTML = '<i class="' + (on ? 'fas' : 'far') + ' fa-heart"></i>'; $('md-fav').classList.toggle('on', on);
@@ -668,32 +739,45 @@ function refreshFavIcons() {
 function closeDetail() {
   const m = $('modal'); if (!m.classList.contains('open')) return;
   m.classList.remove('open'); m.setAttribute('aria-hidden', 'true');
-  $('md-trailer').innerHTML = ''; detailMovie = null;
+  $('md-trailer').innerHTML = ''; $('md-trailer').classList.remove('show');
+  detailMovie = null;
   if (favChanged) { favChanged = false; if (currentCategory === 'Favorilerim') renderList(true); else refreshFavIcons(); }
 }
 async function openDetail(movie) {
   detailMovie = movie; trailerKey = '';
   const m = $('modal'); m.classList.add('open'); m.setAttribute('aria-hidden', 'false'); $('md-close').focus();
-  $('md-title').textContent = movie.name; $('md-meta').textContent = ''; $('md-overview').textContent = 'Bilgiler yükleniyor…';
-  $('md-hero').style.backgroundImage = ''; $('md-trailer').innerHTML = '';
-  $('md-cast').textContent = ''; $('md-similar').textContent = ''; $('md-cast-sec').hidden = true; $('md-sim-sec').hidden = true;
+  
+  $('md-title').textContent = movie.name; $('md-meta').innerHTML = ''; $('md-overview').textContent = 'Bilgiler yükleniyor…';
+  $('md-img-mobile').src = fbMovie; $('md-img-desktop').src = fbMovie;
+  $('md-trailer').innerHTML = ''; $('md-trailer').classList.remove('show');
+  $('md-cast').innerHTML = ''; $('md-similar').innerHTML = ''; $('md-cast-sec').hidden = true; $('md-sim-sec').hidden = true;
+  
   const tb = $('md-trailer-btn'); tb.disabled = true; tb.title = '';
   setDetailFav();
+  
   const rs = parseFloat(store.get('ihs_resume_' + movie.url, '0'));
-  $('md-play').innerHTML = '<i class="fas fa-play"></i> ' + (rs > 30 ? 'Devam et' : 'Oynat');
+  $('md-play').innerHTML = '<i class="fas fa-play"></i> <span>' + (rs > 30 ? 'Devam et' : 'Oynat') + '</span>';
+  
   try {
     const info = await tmdbFind(movie); adopt(movie, info);
     if (detailMovie !== movie) return;
     if (!info.id) { $('md-overview').textContent = 'Bu film için TMDB bilgisi bulunamadı.'; return; }
+    
     const d = await fetchRetry(`${TMDB}/movie/${info.id}?api_key=${TMDB_KEY}&language=tr-TR&include_video_language=tr,en,null&append_to_response=credits,videos,recommendations`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
     if (detailMovie !== movie) return;
+    
     let overview = d.overview;
     if (!overview) { try { overview = (await fetchRetry(`${TMDB}/movie/${info.id}?api_key=${TMDB_KEY}&language=en-US`).then(r => r.json())).overview; } catch {} }
     if (detailMovie !== movie) return;
     
-    // Modernize edilmiş Meta bilgileri
+    // Görsel Atamaları (Mobil için yatay Backdrop, PC için dikey Poster)
+    const bgMobile = d.backdrop_path ? IMG + 'w780' + d.backdrop_path : (d.poster_path ? IMG + 'w500' + d.poster_path : '');
+    const bgDesktop = d.poster_path ? IMG + 'w500' + d.poster_path : bgMobile;
+    $('md-img-mobile').src = bgMobile || fbMovie;
+    $('md-img-desktop').src = bgDesktop || fbMovie;
+
+    // Etiketler (Yıl, Süre, Puan vb.)
     const metaContainer = $('md-meta');
-    metaContainer.innerHTML = '';
     const yr = (d.release_date || '').slice(0, 4);
     if (yr) { const sy = mk('span'); sy.textContent = yr; metaContainer.appendChild(sy); }
     if (d.runtime) { 
@@ -713,9 +797,7 @@ async function openDetail(movie) {
     $('md-title').textContent = d.title || movie.name;
     $('md-overview').textContent = overview || 'Bu film için özet bulunamadı.';
     
-    const bg = d.backdrop_path ? IMG + 'w1280' + d.backdrop_path : d.poster_path ? IMG + 'w500' + d.poster_path : '';
-    if (bg) $('md-hero').style.backgroundImage = 'url(' + bg + ')';
-    
+    // Oyuncular
     const cast = ((d.credits && d.credits.cast) || []).slice(0, 10);
     cast.forEach(p => {
       const it = mk('div', 'md-person'), im = mk('img'); im.alt = ''; im.loading = 'lazy';
@@ -725,22 +807,27 @@ async function openDetail(movie) {
     });
     $('md-cast-sec').hidden = !cast.length;
     
+    // Fragman Kontrolü
     const vids = ((d.videos && d.videos.results) || []).filter(v => v.site === 'YouTube');
     const tr = vids.find(v => v.type === 'Trailer') || vids.find(v => v.type === 'Teaser') || vids[0];
     if (tr) { trailerKey = tr.key; tb.disabled = false; } else tb.title = 'Fragman bulunamadı';
     
+    // Benzer İçerikler
     const idx = libraryIndex();
     const recs = (((d.recommendations && d.recommendations.results) || []).slice(0, 14)).map(r => ({
       r, m: idx.get((r.title || '').toLocaleLowerCase('tr-TR')) || idx.get((r.original_title || '').toLocaleLowerCase('tr-TR'))
     })).sort((a, b) => !!b.m - !!a.m);
+    
     recs.forEach(({ r, m: lm }) => {
       const chip = mk('button', 'md-chip' + (lm ? ' in' : ''), r.title); chip.type = 'button';
       if (lm) { chip.title = 'Kütüphanede var'; chip.onclick = () => openDetail(lm); } else { chip.disabled = true; chip.title = 'Kütüphanede yok'; }
       $('md-similar').appendChild(chip);
     });
     $('md-sim-sec').hidden = !recs.length;
+    
   } catch { if (detailMovie === movie) $('md-overview').textContent = 'Bilgiler alınamadı. İnternetini kontrol edip tekrar dene.'; }
 }
+
 function randomMovie() {
   if (!currentDisplayList.length) { toast('Listede film yok'); return; }
   playStream(currentDisplayList[Math.floor(Math.random() * currentDisplayList.length)]);
@@ -757,7 +844,6 @@ const movieObserver = new IntersectionObserver(entries => {
 
 /* --- Liste çizimi (kaydırdıkça devam eder) --- */
 const fbTV = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'><rect width='150' height='150' fill='%23222'/><text x='50%' y='50%' fill='%23aaa' font-size='16' font-family='sans-serif' dominant-baseline='middle' text-anchor='middle'>TV</text></svg>";
-const fbMovie = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='150'><rect width='100' height='150' fill='%23222'/><text x='50%' y='50%' fill='%23aaa' font-size='12' font-family='sans-serif' dominant-baseline='middle' text-anchor='middle'>FİLM</text></svg>";
 
 function renderList(reset) {
   const area = $('content-area');
@@ -826,7 +912,6 @@ function seekTo(t) {
   clearTimeout(seekTimer);
   seekTimer = setTimeout(() => checkSeek(t, 0), 2500);
 }
-// Sunucu "Range" desteklemiyorsa sarma geri atar: algıla, proxy ile yeniden dene
 function checkSeek(t, tries) {
   if (!activeItem) return;
   const diff = video.currentTime - t;
@@ -875,14 +960,13 @@ function setupControls() {
   video.addEventListener('playing', () => { spinner.style.display = 'none'; $('error-overlay').style.display = 'none'; });
   video.addEventListener('waiting', () => { if (activeItem) spinner.style.display = 'block'; });
   
-  // GÜÇLENDİRİLMİŞ HATA YAKALAMA VE PROXY ZORLAMA
   video.addEventListener('error', () => { 
     if (activeItem && !hls) {
       if (!usedProxy && CONFIG.proxyBases.length > 0) {
-        toast('Doğrudan bağlantı kurulamadı, alternatif proxy ile deneniyor...');
+        toast('Alternatif yol deneniyor...');
         playStream(activeItem, true, pendingStart, 0);
       } else {
-        showError('Yayın bağlantısı kurulamadı. Kaynak geçici olarak kapalı veya çalışmıyor olabilir.');
+        showError('Yayın bağlantısı kurulamadı. Kaynak geçici olarak kapalı olabilir.');
       }
     } 
   });
@@ -928,7 +1012,6 @@ function setupControls() {
     }, 1000);
   });
 
-  // Dokunma bölgeleri: tek dokunuş oynat/durdur, çift dokunuş atla
   const zone = (id, ind, dir) => {
     let last = 0, timer = null;
     $(id).addEventListener('click', () => {
@@ -974,22 +1057,26 @@ function setupExtras() {
     if (i > -1) favorites.splice(i, 1); else favorites.push(detailMovie.url);
     store.set('ihs_favorites', JSON.stringify(favorites)); favChanged = true; setDetailFav();
   };
+  
+  // Fragman Butonu (Geliştirildi)
   $('md-trailer-btn').onclick = () => {
     const box = $('md-trailer');
-    if (box.firstChild) { box.innerHTML = ''; return; }
+    if (box.firstChild) { box.innerHTML = ''; box.classList.remove('show'); return; }
     if (!trailerKey) return;
     const f = document.createElement('iframe');
     f.src = 'https://www.youtube.com/embed/' + encodeURIComponent(trailerKey) + '?autoplay=1&rel=0';
     f.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture'; f.allowFullscreen = true;
     box.appendChild(f);
+    box.classList.add('show');
   };
+  
   $('back10').onclick = () => seekBy(-10);$('fwd10').onclick = () => seekBy(10);
   const speeds = [1, 1.25, 1.5, 2, 0.75];
   $('speed-btn').onclick = () => {
     const n = speeds[(speeds.indexOf(video.playbackRate) + 1) % speeds.length];
     video.playbackRate = n; $('speed-btn').textContent = n + 'x';
   };
-  // Canlı yayın takılırsa 15 sn sonra otomatik yenile (en fazla 3 kez)
+
   let stallT = null;
   video.addEventListener('waiting', () => {
     if (!activeItem) return;
@@ -1051,7 +1138,6 @@ function proxyCandidates(url) {
 function playStream(item, forceProxy, startAt, proxyIndex = 0) {
   usedProxy = !!forceProxy;
   
-  // Eğer başlatılacak süre verilmediyse ve filmse, otomotik bul
   if (startAt === undefined && currentMode === 'MOVIE') {
     const saved = parseFloat(store.get('ihs_resume_' + item.url, '0'));
     startAt = saved > 30 ? saved : 0;
@@ -1081,7 +1167,6 @@ function playStream(item, forceProxy, startAt, proxyIndex = 0) {
     return;
   }
 
-  // https sayfada http kaynak engellenir: otomatik proxy
   let src = item.url;
   const proxies = proxyCandidates(item.url);
   const needsProxy = location.protocol === 'https:' && src.startsWith('http:');
