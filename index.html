@@ -176,7 +176,7 @@ body.cinema-mode .sidebar{opacity:.03;pointer-events:none;filter:blur(4px)}
 .md-similar{display:flex;flex-wrap:wrap;gap:8px}
 .md-chip{background:#1a1a1a;border:1px solid #333;color:#777;padding:7px 12px;border-radius:16px;font-size:12px}
 .md-chip.in{color:#fff;border-color:var(--red);cursor:pointer}
-.tmdb-credit{font-size:10px;color:#666;margin-top:20px;line-height:1.4}
+.tmdb-credit{display:none !important} /* Gizleme komutu eklendi */
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -295,10 +295,7 @@ body.cinema-mode .sidebar{opacity:.03;pointer-events:none;filter:blur(4px)}
   </div>
 </div>
 <script>
-/* IHS Player — dayanıklılık ayarları
- * NOT: TMDB anahtarı ve istemci tarafı parola gerçek gizlilik sağlamaz.
- * Üretimde bunları backend/API gateway arkasına taşıyın.
- */
+/* IHS Player — dayanıklılık ayarları */
 const CONFIG = Object.freeze({
   proxyBases: [
     "https://billowing-block-3ef5proxy.ibrahim-srbl.workers.dev/?url="
@@ -835,7 +832,18 @@ function setupControls() {
   video.addEventListener('pause', () => playBtn.innerHTML = '<i class="fas fa-play"></i>');
   video.addEventListener('playing', () => { spinner.style.display = 'none'; $('error-overlay').style.display = 'none'; });
   video.addEventListener('waiting', () => { if (activeItem) spinner.style.display = 'block'; });
-  video.addEventListener('error', () => { if (activeItem && !hls) showError(); });
+  
+  // GÜÇLENDİRİLMİŞ HATA YAKALAMA VE PROXY ZORLAMA
+  video.addEventListener('error', () => { 
+    if (activeItem && !hls) {
+      if (!usedProxy && CONFIG.proxyBases.length > 0) {
+        toast('Doğrudan bağlantı kurulamadı, alternatif proxy ile deneniyor...');
+        playStream(activeItem, true, pendingStart, 0);
+      } else {
+        showError('Yayın bağlantısı kurulamadı. Kaynak geçici olarak kapalı veya çalışmıyor olabilir.');
+      }
+    } 
+  });
 
   const volIcon = () => {
     const i = video.muted || video.volume === 0 ? 'mute' : video.volume < .5 ? 'down' : 'up';
@@ -1046,7 +1054,7 @@ function playStream(item, forceProxy, startAt, proxyIndex = 0) {
         if (netRetries++ < CONFIG.hlsRetries) { hls.startLoad(); return; }
         const nextProxy = proxyIndex + 1;
         if (proxies[nextProxy]) { hls.destroy(); hls = null; toast('Yedek yayın yolu deneniyor…'); playStream(item, true, pendingStart, nextProxy); return; }
-        if (!usedProxy && proxies[0]) { hls.destroy(); hls = null; toast('Yedek bağlantı deneniyor…'); playStream(item, true, pendingStart, 0); return; }
+        if (!usedProxy && proxies[0]) { hls.destroy(); hls = null; toast('Alternatif proxy deneniyor…'); playStream(item, true, pendingStart, 0); return; }
       } else if (d.type === Hls.ErrorTypes.MEDIA_ERROR && mediaRetries++ < CONFIG.hlsRetries) {
         hls.recoverMediaError(); return;
       }
