@@ -480,45 +480,33 @@ const vContainer = $('video-container');
 const spinner = $('loading-spinner');
 let pendingStart = 0, stallN = 0, moviesState = 'loading', seekTimer = null, toastT = null;
 
-/* --- Canlı TV listesi --- */
+/* --- Güncellenmiş ve Temizlenmiş Canlı TV listesi --- */
 const tvData = `
 #EXTM3U
-#EXTINF:-1 tvg-id="trtspor" tvg-name="TRT Spor" group-title="Spor",TRT Spor
-https://trt.daioncdn.net/trtspor/master_1440p.m3u8?platform=trtspor&sid=8p1puk6hu57r&app=9b65474e-8197-4899-aabb-321fcf6dd9eb&ce=2
-#EXTINF:-1 tvg-id="trtsporyildiz" tvg-name="TRT Spor Yıldız" group-title="Spor",TRT Spor Yıldız
-https://trt.daioncdn.net/trtspor-yildiz/master_1440p.m3u8?platform=trtspor&sid=8p5bqzkzrk5b&app=6d14425d-4281-477b-8b74-49c40e4aa8b8&ce=2
-#EXTINF:-1 tvg-id="fbtv" tvg-name="FB TV" group-title="Spor",FB TV
-https://fbtv.fenerbahce.org/fenerbahcetv.stream/chunklist.m3u8
-#EXTINF:-1 tvg-id="ekolspor" tvg-name="Ekol Spor" group-title="Spor",Ekol Spor
-https://ekoltv-live.ercdn.net/ekolsport/ekolsport_1080p.m3u8
-#EXTINF:-1 tvg-id="tabiispor" tvg-name="Tabii Spor" group-title="Spor",Tabii Spor
-https://kl9mr2vxw7nq5py1sh4tj3gb6.medya.trt.com.tr/master_1080p.m3u8
-#EXTINF:-1 tvg-id="tabiispor1" tvg-name="Tabii Spor 1" group-title="Spor",Tabii Spor 1
-https://pz4qt7nw1mr9sh2vl5xk8jg3y.medya.trt.com.tr/master_1080p.m3u8
-#EXTINF:-1 tvg-id="htspor" tvg-name="HT Spor" group-title="Spor",HT Spor
-https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8?app=web
-#EXTINF:-1 tvg-id="smart1" tvg-name="Smart 1" group-title="Spor",Smart 1
-https://lord.mariuannastluisborg.autos/smart1/index.m3u8
-#EXTINF:-1 tvg-id="smart2" tvg-name="Smart 2" group-title="Spor",Smart 2
-https://lord.mariuannastluisborg.autos/smart2/index.m3u8
-#EXTINF:-1 tvg-id="aspor" tvg-name="A Spor" group-title="Spor",A Spor
-https://trn03.tulix.tv/gt-asportv/index.m3u8?token=0631e8753bcdf25bb2a5015db22ec082
 #EXTINF:-1 tvg-id="trt1" tvg-name="TRT 1" group-title="Ulusal",TRT 1
 https://tv-trt1.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-id="trtspor" tvg-name="TRT Spor" group-title="Spor",TRT Spor
+https://tv-trtspor.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-id="trtsporyildiz" tvg-name="TRT Spor Yıldız" group-title="Spor",TRT Spor Yıldız
+https://tv-trtsporyildiz.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 tvg-id="fbtv" tvg-name="FB TV" group-title="Spor",FB TV
+https://fbtv.fenerbahce.org/fenerbahcetv.stream/chunklist.m3u8
+#EXTINF:-1 tvg-id="aspor" tvg-name="A Spor" group-title="Spor",A Spor
+https://trvplayyayin1.tmgrup.com.tr/televizyon/aspor/aspor.m3u8
 #EXTINF:-1 tvg-id="showtv" tvg-name="Show TV" group-title="Ulusal",Show TV
-https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showtv/showtv.m3u8
+https://ciner-live.ercdn.net/showtv/showtv.m3u8
 #EXTINF:-1 tvg-id="atv" tvg-name="ATV" group-title="Ulusal",ATV
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv.m3u8
+https://trvplayyayin1.tmgrup.com.tr/televizyon/atv/atv.m3u8
 #EXTINF:-1 tvg-id="kanald" tvg-name="Kanal D" group-title="Ulusal",Kanal D
-https://demiroren.daioncdn.net/kanald/kanald_1080p.m3u8?&sid=8sy3aycje51q&app=da2109ea-5dfe-4107-89ab-23593336ed61&ce=3
+https://demiroren-live.ercdn.net/kanald/kanald.m3u8
 #EXTINF:-1 tvg-id="kanal7" tvg-name="Kanal 7" group-title="Ulusal",Kanal 7
-https://kanal7-live.daioncdn.net/kanal7/kanal7.m3u8?hash=432f17e001f1212369e17e35ce140ab9
+https://kanal7-live.daioncdn.net/kanal7/kanal7.m3u8
 #EXTINF:-1 tvg-id="tv8" tvg-name="TV8" group-title="Ulusal",TV8
-https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3&ppid=890ad979c6adcdbdb68886ba2cf105fe&dfp_paln=AQzzBGQEPfmhVX2RS2zcxYIFiZbk53kDaw6vIeJRAr-sjHx4Mxmk9wsDuNvJZ-bBoffjgs9GGWIMFKYZgiyzBioZRNAOr9MqPFBw7qOj6w6hZCTazd45wrFe78xA4w29-Kenlj_Lc5ayoLIcI3altzcWfP-UtHJgjnJf_eCglR_s5OiRUWcB9glQxQ7rBVLtqZsu9eMC006QP6wHYt-u1aHLn82upkk1crcVR67EN48Sv6MTx2KpQofyoeEnYbOHwH2K6KaKhqP-94xhDMAvY3DkKSy_wSOOVRyY7tFOIGQfEq_FpYdsDU1D77HArSmiqwM0XPjgKmbeNJbIGo6wZZp1SkzZ3iOw3FhDzo2zjxqds_GPJO7IWUD55t_x9OjfCz1GCij6YxBputkBz6G3IbM0V637k6j7euuFGracxbIS5Bjbt_ZfUyqfWa1ZvwqGgXwOzXzRHfJ02MbM5R76RKLkxytwOuY2JtHk60Ar2jeJnEzGqi_pA7hRpAF3cAm_KkrxlpgkYlVLnNsx98lJLlIZ7u0Z43meXTg1g8Z_iy8bPPdvlrUrlqsdZuBxyPJDL3g7F-3BUj6-KfbClw_SDJytqxl9AagmoKhWR8yEysVIsk5ASzlvAUuEmZMNVOQNhWUa653RFK8FOjQxntmTGccEMeNpXbUj71m-mi7Jh-VbzwmiyGvbsJ8xEmj5twdM1S2iHteBCf7mbhwfcj7uxDEgAqh1cv7PB4FssTDj0DgDFQyPArWAqi9AIqZGJf9lQniM7R5P7Het0NZa5QsEgNbrFqnmEATknQBCPeG_OeqBT9lLHdZXBag6-v1_0qA3rUmYOgoyY6Q3hTf67UJCAi0iuCrUcJoW05QtO9t8oCs-bg6kLh8iSo-NKF4uHrQVUIZzLkkaa0oBJdBS6e13kySP_W7iHDT97QMenW-dCZ3vkzEoiq_cZTVythwjvT31S_fLTT0oYpeEZisTy5AmifbT1aABTy-rTgsU0lP11Zx8i9mKPtxDItyHkZYqeMuEV2HlbP5tkHiBSt5okBoXoyCBa_Ghy0SWBgwpY5LqyNSUzHR93-4tyYcJO7P0njN18bnopzA0TY2r2sbWQq-Li8FNHxzFqGI1XzRn9w6TwaPU1O-fQb14vp1a-_XBIz_CcSkOpHVJ-Q..
+https://tv8-live.daioncdn.net/tv8/tv8.m3u8
 #EXTINF:-1 tvg-id="beyaztv" tvg-name="Beyaz TV" group-title="Ulusal",Beyaz TV
 https://beyaztv-live.daioncdn.net/beyaztv/beyaztv.m3u8
 #EXTINF:-1 tvg-id="startv" tvg-name="Star TV" group-title="Ulusal",Star TV
-https://dogusdyg-star.lg.mncdn.com/dogusdyg_star/live.m3u8?st=LrJB1vupJUUUjQEPrBpjVw&e=1791133702
+https://dogusdyg-star.lg.mncdn.com/dogusdyg_star/live.m3u8
 #EXTINF:-1 tvg-id="nowtv" tvg-name="NOW TV" group-title="Ulusal",NOW TV
 https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8
 #EXTINF:-1 tvg-id="a2tv" tvg-name="A2 TV" group-title="Ulusal",A2 TV
@@ -526,11 +514,11 @@ https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
 #EXTINF:-1 tvg-id="teve2" tvg-name="Teve2" group-title="Ulusal",Teve2
 https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/teve2/teve2_1080p.m3u8
 #EXTINF:-1 tvg-id="ahaber" tvg-name="A Haber" group-title="Haber",A Haber
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
+https://trvplayyayin1.tmgrup.com.tr/televizyon/ahaber/ahaber.m3u8
 #EXTINF:-1 tvg-id="trthaber" tvg-name="TRT Haber" group-title="Haber",TRT Haber
 https://tv-trthaber.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 tvg-id="haberturk" tvg-name="Habertürk TV" group-title="Haber",Habertürk TV
-https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/haberturktv/haberturktv.m3u8
+https://ciner-live.ercdn.net/haberturktv/haberturktv.m3u8
 #EXTINF:-1 tvg-id="ulketv" tvg-name="Ülke TV" group-title="Haber",Ülke TV
 https://livetv.radyotvonline.net/kanal7live/ulketv/playlist.m3u8
 #EXTINF:-1 tvg-id="24tv" tvg-name="24 TV" group-title="Haber",24 TV
@@ -538,7 +526,19 @@ https://turkmedya-live.ercdn.net/tv24/tv24.m3u8
 #EXTINF:-1 tvg-id="tgrthaber" tvg-name="TGRT Haber" group-title="Haber",TGRT Haber
 https://canli.tgrthaber.com/tgrt.m3u8
 #EXTINF:-1 tvg-id="bloomberght" tvg-name="Bloomberg HT" group-title="Haber",Bloomberg HT
-https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/bloomberght/bloomberght.m3u8
+https://ciner-live.ercdn.net/bloomberght/bloomberght.m3u8
+#EXTINF:-1 tvg-id="ekolspor" tvg-name="Ekol Spor" group-title="Spor",Ekol Spor
+https://ekoltv-live.ercdn.net/ekolsport/ekolsport_1080p.m3u8
+#EXTINF:-1 tvg-id="tabiispor" tvg-name="Tabii Spor" group-title="Spor",Tabii Spor
+https://kl9mr2vxw7nq5py1sh4tj3gb6.medya.trt.com.tr/master_1080p.m3u8
+#EXTINF:-1 tvg-id="tabiispor1" tvg-name="Tabii Spor 1" group-title="Spor",Tabii Spor 1
+https://pz4qt7nw1mr9sh2vl5xk8jg3y.medya.trt.com.tr/master_1080p.m3u8
+#EXTINF:-1 tvg-id="htspor" tvg-name="HT Spor" group-title="Spor",HT Spor
+https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8
+#EXTINF:-1 tvg-id="smart1" tvg-name="Smart 1" group-title="Spor",Smart 1
+https://lord.mariuannastluisborg.autos/smart1/index.m3u8
+#EXTINF:-1 tvg-id="smart2" tvg-name="Smart 2" group-title="Spor",Smart 2
+https://lord.mariuannastluisborg.autos/smart2/index.m3u8
 #EXTINF:-1 group-title="Sinema",Sinema Tv
 https://lord.mariuannastluisborg.autos/sinema/index.m3u8
 #EXTINF:-1 group-title="Sinema",Sinema Tv 2
@@ -553,7 +553,7 @@ https://lord.mariuannastluisborg.autos/sinemakomedi/index.m3u8
 https://lord.mariuannastluisborg.autos/box1/index.m3u8
 `;
 
-/* --- M3U ayrıştırma (tek, esnek) --- */
+/* --- M3U ayrıştırma --- */
 function parseM3U(content, arr, cats) {
   const seen = new Set(arr.map(x => x.url));
   let meta = null;
@@ -665,7 +665,7 @@ function toggleFavorite(e, url) {
   if (currentCategory === 'Favorilerim' && !on) renderList(true);
 }
 
-/* --- TMDB (sonuç movie nesnesinde saklanır) --- */
+/* --- TMDB --- */
 const TMDB = 'https://api.themoviedb.org/3', IMG = 'https://image.tmdb.org/t/p/';
 const tmdbCache = (() => { try { return JSON.parse(store.get('ihs_tmdb', '{}')) || {}; } catch { return {}; } })();
 let tmdbSaveT = null, detailMovie = null, trailerKey = '', favChanged = false, libIdx = null, libN = -1;
@@ -770,13 +770,11 @@ async function openDetail(movie) {
     if (!overview) { try { overview = (await fetchRetry(`${TMDB}/movie/${info.id}?api_key=${TMDB_KEY}&language=en-US`).then(r => r.json())).overview; } catch {} }
     if (detailMovie !== movie) return;
     
-    // Görsel Atamaları (Mobil için yatay Backdrop, PC için dikey Poster)
     const bgMobile = d.backdrop_path ? IMG + 'w780' + d.backdrop_path : (d.poster_path ? IMG + 'w500' + d.poster_path : '');
     const bgDesktop = d.poster_path ? IMG + 'w500' + d.poster_path : bgMobile;
     $('md-img-mobile').src = bgMobile || fbMovie;
     $('md-img-desktop').src = bgDesktop || fbMovie;
 
-    // Etiketler (Yıl, Süre, Puan vb.)
     const metaContainer = $('md-meta');
     const yr = (d.release_date || '').slice(0, 4);
     if (yr) { const sy = mk('span'); sy.textContent = yr; metaContainer.appendChild(sy); }
@@ -797,7 +795,6 @@ async function openDetail(movie) {
     $('md-title').textContent = d.title || movie.name;
     $('md-overview').textContent = overview || 'Bu film için özet bulunamadı.';
     
-    // Oyuncular
     const cast = ((d.credits && d.credits.cast) || []).slice(0, 10);
     cast.forEach(p => {
       const it = mk('div', 'md-person'), im = mk('img'); im.alt = ''; im.loading = 'lazy';
@@ -807,12 +804,10 @@ async function openDetail(movie) {
     });
     $('md-cast-sec').hidden = !cast.length;
     
-    // Fragman Kontrolü
     const vids = ((d.videos && d.videos.results) || []).filter(v => v.site === 'YouTube');
     const tr = vids.find(v => v.type === 'Trailer') || vids.find(v => v.type === 'Teaser') || vids[0];
     if (tr) { trailerKey = tr.key; tb.disabled = false; } else tb.title = 'Fragman bulunamadı';
     
-    // Benzer İçerikler
     const idx = libraryIndex();
     const recs = (((d.recommendations && d.recommendations.results) || []).slice(0, 14)).map(r => ({
       r, m: idx.get((r.title || '').toLocaleLowerCase('tr-TR')) || idx.get((r.original_title || '').toLocaleLowerCase('tr-TR'))
@@ -842,7 +837,6 @@ const movieObserver = new IntersectionObserver(entries => {
   });
 }, { rootMargin: '150px' });
 
-/* --- Liste çizimi (kaydırdıkça devam eder) --- */
 const fbTV = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'><rect width='150' height='150' fill='%23222'/><text x='50%' y='50%' fill='%23aaa' font-size='16' font-family='sans-serif' dominant-baseline='middle' text-anchor='middle'>TV</text></svg>";
 
 function renderList(reset) {
@@ -966,7 +960,7 @@ function setupControls() {
         toast('Alternatif yol deneniyor...');
         playStream(activeItem, true, pendingStart, 0);
       } else {
-        showError('Yayın bağlantısı kurulamadı. Kaynak geçici olarak kapalı olabilir.');
+        showError('Yayın bağlantısı kurulamadı. Kaynak kapalı olabilir.');
       }
     } 
   });
@@ -1058,7 +1052,6 @@ function setupExtras() {
     store.set('ihs_favorites', JSON.stringify(favorites)); favChanged = true; setDetailFav();
   };
   
-  // Fragman Butonu (Geliştirildi)
   $('md-trailer-btn').onclick = () => {
     const box = $('md-trailer');
     if (box.firstChild) { box.innerHTML = ''; box.classList.remove('show'); return; }
@@ -1105,7 +1098,12 @@ function setupExtras() {
   }
 }
 
-/* --- Oynatma --- */
+/* --- YENİ PROXY YÖNLENDİRME MANTIĞI --- */
+function needsStrictProxy(url) {
+  const strict = ['daioncdn', 'turknet', 'token=', 'sid=', 'ercdn'];
+  return strict.some(d => url.includes(d));
+}
+
 function showError(message = 'Yayın açılamadı. Tekrar denemek için Yenile butonuna bas.') {
   spinner.style.display = 'none';
   $('error-overlay').style.display = 'flex';
@@ -1169,33 +1167,39 @@ function playStream(item, forceProxy, startAt, proxyIndex = 0) {
 
   let src = item.url;
   const proxies = proxyCandidates(item.url);
-  const needsProxy = location.protocol === 'https:' && src.startsWith('http:');
-  if (needsProxy) { src = proxies[proxyIndex] || src; usedProxy = !!proxies[proxyIndex]; }
-  if (forceProxy) { src = proxies[proxyIndex] || src; usedProxy = !!proxies[proxyIndex]; }
+  const isStrict = needsStrictProxy(src);
+  const isMixedContent = location.protocol === 'https:' && src.startsWith('http:');
+
+  // URL bilindik yasaklı bir sunucuysa anında Proxy ile aç
+  if (isMixedContent || isStrict) { 
+    src = proxies[proxyIndex] || src; 
+    usedProxy = !!proxies[proxyIndex]; 
+  }
+  if (forceProxy) { 
+    src = proxies[proxyIndex] || src; 
+    usedProxy = !!proxies[proxyIndex]; 
+  }
 
   const isHls = /\.m3u8(?:[?#].*)?$\vert{}\.ts(?:[?#].*)?$/i.test(item.url) || currentMode === 'TV';
   if (isHls && window.Hls && Hls.isSupported()) {
     let netRetries = 0, mediaRetries = 0;
     
-    // GÜNCELLENMİŞ YÜKSEK PERFORMANSLI BUFFER AYARLARI
     hls = new Hls({
       startPosition: pendingStart > 0 ? pendingStart : -1,
       enableWorker: true, 
       lowLatencyMode: false,
       
-      // Agresif Tampon (Buffer) Ayarları
-      backBufferLength: 60,           // Geriye dönük 60 saniye tut
-      maxBufferLength: 60,            // İleriye dönük en az 60 saniye yükle
-      maxMaxBufferLength: 300,        // İnternet iyiyse 5 dakikaya kadar RAM'de tut
-      maxBufferSize: 60 * 1024 * 1024,// RAM'de 60 MB tampona izin ver
+      backBufferLength: 60,           
+      maxBufferLength: 60,            
+      maxMaxBufferLength: 300,        
+      maxBufferSize: 60 * 1024 * 1024,
       
-      // Zaman Aşımı (Timeout) Ayarları
       manifestLoadingTimeOut: 20000, 
       manifestLoadingMaxRetry: 3,
       levelLoadingTimeOut: 20000, 
       levelLoadingMaxRetry: 3,
-      fragLoadingTimeOut: 30000,      // Yavaş sunucular için parça bekleme süresi uzatıldı
-      fragLoadingMaxRetry: 5          // Hata verirse yeniden deneme sayısı artırıldı
+      fragLoadingTimeOut: 30000,      
+      fragLoadingMaxRetry: 5          
     });
     
     hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
