@@ -177,145 +177,7 @@ body.cinema-mode .sidebar{opacity:.03;pointer-events:none;filter:blur(4px)}
 .md-chip{background:#1a1a1a;border:1px solid #333;color:#777;padding:7px 12px;border-radius:16px;font-size:12px}
 .md-chip.in{color:#fff;border-color:var(--red);cursor:pointer}
 .tmdb-credit{font-size:10px;color:#666;margin-top:20px;line-height:1.4}
-
-/* Responsive UI v2 — mobile / tablet / desktop / TV */
-html,body{min-width:0}
-body{overscroll-behavior:none}
-.app-wrapper{isolation:isolate}
-.player-section{min-width:0}
-.sidebar{min-width:0}
-.search-box input{min-width:0}
-.content-area{min-width:0}
-
-@media (min-width:1400px){
-  .player-section{width:60%}
-  .sidebar{width:40%}
-  .pt-title{font-size:16px}
-  .content-area{padding:14px 18px 28px}
-}
-
-@media (min-width:900px){
-  .sidebar{box-shadow:-18px 0 40px rgba(0,0,0,.18)}
-  .player-section{display:flex;align-items:center;justify-content:center}
-  .video-container{width:100%;height:100%}
-  .tab-container{height:58px}
-  .tab-btn{font-size:13px}
-  .search-container{padding:14px 16px 10px}
-  .categories-bar{padding:0 16px 10px}
-  .content-area{padding:8px 16px 24px}
-  .channel-row{min-height:64px}
-}
-
-@media (min-width:900px) and (max-width:1199px){
-  .player-section{width:52%}
-  .sidebar{width:48%}
-  .pt-actions{gap:5px}
-  .pt-btn{width:34px;height:34px}
-  .custom-controls{padding-left:14px;padding-right:14px}
-  .controls-left{gap:12px}
-}
-
-@media (max-width:899px){
-  body{overflow:hidden}
-  .app-wrapper{height:100dvh;min-height:100dvh}
-  .player-section{height:auto;max-height:58dvh;padding-top:env(safe-area-inset-top,0);background:#000}
-  .video-container{aspect-ratio:16/9;max-height:58dvh}
-  .player-top-bar{padding:10px 10px 28px}
-  .pt-title{font-size:13px;max-width:42vw}
-  .pt-actions{gap:5px}
-  .pt-btn{width:32px;height:32px;border-radius:9px;font-size:12px}
-  .custom-controls{padding:32px 11px 9px}
-  .controls-left{gap:10px}
-  .ctrl-btn{font-size:16px}
-  .ctrl-btn.play-btn{font-size:23px}
-  .live-indicator{font-size:11px;gap:5px}
-  .live-dot{width:8px;height:8px}
-  .sidebar{flex:1;min-height:0;height:auto;border-top:1px solid #222}
-  .tab-container{height:52px;position:relative;z-index:5}
-  .tab-btn{padding:12px 0;font-size:12px}
-  .search-container{padding:8px 10px}
-  .search-box{padding:9px 12px;border-radius:10px}
-  .categories-bar{padding:0 10px 8px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
-  .categories-bar::-webkit-scrollbar{display:none}
-  .content-area{padding:4px 10px calc(18px + env(safe-area-inset-bottom,0));overflow-x:hidden}
-  .channel-row{min-height:56px;padding:7px 8px}
-  .channel-row-name{font-size:12px}
-  .channel-row img{width:42px;height:42px}
-  .channel-row.movie-row img{width:36px;height:54px}
-  .fav-icon{font-size:15px;padding:7px}
-  .category-menu{inset:0;position:fixed;height:100dvh}
-  .cm-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:10px}
-  .cm-item{min-height:54px;font-size:12px}
-  .modal{padding:0;align-items:flex-end}
-  .modal-card{width:100%;max-width:none;max-height:92dvh;border-radius:18px 18px 0 0;border-bottom:0}
-  .md-body{padding:4px 16px calc(18px + env(safe-area-inset-bottom,0))}
-  .md-body h2{font-size:20px;padding-right:34px}
-  .md-overview{font-size:13px}
-}
-
-@media (max-width:480px){
-  .player-section{max-height:46dvh}
-  .video-container{max-height:46dvh}
-  .pt-badge{font-size:9px;padding:3px 6px}
-  .pt-title{max-width:35vw;font-size:12px}
-  .pt-btn:nth-child(3){display:none}
-  .custom-controls{padding-top:26px}
-  .progress-container{gap:6px;margin-bottom:7px}
-  .time-text{font-size:10px;min-width:36px}
-  .seek-bar::-webkit-slider-thumb{width:13px;height:13px}
-  .controls-left{gap:7px}
-  .ctrl-btn{font-size:14px}
-  .ctrl-btn.play-btn{font-size:21px}
-  .volume-box{display:none}
-  .live-indicator{font-size:10px}
-  .tab-btn i{margin-right:3px}
-  .search-box input{font-size:13px}
-  .channel-row{border-radius:8px}
-}
-
-@media (max-height:650px) and (orientation:landscape){
-  .app-wrapper{flex-direction:row}
-  .player-section{width:62%;height:100dvh;max-height:none;padding-top:0}
-  .video-container{height:100dvh;max-height:none;aspect-ratio:auto}
-  .sidebar{width:38%;height:100dvh}
-  .tab-container{height:46px}
-  .search-container{padding:6px 9px}
-  .categories-bar{padding-bottom:5px}
-  .content-area{padding-top:2px}
-  .pt-actions .pt-btn{width:30px;height:30px}
-}
-
-@media (min-width:1800px){
-  .channel-row{min-height:70px}
-  .channel-row-name{font-size:14px}
-  .search-box{padding:12px 15px}
-}
-
-@media (hover:none){
-  .pt-btn:hover,.ctrl-btn:hover,.md-btn:hover{transform:none}
-  .pt-btn:active,.ctrl-btn:active,.md-btn:active{transform:scale(.96)}
-}
-
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-
-/* ===== OTT / MULTI-SCREEN DESIGN LAYER ===== */
-:root{--glass:rgba(16,18,24,.82);--glass2:rgba(255,255,255,.055);--line2:rgba(255,255,255,.09);--accent2:#8b7cff}
-.app-brand{display:flex;align-items:center;gap:11px;padding:15px 16px 11px;background:linear-gradient(180deg,rgba(255,255,255,.045),transparent);border-bottom:1px solid var(--line2)}
-.brand-mark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 24px rgba(0,0,0,.28);font-size:14px}
-.app-brand strong{display:block;letter-spacing:.5px;font-size:13px}.app-brand strong span{opacity:.65}.app-brand small{display:block;color:var(--muted);font-size:9px;margin-top:2px}.brand-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:8px;color:#a7f3c5;letter-spacing:.7px}.brand-status i{width:6px;height:6px;border-radius:50%;background:#54e38e;box-shadow:0 0 9px #54e38e}
-.library-strip{padding:10px 14px 6px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent)}
-.library-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;font-size:11px;font-weight:700}.library-head i{opacity:.75}.library-head button{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:4px}.library-rail{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:3px}.library-rail::-webkit-scrollbar{display:none}
-.library-card{flex:0 0 76px;position:relative;border-radius:9px;overflow:hidden;aspect-ratio:2/3;background:#171922;border:1px solid var(--line2);cursor:pointer}.library-card img{width:100%;height:100%;object-fit:cover;display:block}.library-card:after{content:"";position:absolute;inset:auto 0 0;height:35%;background:linear-gradient(transparent,rgba(0,0,0,.85))}.library-card .lc-play{position:absolute;left:7px;bottom:7px;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:var(--accent);font-size:9px;z-index:2}.library-card .lc-title{position:absolute;left:34px;right:4px;bottom:7px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2}.library-card .lc-progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.18);z-index:3}.library-card .lc-progress i{display:block;height:100%;background:var(--accent);width:var(--progress)}
-.mobile-bottom-nav{display:none}
-@media (min-width:900px){.sidebar{box-shadow:-16px 0 50px rgba(0,0,0,.25)}.app-brand{padding-top:16px}.library-strip{padding-top:12px}.library-card{flex-basis:72px}}
-@media (max-width:899px){
-  body{padding-bottom:calc(62px + env(safe-area-inset-bottom))}.app-brand{padding:11px 12px 9px}.library-strip{padding:8px 12px 5px}.library-card{flex-basis:67px}.mobile-bottom-nav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;z-index:80;left:0;right:0;bottom:0;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:rgba(10,11,16,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line2)}.mobile-nav-btn{border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;padding:4px;border-radius:10px}.mobile-nav-btn i{font-size:17px}.mobile-nav-btn.active{color:#fff;background:rgba(255,255,255,.06)}.mobile-nav-btn.active i{color:var(--accent)}
-  .tab-container{position:sticky;top:0;z-index:30;background:rgba(10,11,16,.94);backdrop-filter:blur(14px)}
-}
-@media (max-width:560px){.app-brand strong{font-size:12px}.brand-status{font-size:7px}.library-card{flex-basis:62px}.library-head{font-size:10px}.content-area{padding-bottom:10px}}
-@media (min-width:1200px){.library-card{flex-basis:82px}.library-rail{gap:10px}}
-@media (prefers-reduced-motion:reduce){.library-card,.mobile-nav-btn{transition:none!important}}
-
 </style>
 </head>
 <body>
@@ -399,15 +261,6 @@ body{overscroll-behavior:none}
   </div>
 
   <div class="sidebar">
-    <div class="app-brand">
-      <div class="brand-mark"><i class="fas fa-play"></i></div>
-      <div><strong>IHS <span>PLAYER</span></strong><small id="brand-subtitle">Canlı yayın ve film</small></div>
-      <div class="brand-status"><i></i><span>ONLINE</span></div>
-    </div>
-    <div class="library-strip" id="library-strip">
-      <div class="library-head"><span><i class="fas fa-sparkles"></i> Kütüphane</span><button id="library-refresh" title="Yenile"><i class="fas fa-rotate"></i></button></div>
-      <div class="library-rail" id="library-rail"></div>
-    </div>
     <div class="tab-container">
       <button class="tab-btn active" id="tab-tv"><i class="fas fa-tv"></i> CANLI TV</button>
       <button class="tab-btn" id="tab-movie"><i class="fas fa-film"></i> FİLMLER</button>
@@ -419,12 +272,6 @@ body{overscroll-behavior:none}
       <div class="cm-list" id="cm-list"></div>
     </div>
     <div class="content-area" id="content-area"></div>
-    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Ana menü">
-      <button class="mobile-nav-btn active" data-nav="home"><i class="fas fa-house"></i><span>Ana Sayfa</span></button>
-      <button class="mobile-nav-btn" data-nav="tv"><i class="fas fa-tv"></i><span>Canlı TV</span></button>
-      <button class="mobile-nav-btn" data-nav="movies"><i class="fas fa-film"></i><span>Filmler</span></button>
-      <button class="mobile-nav-btn" data-nav="favorites"><i class="fas fa-heart"></i><span>Favoriler</span></button>
-    </nav>
   </div>
 </div>
 
@@ -1281,51 +1128,6 @@ function formatTime(s) {
   const p = n => String(n).padStart(2, '0');
   return h ? `${h}:${p(m)}:${p(sec)}` : `${m}:${p(sec)}`;
 }
-
-/* ===== OTT UX ===== */
-function getResumeMovies(){
-  return movies.filter(m=>parseFloat(store.get('ihs_resume_'+m.url,'0'))>30).sort((a,b)=>parseFloat(store.get('ihs_resume_'+b.url,'0'))-parseFloat(store.get('ihs_resume_'+a.url,'0'))).slice(0,10);
-}
-function renderLibraryRail(){
-  const rail=$('library-rail'); if(!rail) return;
-  const items=currentMode==='MOVIE' ? getResumeMovies() : tvChannels.filter(c=>favorites.includes(c.url)).slice(0,10);
-  rail.innerHTML='';
-  if(!items.length){
-    rail.innerHTML='<div style="color:var(--muted);font-size:9px;padding:7px 2px">'+(currentMode==='MOVIE'?'Yarım bıraktığın film burada görünecek.':'Favori kanallarını burada hızlıca açabilirsin.')+'</div>'; return;
-  }
-  items.forEach(item=>{
-    const card=document.createElement('div'); card.className='library-card';
-    const img=document.createElement('img'); img.loading='lazy'; img.alt=''; img.src=item.poster||item.logo||fbTV; img.onerror=()=>{img.src=currentMode==='MOVIE'?fbMovie:fbTV};
-    const play=document.createElement('span'); play.className='lc-play'; play.innerHTML='<i class="fas fa-play"></i>';
-    const title=document.createElement('span'); title.className='lc-title'; title.textContent=item.name;
-    card.append(img,play,title);
-    if(currentMode==='MOVIE'){
-      const dur=Number(item.runtime||0)||120, pos=Number(store.get('ihs_resume_'+item.url,'0'))||0;
-      const pct=Math.max(0,Math.min(100,pos/Math.max(1,dur*60)*100));
-      const prog=document.createElement('span'); prog.className='lc-progress'; prog.style.setProperty('--progress',pct+'%'); prog.innerHTML='<i></i>'; card.appendChild(prog);
-      card.onclick=()=>openDetail(item);
-    } else card.onclick=()=>playStream(item);
-    rail.appendChild(card);
-  });
-}
-function syncMobileNav(){
-  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
-  const key=currentMode==='MOVIE'?'movies':'tv'; const el=document.querySelector('[data-nav="'+key+'"]'); if(el) el.classList.add('active');
-}
-document.querySelectorAll('.mobile-nav-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  const nav=btn.dataset.nav;
-  if(nav==='tv') switchMode('TV');
-  else if(nav==='movies') switchMode('MOVIE');
-  else if(nav==='favorites'){ currentCategory='Favorilerim'; renderCategories(); renderList(true); syncMobileNav(); }
-  else { currentCategory='Tümü'; $('search-input').value=''; renderCategories(); renderList(true); }
-}));
-if($('library-refresh')) $('library-refresh').onclick=renderLibraryRail;
-const _switchMode=switchMode;
-switchMode=function(mode){ _switchMode(mode); renderLibraryRail(); syncMobileNav(); };
-const _renderList=renderList;
-renderList=function(reset){ _renderList(reset); if(reset) setTimeout(renderLibraryRail,0); };
-window.addEventListener('resize',()=>{document.documentElement.style.setProperty('--vh',window.innerHeight+'px')},{passive:true});
-
 </script>
 </body>
 </html>
