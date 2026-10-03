@@ -176,7 +176,7 @@ body.cinema-mode .sidebar{opacity:.03;pointer-events:none;filter:blur(4px)}
 .md-similar{display:flex;flex-wrap:wrap;gap:8px}
 .md-chip{background:#1a1a1a;border:1px solid #333;color:#777;padding:7px 12px;border-radius:16px;font-size:12px}
 .md-chip.in{color:#fff;border-color:var(--red);cursor:pointer}
-.tmdb-credit{display:none !important} /* Gizleme komutu eklendi */
+.tmdb-credit{display:none !important} 
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -854,11 +854,12 @@ function setupControls() {
 
   video.addEventListener('loadedmetadata', () => {
     if (currentMode !== 'MOVIE' || !activeItem) return;
-    let t = pendingStart; pendingStart = 0;
-    if (!t) t = parseFloat(store.get('ihs_resume_' + activeItem.url));
-    const end = mediaEnd();
-    if (t && end && t < end - 10) video.currentTime = t;
+    if (pendingStart > 30) {
+      video.currentTime = pendingStart;
+      pendingStart = 0; 
+    }
   });
+  
   video.addEventListener('timeupdate', () => {
     if (currentMode !== 'MOVIE' || !activeItem) return;
     const end = mediaEnd();
@@ -1006,7 +1007,15 @@ function proxyCandidates(url) {
 }
 
 function playStream(item, forceProxy, startAt, proxyIndex = 0) {
-  usedProxy = !!forceProxy; pendingStart = startAt || 0;
+  usedProxy = !!forceProxy;
+  
+  // Eğer başlatılacak süre verilmediyse ve filmse, otomotik bul
+  if (startAt === undefined && currentMode === 'MOVIE') {
+    const saved = parseFloat(store.get('ihs_resume_' + item.url, '0'));
+    startAt = saved > 30 ? saved : 0;
+  }
+  pendingStart = startAt || 0;
+  
   stopPlayback();
   if (item !== activeItem) stallN = 0;
   activeItem = item; activeIndex = currentDisplayList.indexOf(item);
@@ -1041,6 +1050,7 @@ function playStream(item, forceProxy, startAt, proxyIndex = 0) {
   if (isHls && window.Hls && Hls.isSupported()) {
     let netRetries = 0, mediaRetries = 0;
     hls = new Hls({
+      startPosition: pendingStart > 0 ? pendingStart : -1, // KALDIĞI YERDEN BAŞLATMA EKLENDİ
       enableWorker: true, lowLatencyMode: false,
       backBufferLength: 30, maxBufferLength: 20, maxMaxBufferLength: 30,
       manifestLoadingTimeOut: 10000, manifestLoadingMaxRetry: 1,
