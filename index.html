@@ -1149,7 +1149,9 @@ function playStream(item, forceProxy, startAt, proxyIndex = 0) {
 
   let src = item.url;
   const proxies = proxyCandidates(item.url);
-  const isStrict = needsStrictProxy(src);
+  const isResolverStream = currentMode === 'TV' &&
+    (() => { try { return new URL(item.url).hostname === 'vavoo-resolver.ibrahim-srbl.workers.dev'; } catch (_) { return false; } })();
+  const isStrict = needsStrictProxy(src) || isResolverStream;
   const isMixedContent = location.protocol === 'https:' && src.startsWith('http:');
 
   if (isMixedContent || isStrict) { 
