@@ -396,6 +396,7 @@ const CONFIG = Object.freeze({
   ],
   tmdbKey: "4d89b35eb4db17dc2a746c2318dd598b",
   password: "aWhzcHJv",
+  tvListUrl: "https://vavoo-list.ibrahim-srbl.workers.dev/playlist.m3u8?groups=Turkey",
   movieListUrl: "https://raw.githubusercontent.com/gencalp27-gif/Crozyiptv/main/film.m3u",
   requestTimeout: 12000,
   requestRetries: 2,
@@ -480,78 +481,13 @@ const vContainer = $('video-container');
 const spinner = $('loading-spinner');
 let pendingStart = 0, stallN = 0, moviesState = 'loading', seekTimer = null, toastT = null;
 
-/* --- Canlı TV listesi --- */
-const tvData = `
-#EXTM3U
-#EXTINF:-1 tvg-id="trt1" tvg-name="TRT 1" group-title="Ulusal",TRT 1
-https://tv-trt1.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 tvg-id="trtspor" tvg-name="TRT Spor" group-title="Spor",TRT Spor
-https://tv-trtspor.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 tvg-id="trtsporyildiz" tvg-name="TRT Spor Yıldız" group-title="Spor",TRT Spor Yıldız
-https://tv-trtsporyildiz.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 tvg-id="fbtv" tvg-name="FB TV" group-title="Spor",FB TV
-https://fbtv.fenerbahce.org/fenerbahcetv.stream/chunklist.m3u8
-#EXTINF:-1 tvg-id="aspor" tvg-name="A Spor" group-title="Spor",A Spor
-https://trvplayyayin1.tmgrup.com.tr/televizyon/aspor/aspor.m3u8
-#EXTINF:-1 tvg-id="showtv" tvg-name="Show TV" group-title="Ulusal",Show TV
-https://ciner-live.ercdn.net/showtv/showtv.m3u8
-#EXTINF:-1 tvg-id="atv" tvg-name="ATV" group-title="Ulusal",ATV
-https://trvplayyayin1.tmgrup.com.tr/televizyon/atv/atv.m3u8
-#EXTINF:-1 tvg-id="kanald" tvg-name="Kanal D" group-title="Ulusal",Kanal D
-https://demiroren-live.ercdn.net/kanald/kanald.m3u8
-#EXTINF:-1 tvg-id="kanal7" tvg-name="Kanal 7" group-title="Ulusal",Kanal 7
-https://kanal7-live.daioncdn.net/kanal7/kanal7.m3u8
-#EXTINF:-1 tvg-id="tv8" tvg-name="TV8" group-title="Ulusal",TV8
-https://tv8-live.daioncdn.net/tv8/tv8.m3u8
-#EXTINF:-1 tvg-id="beyaztv" tvg-name="Beyaz TV" group-title="Ulusal",Beyaz TV
-https://beyaztv-live.daioncdn.net/beyaztv/beyaztv.m3u8
-#EXTINF:-1 tvg-id="startv" tvg-name="Star TV" group-title="Ulusal",Star TV
-https://dogusdyg-star.lg.mncdn.com/dogusdyg_star/live.m3u8
-#EXTINF:-1 tvg-id="nowtv" tvg-name="NOW TV" group-title="Ulusal",NOW TV
-https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8
-#EXTINF:-1 tvg-id="a2tv" tvg-name="A2 TV" group-title="Ulusal",A2 TV
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
-#EXTINF:-1 tvg-id="teve2" tvg-name="Teve2" group-title="Ulusal",Teve2
-https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/teve2/teve2_1080p.m3u8
-#EXTINF:-1 tvg-id="ahaber" tvg-name="A Haber" group-title="Haber",A Haber
-https://trvplayyayin1.tmgrup.com.tr/televizyon/ahaber/ahaber.m3u8
-#EXTINF:-1 tvg-id="trthaber" tvg-name="TRT Haber" group-title="Haber",TRT Haber
-https://tv-trthaber.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 tvg-id="haberturk" tvg-name="Habertürk TV" group-title="Haber",Habertürk TV
-https://ciner-live.ercdn.net/haberturktv/haberturktv.m3u8
-#EXTINF:-1 tvg-id="ulketv" tvg-name="Ülke TV" group-title="Haber",Ülke TV
-https://livetv.radyotvonline.net/kanal7live/ulketv/playlist.m3u8
-#EXTINF:-1 tvg-id="24tv" tvg-name="24 TV" group-title="Haber",24 TV
-https://turkmedya-live.ercdn.net/tv24/tv24.m3u8
-#EXTINF:-1 tvg-id="tgrthaber" tvg-name="TGRT Haber" group-title="Haber",TGRT Haber
-https://canli.tgrthaber.com/tgrt.m3u8
-#EXTINF:-1 tvg-id="bloomberght" tvg-name="Bloomberg HT" group-title="Haber",Bloomberg HT
-https://ciner-live.ercdn.net/bloomberght/bloomberght.m3u8
-#EXTINF:-1 tvg-id="ekolspor" tvg-name="Ekol Spor" group-title="Spor",Ekol Spor
-https://ekoltv-live.ercdn.net/ekolsport/ekolsport_1080p.m3u8
-#EXTINF:-1 tvg-id="tabiispor" tvg-name="Tabii Spor" group-title="Spor",Tabii Spor
-https://kl9mr2vxw7nq5py1sh4tj3gb6.medya.trt.com.tr/master_1080p.m3u8
-#EXTINF:-1 tvg-id="tabiispor1" tvg-name="Tabii Spor 1" group-title="Spor",Tabii Spor 1
-https://pz4qt7nw1mr9sh2vl5xk8jg3y.medya.trt.com.tr/master_1080p.m3u8
-#EXTINF:-1 tvg-id="htspor" tvg-name="HT Spor" group-title="Spor",HT Spor
-https://ciner.daioncdn.net/ht-spor/ht-spor.m3u8
-#EXTINF:-1 tvg-id="smart1" tvg-name="Smart 1" group-title="Spor",Smart 1
-https://lord.mariuannastluisborg.autos/smart1/index.m3u8
-#EXTINF:-1 tvg-id="smart2" tvg-name="Smart 2" group-title="Spor",Smart 2
-https://lord.mariuannastluisborg.autos/smart2/index.m3u8
-#EXTINF:-1 group-title="Sinema",Sinema Tv
-https://lord.mariuannastluisborg.autos/sinema/index.m3u8
-#EXTINF:-1 group-title="Sinema",Sinema Tv 2
-https://lord.mariuannastluisborg.autos/sinema2/index.m3u8
-#EXTINF:-1 group-title="Sinema",Sinema Aksiyon
-https://lord.mariuannastluisborg.autos/sinemaaksiyon/index.m3u8
-#EXTINF:-1 group-title="Sinema",Sinema Aile
-https://lord.mariuannastluisborg.autos/sinemaaile/index.m3u8
-#EXTINF:-1 group-title="Sinema",Sinema Komedi
-https://lord.mariuannastluisborg.autos/sinemakomedi/index.m3u8
-#EXTINF:-1 group-title="Sinema",Marvel Studio 1
-https://lord.mariuannastluisborg.autos/box1/index.m3u8
-`;
+/* --- Canlı TV kategori sırası --- */
+const TV_CATEGORY_ORDER = [
+  'Ulusal', 'Spor', 'Haber', 'Belgesel', 'Çocuk', 'Sinema',
+  'Dizi', 'Müzik', 'Yaşam ve Yemek', 'Din', 'Eğitim', 'Genel'
+];
+let tvState = 'loading';
+let tvLoadPromise = null;
 
 /* --- M3U ayrıştırma --- */
 function parseM3U(content, arr, cats) {
@@ -573,11 +509,40 @@ function parseM3U(content, arr, cats) {
 }
 
 function initApp() {
-  parseM3U(tvData, tvChannels, tvCategories);
+  loadTV();
   loadMovies();
   setupControls(); setupExtras();
   switchMode(store.get('ihs_mode', 'TV') === 'MOVIE' ? 'MOVIE' : 'TV');
 }
+async function loadTV() {
+  if (tvLoadPromise) return tvLoadPromise;
+  tvState = 'loading';
+  tvLoadPromise = (async () => {
+    try {
+      const response = await fetchRetry(CONFIG.tvListUrl, { cache: 'no-cache' });
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const text = await response.text();
+      if (!text.trimStart().startsWith('#EXTM3U')) throw new Error('Geçersiz M3U listesi');
+      const channels = [], categories = new Set();
+      parseM3U(text, channels, categories);
+      if (!channels.length) throw new Error('Liste boş');
+      tvChannels = channels;
+      tvCategories = categories;
+      tvState = 'ok';
+    } catch (error) {
+      tvState = 'error';
+      console.error('Canlı TV listesi yüklenemedi:', error);
+    } finally {
+      tvLoadPromise = null;
+      if (currentMode === 'TV') {
+        renderCategories();
+        renderList(true);
+      }
+    }
+  })();
+  return tvLoadPromise;
+}
+
 function loadMovies() {
   moviesState = 'loading';
   fetchRetry(CONFIG.movieListUrl, { cache: 'no-cache' })
@@ -586,6 +551,14 @@ function loadMovies() {
     .catch(() => { moviesState = 'error'; if (currentMode === 'MOVIE') renderList(true); });
 }
 function showEmpty(area, dataset) {
+  if (currentMode === 'TV' && !dataset.length && tvState === 'error') {
+    area.innerHTML = '<div class="empty">Canlı TV listesi yüklenemedi.<br><br><button class="retry-btn" id="reload-tv">Tekrar dene</button></div>';
+    $('reload-tv').onclick = () => {
+      area.innerHTML = '<div class="empty">Yükleniyor…</div>';
+      loadTV();
+    };
+    return;
+  }
   if (currentMode === 'MOVIE' && !dataset.length && moviesState === 'error') {
     area.innerHTML = '<div class="empty">Film listesi yüklenemedi.<br><br><button class="retry-btn" id="reload-movies">Tekrar dene</button></div>';
     $('reload-movies').onclick = () => { area.innerHTML = '<div class="empty">Yükleniyor…</div>'; loadMovies(); };
@@ -630,7 +603,7 @@ function renderCategories() {
     bar.appendChild(b);
   };
   add('Favorilerim', { icon: 'fa-heart' }); add('Tümü');
-  if (currentMode === 'TV') [...tvCategories].sort(new Intl.Collator('tr').compare).forEach(c => add(c));
+  if (currentMode === 'TV') [...tvCategories].sort((a, b) => { const ai = TV_CATEGORY_ORDER.indexOf(a), bi = TV_CATEGORY_ORDER.indexOf(b); return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi) || a.localeCompare(b, 'tr'); }).forEach(c => add(c));
   else {
     add('Devam Et', { icon: 'fa-clock-rotate-left' });
     add('Kategoriler', { icon: 'fa-list-ul', active: false, onclick: openCategoryMenu });
